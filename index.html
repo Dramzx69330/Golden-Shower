@@ -3,406 +3,172 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duo Update — Dashboard collaboratif</title>
+  <title>Duo Update Pro</title>
   <style>
-
     :root{
-      --bg:#f5f7fb;
-      --surface:#ffffff;
-      --surface-2:#f8fafc;
-      --text:#111827;
-      --muted:#6b7280;
-      --line:#e5e7eb;
-      --line-strong:#d1d5db;
-      --accent:#2563eb;
-      --accent-hover:#1d4ed8;
-      --success:#16a34a;
-      --warning:#d97706;
-      --danger:#dc2626;
-      --radius:16px;
-      --shadow:0 12px 30px rgba(17,24,39,.08);
-      --shadow-soft:0 4px 14px rgba(17,24,39,.06);
+      --bg:#0b1020;--panel:#111827;--panel2:#172033;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
+      --line:#e2e8f0;--darkText:#e5e7eb;--darkMuted:#94a3b8;--accent:#2563eb;--accent2:#16a34a;--warn:#d97706;--danger:#dc2626;
+      --radius:18px;--shadow:0 18px 45px rgba(15,23,42,.10);--sidebar:280px
     }
-
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,#f8fafc 0%,#eef2f7 100%);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    .wrap{max-width:1240px;margin:0 auto;padding:32px 20px 48px}
-    header{
-      display:flex;
-      justify-content:space-between;
-      gap:18px;
-      align-items:flex-start;
-      margin-bottom:22px;
-      flex-wrap:wrap;
-    }
-
-    .eyebrow{
-      color:var(--accent);
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:.14em;
-      font-size:12px;
-      margin-bottom:8px;
-    }
-
-    h1{
-      margin:0;
-      font-size:clamp(32px,4vw,48px);
-      letter-spacing:-.045em;
-      line-height:1.02;
-      font-weight:800;
-    }
-
-    h2{
-      color:#111827;
-      letter-spacing:-.025em;
-      font-weight:750;
-    }
-
-    .muted{color:var(--muted)}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-
-    .card{
-      background:rgba(255,255,255,.92);
-      border:1px solid rgba(229,231,235,.95);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow-soft);
-    }
-
-    .hero{
-      padding:22px;
-      display:grid;
-      grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr);
-      gap:18px;
-      margin-bottom:18px;
-    }
-
-    .syncBox{
-      background:var(--surface-2);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:18px;
-    }
-
-    .statusDot{
-      display:inline-block;
-      width:9px;
-      height:9px;
-      border-radius:99px;
-      background:var(--warning);
-      margin-right:9px;
-      box-shadow:0 0 0 4px rgba(217,119,6,.12);
-    }
-    .statusDot.ok{background:var(--success);box-shadow:0 0 0 4px rgba(22,163,74,.12)}
-    .statusDot.bad{background:var(--danger);box-shadow:0 0 0 4px rgba(220,38,38,.12)}
-
-    .kpis{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:14px;
-      margin-bottom:18px;
-    }
-
-    .kpi{padding:18px}
-    .kpi span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      font-weight:700;
-    }
-    .kpi strong{
-      display:block;
-      font-size:28px;
-      margin-top:8px;
-      letter-spacing:-.035em;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);
-      gap:18px;
-    }
-
-    .toolbar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin:0 0 14px;
-      padding-bottom:14px;
-      border-bottom:1px solid var(--line);
-    }
-
-    input,select,button{
-      border:1px solid var(--line-strong);
-      background:#fff;
-      color:var(--text);
-      border-radius:12px;
-      padding:11px 12px;
-      font:inherit;
-      outline:none;
-      transition:border-color .15s ease, box-shadow .15s ease, background .15s ease, transform .15s ease;
-    }
-
-    input::placeholder{color:#9ca3af}
-    input:focus,select:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 4px rgba(37,99,235,.10);
-    }
-
-    input,select{min-width:150px}
-    select{cursor:pointer}
-
-    button{
-      cursor:pointer;
-      font-weight:750;
-      background:var(--accent);
-      border-color:var(--accent);
-      color:#fff;
-      box-shadow:0 6px 14px rgba(37,99,235,.18);
-    }
-    button:hover{background:var(--accent-hover);border-color:var(--accent-hover);transform:translateY(-1px)}
-    button.secondary{
-      background:#fff;
-      color:#374151;
-      border:1px solid var(--line-strong);
-      box-shadow:none;
-    }
-    button.secondary:hover{background:#f9fafb}
-    button.danger{
-      background:#fff;
-      color:var(--danger);
-      border:1px solid rgba(220,38,38,.28);
-      box-shadow:none;
-    }
-    button.danger:hover{background:#fef2f2;border-color:rgba(220,38,38,.45)}
-
-    table{
-      width:100%;
-      border-collapse:separate;
-      border-spacing:0;
-      overflow:hidden;
-      font-size:14px;
-    }
-    th,td{
-      padding:13px 12px;
-      text-align:left;
-      border-bottom:1px solid var(--line);
-      vertical-align:middle;
-      white-space:nowrap;
-    }
-    th{
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      color:#6b7280;
-      background:#f9fafb;
-      font-weight:800;
-    }
-    tbody tr:last-child td{border-bottom:none}
-    tr:hover td{background:#fafafa}
-
-    .right{text-align:right}
-    .actions{display:flex;gap:8px;justify-content:flex-end}
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      border-radius:999px;
-      padding:5px 9px;
-      font-size:12px;
-      font-weight:800;
-      background:#fff7ed;
-      color:#9a3412;
-      border:1px solid #fed7aa;
-    }
-    .pill.send{
-      background:#eff6ff;
-      color:#1d4ed8;
-      border-color:#bfdbfe;
-    }
-    .pill.ok{
-      background:#ecfdf5;
-      color:#047857;
-      border-color:#a7f3d0;
-    }
-
-    .seller{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-      margin:14px 0;
-      font-size:14px;
-    }
-    .bar{
-      height:8px;
-      background:#eef2f7;
-      border-radius:999px;
-      overflow:hidden;
-      margin-top:8px;
-    }
-    .bar span{
-      display:block;
-      height:100%;
-      background:linear-gradient(90deg,#2563eb,#16a34a);
-      border-radius:999px;
-    }
-
-    .form{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-    }
-    .form label{
-      display:grid;
-      gap:7px;
-      color:#4b5563;
-      font-size:12px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.075em;
-    }
-    .form input,.form select{width:100%;min-width:0}
-    .form .full{grid-column:1/-1}
-
-    .help{
-      font-size:13px;
-      line-height:1.55;
-      background:#fff;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      margin-top:14px;
-      color:#4b5563;
-    }
-
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
-
-    @media (max-width:900px){
-      .wrap{padding:22px 14px 36px}
-      .hero,.grid,.kpis{grid-template-columns:1fr}
-      .form{grid-template-columns:1fr}
-      th:nth-child(3),td:nth-child(3),th:nth-child(6),td:nth-child(6){display:none}
-      table{font-size:13px}
-      th,td{padding:11px 9px}
-    }
-
+    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#eef2f7;color:var(--text)}
+    button,input,select{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-columns:var(--sidebar) 1fr}
+    .sidebar{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#0b1020,#111827);color:var(--darkText);padding:20px 16px;display:flex;flex-direction:column;gap:18px}
+    .brand{display:flex;gap:12px;align-items:center;padding:8px 8px 18px;border-bottom:1px solid rgba(148,163,184,.18)}
+    .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#16a34a);display:grid;place-items:center;font-weight:900}
+    .brand strong{display:block;font-size:18px}.brand span{display:block;color:var(--darkMuted);font-size:12px;margin-top:2px}
+    .nav{display:grid;gap:6px}
+    .nav a{color:var(--darkMuted);text-decoration:none;padding:12px 13px;border-radius:14px;font-weight:750;display:flex;justify-content:space-between;align-items:center}
+    .nav a:hover,.nav a.active{background:rgba(255,255,255,.08);color:#fff}
+    .badge{font-size:11px;border:1px solid rgba(148,163,184,.24);border-radius:999px;padding:2px 7px;color:var(--darkMuted)}
+    .sideFoot{margin-top:auto;color:var(--darkMuted);font-size:12px;border-top:1px solid rgba(148,163,184,.18);padding-top:14px;line-height:1.5}
+    .main{min-width:0;padding:28px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+    .title h1{margin:0;font-size:clamp(28px,4vw,44px);letter-spacing:-.045em;line-height:1}.title p{margin:8px 0 0;color:var(--muted)}
+    .sync{background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 13px;color:var(--muted);box-shadow:var(--shadow);font-size:13px;white-space:nowrap}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:99px;background:var(--warn);margin-right:8px}.dot.ok{background:var(--accent2)}.dot.bad{background:var(--danger)}
+    .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
+    .card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .kpi{padding:18px}.kpi span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.kpi strong{display:block;font-size:30px;margin-top:8px;letter-spacing:-.04em}
+    .layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:16px}
+    .panel{padding:18px}.panel h2{margin:0 0 14px;font-size:21px;letter-spacing:-.025em}
+    .form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    label{display:grid;gap:7px;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:850}
+    input,select{border:1px solid #cbd5e1;border-radius:13px;background:#fff;color:var(--text);padding:11px 12px;outline:none;width:100%;min-width:0}
+    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+    .full{grid-column:1/-1}
+    .actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+    button{border:0;border-radius:13px;padding:11px 14px;font-weight:850;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.20)}
+    button:hover{filter:brightness(.96);transform:translateY(-1px)}
+    button.secondary{background:#fff;color:#334155;border:1px solid #cbd5e1;box-shadow:none}
+    button.danger{background:#fff;color:var(--danger);border:1px solid rgba(220,38,38,.25);box-shadow:none}
+    button.success{background:var(--accent2)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+    .tableWrap{overflow:auto}.table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+    th,td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
+    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;font-weight:900}
+    tr:hover td{background:#fafafa}.right{text-align:right}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.muted{color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
+    .pill.send{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.pill.ok{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
+    .seller{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:14px 0;font-size:14px}.bar{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:8px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#16a34a);border-radius:999px}
+    .page{display:none}.page.active{display:block}.miniGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .statLine{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.statLine:last-child{border-bottom:0}
+    .history{display:grid;gap:10px}.historyItem{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff}.historyItem strong{display:block}.historyItem small{color:var(--muted)}
+    .mobileBtn{display:none}
+    @media(max-width:1000px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:20;left:-290px;transition:.2s}.sidebar.open{left:0}.mobileBtn{display:inline-flex}.main{padding:18px}.layout,.kpis,.miniGrid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.sync{white-space:normal}.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10}.overlay.show{display:block}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <div class="eyebrow">Duo Update</div>
-        <h1>Dashboard collaboratif</h1>
-        <p class="muted">Ajouts et modifications synchronisés en temps réel entre toi et ton ami.</p>
-      </div>
-      <button class="secondary" onclick="seedDemoData()">Réimporter les données de départ</button>
-    </header>
+<div class="overlay" id="overlay" onclick="toggleMenu(false)"></div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand"><div class="logo">DU</div><div><strong>Duo Update Pro</strong><span>Temps réel • Firestore</span></div></div>
+    <nav class="nav" id="nav">
+      <a href="#dashboard" data-page="dashboard">Dashboard <span class="badge" id="navTotal">0</span></a>
+      <a href="#ajout" data-page="ajout">Ajout rapide</a>
+      <a href="#lignes" data-page="lignes">Toutes les lignes</a>
+      <a href="#confirmes" data-page="confirmes">Confirmés <span class="badge" id="navConfirmed">0</span></a>
+      <a href="#asend" data-page="asend">À envoyer</a>
+      <a href="#send" data-page="send">Envoyés</a>
+      <a href="#stats" data-page="stats">Statistiques</a>
+      <a href="#historique" data-page="historique">Historique</a>
+      <a href="#parametres" data-page="parametres">Paramètres</a>
+    </nav>
+    <div class="sideFoot">Même lien = mêmes données.<br>Performance calculée uniquement sur <b>Confirmer</b>.</div>
+  </aside>
 
-    <section class="hero card">
-      <div>
-        <h2 style="margin:0 0 8px;font-size:25px">Ajouter ou modifier une ligne</h2>
+  <main class="main">
+    <div class="topbar">
+      <button class="secondary mobileBtn" onclick="toggleMenu(true)">Menu</button>
+      <div class="title"><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Vue globale de votre activité duo.</p></div>
+      <div class="sync" id="syncState"><span class="dot"></span>Connexion...</div>
+    </div>
+
+    <section class="grid kpis">
+      <div class="card kpi"><span>Total confirmé</span><strong id="kpiConfirmedTotal">0 €</strong></div>
+      <div class="card kpi"><span>Lignes</span><strong id="kpiRows">0</strong></div>
+      <div class="card kpi"><span>Confirmés</span><strong id="kpiConfirmed">0</strong></div>
+      <div class="card kpi"><span>Moyenne confirmée</span><strong id="kpiAvg">0 €</strong></div>
+    </section>
+
+    <section class="page active" id="page-dashboard">
+      <div class="layout">
+        <div class="card panel">
+          <h2>Dernières lignes</h2>
+          <div class="toolbar">
+            <input id="qDash" placeholder="Recherche rapide..." oninput="renderAll()">
+            <button class="secondary" onclick="location.hash='#ajout'">Ajouter</button>
+            <button class="secondary" onclick="exportCSV()">Export CSV</button>
+          </div>
+          <div class="tableWrap"><table class="table"><thead id="theadDash"></thead><tbody id="tbodyDash"></tbody></table></div>
+        </div>
+        <aside class="card panel">
+          <h2>Performance duo</h2>
+          <p class="muted">Chiffre confirmé par vendeur.</p>
+          <div id="sellerPerformance"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="page" id="page-ajout">
+      <div class="card panel">
+        <h2>Ajouter ou modifier une ligne</h2>
         <form id="entryForm" class="form">
           <input type="hidden" id="docId">
           <label>Vendeur<input id="vendeur" required placeholder="Nom"></label>
           <label>Client<input id="client" placeholder="Client"></label>
-          <label>Compte<input id="compte" placeholder="Compte / email masqué"></label>
-          <label>Produit
-            <select id="produit" required>
-              <option value="">Choisir...</option>
-              <option value="Perth Mint">Perth Mint</option>
-              <option value="PAMP">PAMP</option>
-            </select>
-          </label>
-          <label>Poids
-            <select id="poids" required>
-              <option value="">Choisir...</option>
-              <option value="10g">10g</option>
-              <option value="5g">5g</option>
-            </select>
-          </label>
+          <label>Compte<input id="compte" placeholder="Compte"></label>
+          <label>Produit<select id="produit" required><option value="">Choisir...</option><option>Perth Mint</option><option>PAMP</option></select></label>
+          <label>Poids<select id="poids" required><option value="">Choisir...</option><option>10g</option><option>5g</option></select></label>
           <label>Série<input id="serie" placeholder="Référence"></label>
-          <label>Plateforme
-            <select id="plateforme" required>
-              <option value="">Choisir...</option>
-              <option value="Vinted">Vinted</option>
-              <option value="Leboncoin">Leboncoin</option>
-            </select>
-          </label>
-          <label>Statut
-            <select id="statut" required>
-              <option value="">Choisir...</option>
-              <option value="A Send">A Send</option>
-              <option value="Send">Send</option>
-              <option value="Confirmer">Confirmer</option>
-            </select>
-          </label>
+          <label>Plateforme<select id="plateforme" required><option value="">Choisir...</option><option>Vinted</option><option>Leboncoin</option></select></label>
+          <label>Statut<select id="statut" required><option value="">Choisir...</option><option>A Send</option><option>Send</option><option>Confirmer</option></select></label>
           <label>Prix<input id="prix" type="number" min="0" step="0.01" placeholder="0"></label>
           <label class="full">Note<input id="note" placeholder="Note privée"></label>
-          <div class="full actions" style="justify-content:flex-start">
-            <button type="submit">Enregistrer</button>
-            <button type="button" class="secondary" onclick="clearForm()">Nouveau</button>
-          </div>
+          <div class="full actions"><button type="submit">Enregistrer</button><button type="button" class="secondary" onclick="clearForm()">Nouveau</button></div>
         </form>
       </div>
-      <div class="syncBox">
-        <h2 style="margin:0 0 10px;font-size:22px">Synchronisation</h2>
-        <p id="syncState" class="muted"><span class="statusDot" id="syncDot"></span>Firebase non configuré.</p>
-        <p class="help">
-          Pour que ça se mette à jour chez vous deux : crée un projet Firebase, active Firestore,
-          puis remplace <span class="mono">firebaseConfig</span> dans ce fichier. Ensuite vous ouvrez tous les deux le même fichier hébergé ou le même lien.
-        </p>
+    </section>
+
+    <section class="page" id="page-lignes"><div class="card panel"><h2>Toutes les lignes</h2><div id="mainToolbar" class="toolbar"></div><div class="tableWrap"><table class="table"><thead id="theadMain"></thead><tbody id="tbodyMain"></tbody></table></div></div></section>
+    <section class="page" id="page-confirmes"><div class="card panel"><h2>Lignes confirmées</h2><div class="tableWrap"><table class="table"><thead id="theadConfirmed"></thead><tbody id="tbodyConfirmed"></tbody></table></div></div></section>
+    <section class="page" id="page-asend"><div class="card panel"><h2>À envoyer</h2><div class="tableWrap"><table class="table"><thead id="theadASend"></thead><tbody id="tbodyASend"></tbody></table></div></div></section>
+    <section class="page" id="page-send"><div class="card panel"><h2>Envoyés</h2><div class="tableWrap"><table class="table"><thead id="theadSend"></thead><tbody id="tbodySend"></tbody></table></div></div></section>
+
+    <section class="page" id="page-stats">
+      <div class="miniGrid">
+        <div class="card panel"><h2>Par vendeur</h2><div id="statsVendeur"></div></div>
+        <div class="card panel"><h2>Par plateforme</h2><div id="statsPlateforme"></div></div>
+        <div class="card panel"><h2>Par produit</h2><div id="statsProduit"></div></div>
+        <div class="card panel"><h2>Par poids</h2><div id="statsPoids"></div></div>
       </div>
     </section>
 
-    <section class="kpis">
-      <div class="card kpi"><span>Total</span><strong id="kpiTotal">0 €</strong></div>
-      <div class="card kpi"><span>Lignes</span><strong id="kpiRows">0</strong></div>
-      <div class="card kpi"><span>Send</span><strong id="kpiSend">0</strong></div>
-      <div class="card kpi"><span>Moyenne</span><strong id="kpiAvg">0 €</strong></div>
-    </section>
+    <section class="page" id="page-historique"><div class="card panel"><h2>Historique</h2><div class="actions" style="margin-bottom:12px"><button class="secondary" onclick="renderHistory()">Rafraîchir</button></div><div id="historyList" class="history"></div></div></section>
 
-    <section class="grid">
-      <div class="card" style="padding:16px;overflow:auto">
-        <div class="toolbar">
-          <input id="q" placeholder="Recherche…" oninput="render()" />
-          <select id="seller" onchange="render()"><option value="">Tous vendeurs</option></select>
-          <select id="status" onchange="render()"><option value="">Tous statuts</option></select>
-          <button class="secondary" onclick="resetFilters()">Reset</button>
+    <section class="page" id="page-parametres">
+      <div class="card panel">
+        <h2>Paramètres</h2>
+        <p class="muted">Outils de gestion de votre espace partagé.</p>
+        <div class="actions">
+          <button class="secondary" onclick="seedDemoData()">Réimporter données de départ</button>
+          <button class="secondary" onclick="exportCSV()">Exporter CSV</button>
         </div>
-        <table>
-          <thead><tr><th>Vendeur</th><th>Client</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Série</th><th>Plateforme</th><th>Statut</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
+        <p class="muted" style="margin-top:16px">Collection Firestore : <span class="mono">duos/duo-principal/entries</span></p>
       </div>
-      <aside class="card" style="padding:18px">
-        <h2 style="margin:0 0 6px;font-size:22px">Performance duo</h2>
-        <p class="muted" style="margin-top:0">Répartition du chiffre confirmé par vendeur uniquement.</p>
-        <div id="sellers"></div>
-      </aside>
     </section>
-    <footer>Données synchronisées via Firestore quand Firebase est configuré.</footer>
-  </div>
+  </main>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, collection, addDoc, setDoc, doc, deleteDoc, onSnapshot,
-  serverTimestamp, query, orderBy, getDocs, writeBatch
+  serverTimestamp, query, orderBy, getDocs, writeBatch, limit
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* 1) Remplace ces valeurs par celles de Firebase > Project settings > Web app */
 const firebaseConfig = {
   apiKey: "AIzaSyBQBpxys9vtgEca5mvzXtbA6v9Pka5mGlc",
   authDomain: "golden-shower-52a9e.firebaseapp.com",
@@ -412,9 +178,7 @@ const firebaseConfig = {
   appId: "1:134037392413:web:f99ba286e9f0ca257e4af4"
 };
 
-/* 2) Même duoId = mêmes données partagées. Change ce nom pour créer un autre espace. */
 const duoId = "duo-principal";
-
 const initialRows = [
   {"vendeur":"ZerleZZ","client":"DM","compte":"el•••@gm•••","produit":"Perth Mint","poids":"10g","serie":"B017483","plateforme":"Leboncoin","statut":"A Send","prix":800,"note":""},
   {"vendeur":"Dora","client":"DM","compte":"ma•••@ou•••","produit":"Perth Mint","poids":"10g","serie":"C019927","plateforme":"Leboncoin","statut":"Confirmer","prix":400,"note":""},
@@ -422,187 +186,101 @@ const initialRows = [
   {"vendeur":"Dora","client":"Spain","compte":"Raph","produit":"Perth Mint","poids":"10g","serie":"C019927","plateforme":"Vinted","statut":"Send","prix":380,"note":""}
 ];
 
-let rows = [];
-let db = null;
-let colRef = null;
-const isConfigured = firebaseConfig.apiKey !== "REMPLACE_MOI" && firebaseConfig.projectId !== "REMPLACE_MOI";
-const euro = n => new Intl.NumberFormat('fr-FR', {style:'currency', currency:'EUR', maximumFractionDigits:0}).format(Number(n || 0));
-const $ = id => document.getElementById(id);
-const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let rows=[], historyRows=[], db=null, colRef=null, historyRef=null;
+const $=id=>document.getElementById(id);
+const euro=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const isConfirmed=r=>String(r.statut||'').trim().toLowerCase().includes('confirm');
+const isSend=r=>String(r.statut||'').trim().toLowerCase()==='send';
+const isASend=r=>String(r.statut||'').trim().toLowerCase()==='a send';
 
-function setSync(text, type = "") {
-  $("syncState").innerHTML = `<span class="statusDot ${type}" id="syncDot"></span>${esc(text)}`;
+function setSync(text,type=""){ $("syncState").innerHTML=`<span class="dot ${type}"></span>${esc(text)}`; }
+function toggleMenu(show){$("sidebar").classList.toggle("open",show);$("overlay").classList.toggle("show",show)}
+window.toggleMenu=toggleMenu;
+
+function tableHead(){return `<tr><th>Vendeur</th><th>Client</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Série</th><th>Plateforme</th><th>Statut</th><th class="right">Prix</th><th class="right">Actions</th></tr>`}
+function badge(s){const v=String(s||'');const c=v.toLowerCase()==='send'?'send':v.toLowerCase().includes('confirm')?'ok':'';return `<span class="pill ${c}">${esc(v||'—')}</span>`}
+function rowHtml(r){return `<tr><td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td><td class="mono muted">${esc(r.compte)}</td><td>${esc(r.produit)}</td><td>${esc(r.poids||'—')}</td><td class="mono">${esc(r.serie)}</td><td>${esc(r.plateforme)}</td><td>${badge(r.statut)}</td><td class="right"><strong>${euro(r.prix)}</strong></td><td class="right"><div class="actions" style="justify-content:flex-end"><button class="secondary" onclick="editRow('${esc(r.id)}')">Modifier</button><button class="danger" onclick="removeRow('${esc(r.id)}')">Supprimer</button></div></td></tr>`}
+function renderTable(thead,tbody,list){$(thead).innerHTML=tableHead();$(tbody).innerHTML=list.map(rowHtml).join('')||`<tr><td colspan="10" class="muted">Aucun résultat.</td></tr>`}
+
+function filteredAll(){
+  const q=($("globalQ")?.value||"").trim().toLowerCase();
+  const seller=$("filterSeller")?.value||"", status=$("filterStatus")?.value||"", platform=$("filterPlatform")?.value||"";
+  return rows.filter(r=>(!seller||r.vendeur===seller)&&(!status||r.statut===status)&&(!platform||r.plateforme===platform)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q)));
+}
+function unique(key){return [...new Set(rows.map(r=>r[key]).filter(Boolean))].sort()}
+function buildToolbar(){
+  $("mainToolbar").innerHTML = `
+    <input id="globalQ" placeholder="Recherche..." oninput="renderAll()">
+    <select id="filterSeller" onchange="renderAll()"><option value="">Tous vendeurs</option>${unique('vendeur').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
+    <select id="filterStatus" onchange="renderAll()"><option value="">Tous statuts</option>${unique('statut').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
+    <select id="filterPlatform" onchange="renderAll()"><option value="">Toutes plateformes</option>${unique('plateforme').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
+    <button class="secondary" onclick="resetFilters()">Reset</button><button class="secondary" onclick="exportCSV()">Export CSV</button>`;
 }
 
-function localLoad() {
-  rows = JSON.parse(localStorage.getItem("duoRows") || "null") || initialRows.map((r,i)=>({...r,id:`local-${i+1}`}));
-  setSync("Mode local : Firebase non configuré. Les changements ne seront pas visibles chez ton ami.", "bad");
-  rebuildFilters(); render();
+function renderKPIs(){
+  const confirmed=rows.filter(isConfirmed), total=confirmed.reduce((s,r)=>s+Number(r.prix||0),0);
+  $("kpiConfirmedTotal").textContent=euro(total);$("kpiRows").textContent=rows.length;$("kpiConfirmed").textContent=confirmed.length;$("kpiAvg").textContent=euro(confirmed.length?total/confirmed.length:0);
+  $("navTotal").textContent=rows.length;$("navConfirmed").textContent=confirmed.length;
 }
-
-async function startFirebase() {
-  if (!isConfigured) return localLoad();
-  try {
-    const app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    colRef = collection(db, "duos", duoId, "entries");
-    const qRef = query(colRef, orderBy("createdAt", "desc"));
-    onSnapshot(qRef, snap => {
-      rows = snap.docs.map(d => ({id:d.id, ...d.data()}));
-      setSync("Connecté : mises à jour en temps réel activées.", "ok");
-      rebuildFilters(); render();
-    }, err => {
-      console.error(err);
-      setSync("Erreur Firebase : vérifie la configuration et les règles Firestore.", "bad");
-      localLoad();
-    });
-  } catch (err) {
-    console.error(err);
-    setSync("Impossible de démarrer Firebase. Mode local activé.", "bad");
-    localLoad();
-  }
+function renderSellers(){
+  const totals={};rows.filter(isConfirmed).forEach(r=>totals[r.vendeur||"Sans vendeur"]=(totals[r.vendeur||"Sans vendeur"]||0)+Number(r.prix||0));
+  const max=Math.max(1,...Object.values(totals));
+  $("sellerPerformance").innerHTML=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="seller"><div style="width:100%"><strong>${esc(n)}</strong><div class="bar"><span style="width:${Math.round(v/max*100)}%"></span></div></div><strong>${euro(v)}</strong></div>`).join('')||'<p class="muted">Aucune vente confirmée.</p>';
 }
-
-function unique(key) { return [...new Set(rows.map(r => r[key]).filter(Boolean))].sort(); }
-
-function rebuildFilters() {
-  const oldSeller = $("seller").value;
-  const oldStatus = $("status").value;
-  $("seller").innerHTML = '<option value="">Tous vendeurs</option>' + unique('vendeur').map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
-  $("status").innerHTML = '<option value="">Tous statuts</option>' + unique('statut').map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
-  $("seller").value = oldSeller;
-  $("status").value = oldStatus;
+function statBlock(key,id){
+  const totals={};rows.filter(isConfirmed).forEach(r=>{const k=r[key]||"Non défini";totals[k]=(totals[k]||0)+Number(r.prix||0)});
+  $(id).innerHTML=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="statLine"><strong>${esc(k)}</strong><span>${euro(v)}</span></div>`).join('')||'<p class="muted">Aucune donnée confirmée.</p>';
 }
-
-function badge(s) {
-  const value = String(s || '');
-  const c = value.toLowerCase() === 'send' ? 'send' : value.toLowerCase().includes('confirm') ? 'ok' : 'pending';
-  return `<span class="pill ${c}">${esc(value || '—')}</span>`;
+function renderHistory(){
+  $("historyList").innerHTML=historyRows.map(h=>`<div class="historyItem"><strong>${esc(h.action||'Action')}</strong><small>${esc(h.label||'')} • ${h.date?.toDate ? h.date.toDate().toLocaleString('fr-FR') : ''}</small></div>`).join('')||'<p class="muted">Aucun historique.</p>';
 }
-
-function filtered() {
-  const queryText = $("q").value.trim().toLowerCase();
-  return rows.filter(r =>
-    (!$("seller").value || r.vendeur === $("seller").value) &&
-    (!$("status").value || r.statut === $("status").value) &&
-    (!queryText || Object.values(r).join(' ').toLowerCase().includes(queryText))
-  );
+function renderAll(){
+  renderKPIs(); buildToolbar();
+  const dashQ=($("qDash")?.value||"").trim().toLowerCase();
+  const dash=rows.filter(r=>!dashQ||Object.values(r).join(' ').toLowerCase().includes(dashQ)).slice(0,8);
+  renderTable("theadDash","tbodyDash",dash);
+  renderTable("theadMain","tbodyMain",filteredAll());
+  renderTable("theadConfirmed","tbodyConfirmed",rows.filter(isConfirmed));
+  renderTable("theadASend","tbodyASend",rows.filter(isASend));
+  renderTable("theadSend","tbodySend",rows.filter(isSend));
+  renderSellers(); statBlock('vendeur','statsVendeur'); statBlock('plateforme','statsPlateforme'); statBlock('produit','statsProduit'); statBlock('poids','statsPoids'); renderHistory();
 }
+window.renderAll=renderAll;
 
-function render() {
-  const list = filtered();
-  const total = list.reduce((s,r)=>s+Number(r.prix || 0),0);
-  $("kpiTotal").textContent = euro(total);
-  $("kpiRows").textContent = list.length;
-  $("kpiSend").textContent = list.filter(r=>String(r.statut || '').toLowerCase()==='send').length;
-  $("kpiAvg").textContent = euro(list.length ? total/list.length : 0);
-  $("tbody").innerHTML = list.map(r => `<tr>
-    <td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td><td class="mono muted">${esc(r.compte)}</td>
-    <td>${esc(r.produit)}</td><td>${esc(r.poids || "—")}</td><td class="mono">${esc(r.serie)}</td>
-    <td>${esc(r.plateforme)}</td><td>${badge(r.statut)}</td><td class="right"><strong>${euro(r.prix)}</strong></td>
-    <td class="right"><div class="actions"><button class="secondary" onclick="editRow('${esc(r.id)}')">Modifier</button><button class="danger" onclick="removeRow('${esc(r.id)}')">Supprimer</button></div></td>
-  </tr>`).join('') || `<tr><td colspan="10" class="muted">Aucun résultat.</td></tr>`;
-  renderSellers(list);
-}
+function getFormData(){return {vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),compte:$("compte").value.trim(),produit:$("produit").value.trim(),poids:$("poids").value.trim(),serie:$("serie").value.trim(),plateforme:$("plateforme").value.trim(),statut:$("statut").value.trim(),prix:Number($("prix").value||0),note:$("note").value.trim(),updatedAt:serverTimestamp()}}
+async function addHistory(action,label){ if(historyRef) await addDoc(historyRef,{action,label,date:serverTimestamp()}); }
 
-function isConfirmed(row) {
-  return String(row.statut || '').trim().toLowerCase().includes('confirm');
-}
-
-function renderSellers(list) {
-  const confirmedList = list.filter(isConfirmed);
-  const totals = {};
-  confirmedList.forEach(r => {
-    const seller = r.vendeur || "Sans vendeur";
-    totals[seller] = (totals[seller] || 0) + Number(r.prix || 0);
-  });
-  const max = Math.max(1, ...Object.values(totals));
-  $("sellers").innerHTML = Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([name,val]) => `
-    <div class="seller"><div style="width:100%"><strong>${esc(name)}</strong><div class="bar"><span style="width:${Math.round(val/max*100)}%"></span></div></div><strong>${euro(val)}</strong></div>
-  `).join('') || '<p class="muted">Aucune vente confirmée.</p>';
-}
-
-function getFormData() {
-  return {
-    vendeur: $("vendeur").value.trim(),
-    client: $("client").value.trim(),
-    compte: $("compte").value.trim(),
-    produit: $("produit").value.trim(),
-    poids: $("poids").value.trim(),
-    serie: $("serie").value.trim(),
-    plateforme: $("plateforme").value.trim(),
-    statut: $("statut").value.trim(),
-    prix: Number($("prix").value || 0),
-    note: $("note").value.trim(),
-    updatedAt: serverTimestamp ? serverTimestamp() : new Date().toISOString()
-  };
-}
-
-$("entryForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const id = $("docId").value;
-  const data = getFormData();
-  if (!data.vendeur) return alert("Le vendeur est obligatoire.");
-  if (!data.poids) return alert("Le poids est obligatoire.");
-
-  if (db && colRef) {
-    if (id) await setDoc(doc(colRef, id), data, { merge:true });
-    else await addDoc(colRef, { ...data, createdAt: serverTimestamp() });
-  } else {
-    if (id) rows = rows.map(r => r.id === id ? {...r, ...data, updatedAt:new Date().toISOString()} : r);
-    else rows.unshift({...data, id: crypto.randomUUID(), createdAt:new Date().toISOString()});
-    localStorage.setItem("duoRows", JSON.stringify(rows));
-    rebuildFilters(); render();
-  }
-  clearForm();
+$("entryForm").addEventListener("submit",async e=>{
+  e.preventDefault(); const id=$("docId").value; const data=getFormData();
+  if(!data.vendeur) return alert("Le vendeur est obligatoire."); if(!data.poids) return alert("Le poids est obligatoire.");
+  if(id){ await setDoc(doc(colRef,id),data,{merge:true}); await addHistory("Modification",`${data.vendeur} • ${data.statut} • ${data.prix}€`);}
+  else{ await addDoc(colRef,{...data,createdAt:serverTimestamp()}); await addHistory("Ajout",`${data.vendeur} • ${data.statut} • ${data.prix}€`);}
+  clearForm(); location.hash="#lignes";
 });
+window.editRow=id=>{const r=rows.find(x=>x.id===id); if(!r)return; ["docId","vendeur","client","compte","produit","poids","serie","plateforme","statut","prix","note"].forEach(k=>$(k).value=k==="docId"?id:(r[k]??"")); location.hash="#ajout"; window.scrollTo({top:0,behavior:"smooth"});}
+window.removeRow=async id=>{if(!confirm("Supprimer cette ligne ?"))return; const r=rows.find(x=>x.id===id); await deleteDoc(doc(colRef,id)); await addHistory("Suppression",`${r?.vendeur||''} • ${r?.statut||''}`);}
+window.clearForm=()=>{$("entryForm").reset();$("docId").value=""}
+window.resetFilters=()=>{["globalQ","filterSeller","filterStatus","filterPlatform"].forEach(id=>{if($(id))$(id).value=""});renderAll()}
+window.exportCSV=()=>{const header=["vendeur","client","compte","produit","poids","serie","plateforme","statut","prix","note"];const csv=[header.join(";"),...rows.map(r=>header.map(k=>`"${String(r[k]??'').replaceAll('"','""')}"`).join(";"))].join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="duo-update.csv";a.click();URL.revokeObjectURL(a.href)}
+window.seedDemoData=async()=>{if(!confirm("Réimporter les données de départ ?"))return;const snap=await getDocs(colRef);const batch=writeBatch(db);snap.docs.forEach(d=>batch.delete(d.ref));initialRows.forEach(r=>batch.set(doc(colRef),{...r,createdAt:serverTimestamp(),updatedAt:serverTimestamp()}));await batch.commit();await addHistory("Réimport","Données de départ réimportées");}
 
-window.editRow = id => {
-  const r = rows.find(x => x.id === id);
-  if (!r) return;
-  ["docId","vendeur","client","compte","produit","poids","serie","plateforme","statut","prix","note"].forEach(k => $(k).value = k === "docId" ? id : (r[k] ?? ""));
-  window.scrollTo({top:0, behavior:"smooth"});
-};
+function route(){
+  const page=(location.hash||"#dashboard").slice(1);
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const el=$("page-"+page)||$("page-dashboard"); el.classList.add("active");
+  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.page===page));
+  const titles={dashboard:["Dashboard","Vue globale de votre activité duo."],ajout:["Ajout rapide","Créer ou modifier une ligne."],lignes:["Toutes les lignes","Recherche, filtres et gestion complète."],confirmes:["Confirmés","Toutes les lignes validées."],asend:["À envoyer","Lignes en attente d'envoi."],send:["Envoyés","Lignes déjà envoyées."],stats:["Statistiques","Analyse par vendeur, plateforme, produit et poids."],historique:["Historique","Journal des ajouts, modifications et suppressions."],parametres:["Paramètres","Outils et configuration."]};
+  $("pageTitle").textContent=(titles[page]||titles.dashboard)[0]; $("pageSub").textContent=(titles[page]||titles.dashboard)[1]; toggleMenu(false);
+}
+window.addEventListener("hashchange",route);
 
-window.removeRow = async id => {
-  if (!confirm("Supprimer cette ligne ?")) return;
-  if (db && colRef) await deleteDoc(doc(colRef, id));
-  else {
-    rows = rows.filter(r => r.id !== id);
-    localStorage.setItem("duoRows", JSON.stringify(rows));
-    rebuildFilters(); render();
-  }
-};
-
-window.clearForm = () => {
-  $("entryForm").reset();
-  $("docId").value = "";
-};
-
-window.resetFilters = () => {
-  $("q").value = "";
-  $("seller").value = "";
-  $("status").value = "";
-  render();
-};
-
-window.seedDemoData = async () => {
-  if (!confirm("Réimporter les lignes de départ ?")) return;
-  if (db && colRef) {
-    const snap = await getDocs(colRef);
-    const batch = writeBatch(db);
-    snap.docs.forEach(d => batch.delete(d.ref));
-    initialRows.forEach(r => batch.set(doc(colRef), {...r, createdAt:serverTimestamp(), updatedAt:serverTimestamp()}));
-    await batch.commit();
-  } else {
-    rows = initialRows.map((r,i)=>({...r,id:`local-${Date.now()}-${i}`}));
-    localStorage.setItem("duoRows", JSON.stringify(rows));
-    rebuildFilters(); render();
-  }
-};
-
-window.render = render;
-startFirebase();
+try{
+  const app=initializeApp(firebaseConfig); db=getFirestore(app); colRef=collection(db,"duos",duoId,"entries"); historyRef=collection(db,"duos",duoId,"history");
+  onSnapshot(query(colRef,orderBy("createdAt","desc")),snap=>{rows=snap.docs.map(d=>({id:d.id,...d.data()}));setSync("Connecté : temps réel activé.","ok");renderAll();});
+  onSnapshot(query(historyRef,orderBy("date","desc"),limit(60)),snap=>{historyRows=snap.docs.map(d=>({id:d.id,...d.data()}));renderHistory();});
+}catch(err){console.error(err);setSync("Erreur Firebase : vérifie les règles Firestore.","bad");}
+route();
 </script>
 </body>
 </html>
