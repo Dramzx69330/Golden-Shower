@@ -3,170 +3,459 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duo Update Pro</title>
+  <title>Duo Update — Gestion commandes</title>
   <style>
     :root{
-      --bg:#0b1020;--panel:#111827;--panel2:#172033;--card:#ffffff;--card2:#f8fafc;--text:#0f172a;--muted:#64748b;
-      --line:#e2e8f0;--darkText:#e5e7eb;--darkMuted:#94a3b8;--accent:#2563eb;--accent2:#16a34a;--warn:#d97706;--danger:#dc2626;
-      --radius:18px;--shadow:0 18px 45px rgba(15,23,42,.10);--sidebar:280px
+      --bg:#f6f7f9;
+      --panel:#ffffff;
+      --panel-2:#fafafa;
+      --text:#111111;
+      --muted:#6f6f6f;
+      --line:#e5e5e5;
+      --line-strong:#d4d4d4;
+      --black:#111111;
+      --accent:#1d4ed8;
+      --success:#087f5b;
+      --warning:#b7791f;
+      --danger:#b42318;
+      --radius:10px;
+      --shadow:0 20px 50px rgba(0,0,0,.06);
+      --shadow-soft:0 8px 24px rgba(0,0,0,.04);
     }
+
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#eef2f7;color:var(--text)}
-    button,input,select{font:inherit}
-    .app{min-height:100vh;display:grid;grid-template-columns:var(--sidebar) 1fr}
-    .sidebar{position:sticky;top:0;height:100vh;background:linear-gradient(180deg,#0b1020,#111827);color:var(--darkText);padding:20px 16px;display:flex;flex-direction:column;gap:18px}
-    .brand{display:flex;gap:12px;align-items:center;padding:8px 8px 18px;border-bottom:1px solid rgba(148,163,184,.18)}
-    .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#16a34a);display:grid;place-items:center;font-weight:900}
-    .brand strong{display:block;font-size:18px}.brand span{display:block;color:var(--darkMuted);font-size:12px;margin-top:2px}
-    .nav{display:grid;gap:6px}
-    .nav a{color:var(--darkMuted);text-decoration:none;padding:12px 13px;border-radius:14px;font-weight:750;display:flex;justify-content:space-between;align-items:center}
-    .nav a:hover,.nav a.active{background:rgba(255,255,255,.08);color:#fff}
-    .badge{font-size:11px;border:1px solid rgba(148,163,184,.24);border-radius:999px;padding:2px 7px;color:var(--darkMuted)}
-    .sideFoot{margin-top:auto;color:var(--darkMuted);font-size:12px;border-top:1px solid rgba(148,163,184,.18);padding-top:14px;line-height:1.5}
-    .main{min-width:0;padding:28px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
-    .title h1{margin:0;font-size:clamp(28px,4vw,44px);letter-spacing:-.045em;line-height:1}.title p{margin:8px 0 0;color:var(--muted)}
-    .sync{background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 13px;color:var(--muted);box-shadow:var(--shadow);font-size:13px;white-space:nowrap}
-    .dot{display:inline-block;width:9px;height:9px;border-radius:99px;background:var(--warn);margin-right:8px}.dot.ok{background:var(--accent2)}.dot.bad{background:var(--danger)}
-    .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}
-    .card{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
-    .kpi{padding:18px}.kpi span{display:block;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:850}.kpi strong{display:block;font-size:30px;margin-top:8px;letter-spacing:-.04em}
-    .layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:16px}
-    .panel{padding:18px}.panel h2{margin:0 0 14px;font-size:21px;letter-spacing:-.025em}
-    .form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    label{display:grid;gap:7px;color:#475569;font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:850}
-    input,select{border:1px solid #cbd5e1;border-radius:13px;background:#fff;color:var(--text);padding:11px 12px;outline:none;width:100%;min-width:0}
-    input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      letter-spacing:-.01em;
+    }
+
+    .app{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:100vh}
+    aside{
+      background:#fff;
+      border-right:1px solid var(--line);
+      padding:34px 26px;
+      position:sticky;
+      top:0;
+      height:100vh;
+    }
+
+    .brand{margin-bottom:42px}
+    .brand small{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+    .brand strong{font-size:24px;letter-spacing:-.04em}
+
+    nav{display:grid;gap:8px}
+    .navBtn{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:#3f3f46;
+      text-align:left;
+      padding:14px 14px;
+      border-radius:8px;
+      font-weight:760;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow:none;
+    }
+    .navBtn:hover{background:#f4f4f5}
+    .navBtn.active{background:#111;color:#fff}
+
+    .sideFooter{
+      position:absolute;
+      left:26px;
+      right:26px;
+      bottom:28px;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.55;
+    }
+
+    main{padding:42px clamp(24px,4vw,58px) 60px}
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:24px;
+      margin-bottom:32px;
+    }
+    h1{margin:0;font-size:42px;line-height:1.05;letter-spacing:-.055em;font-weight:850}
+    .subtitle{margin:12px 0 0;color:var(--muted);font-size:16px;max-width:680px;line-height:1.55}
+    .sync{
+      min-width:280px;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:14px 16px;
+      font-size:14px;
+      color:var(--muted);
+      box-shadow:var(--shadow-soft);
+    }
+    .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--warning);margin-right:9px}
+    .dot.ok{background:var(--success)}
+    .dot.bad{background:var(--danger)}
+
+    .section{display:none}
+    .section.active{display:block}
+
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin-bottom:28px}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow-soft);
+    }
+    .metric{padding:24px}
+    .metric span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      font-weight:850;
+      margin-bottom:14px;
+    }
+    .metric strong{font-size:34px;letter-spacing:-.05em;line-height:1}
+
+    .layout{display:grid;grid-template-columns:minmax(0,1.3fr) 420px;gap:22px;align-items:start}
+    .panel{padding:24px}
+    .panelHeader{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:20px;
+      margin-bottom:22px;
+    }
+    h2{margin:0;font-size:22px;letter-spacing:-.035em}
+    h3{margin:0 0 14px;font-size:17px;letter-spacing:-.02em}
+    .muted{color:var(--muted)}
+
+    form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    label{
+      display:grid;
+      gap:8px;
+      color:#525252;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.09em;
+      font-weight:850;
+    }
     .full{grid-column:1/-1}
-    .actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-    button{border:0;border-radius:13px;padding:11px 14px;font-weight:850;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(37,99,235,.20)}
-    button:hover{filter:brightness(.96);transform:translateY(-1px)}
-    button.secondary{background:#fff;color:#334155;border:1px solid #cbd5e1;box-shadow:none}
-    button.danger{background:#fff;color:var(--danger);border:1px solid rgba(220,38,38,.25);box-shadow:none}
-    button.success{background:var(--accent2)}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-    .tableWrap{overflow:auto}.table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-    th,td{padding:13px 12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
-    th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;background:#f8fafc;font-weight:900}
-    tr:hover td{background:#fafafa}.right{text-align:right}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.muted{color:var(--muted)}
-    .pill{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
-    .pill.send{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}.pill.ok{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
-    .seller{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:14px 0;font-size:14px}.bar{height:8px;background:#eef2f7;border-radius:999px;overflow:hidden;margin-top:8px}.bar span{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#16a34a);border-radius:999px}
-    .page{display:none}.page.active{display:block}.miniGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-    .statLine{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.statLine:last-child{border-bottom:0}
-    .history{display:grid;gap:10px}.historyItem{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff}.historyItem strong{display:block}.historyItem small{color:var(--muted)}
-    .mobileBtn{display:none}
-    @media(max-width:1000px){.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:20;left:-290px;transition:.2s}.sidebar.open{left:0}.mobileBtn{display:inline-flex}.main{padding:18px}.layout,.kpis,.miniGrid{grid-template-columns:1fr}.form{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.sync{white-space:normal}.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10}.overlay.show{display:block}}
+
+    input,select,button{
+      font:inherit;
+      border-radius:7px;
+      border:1px solid var(--line-strong);
+      background:#fff;
+      color:var(--text);
+      padding:13px 13px;
+      outline:none;
+      min-width:0;
+    }
+    input:focus,select:focus{border-color:#111;box-shadow:0 0 0 3px rgba(0,0,0,.08)}
+    button{
+      cursor:pointer;
+      border-color:#111;
+      background:#111;
+      color:#fff;
+      font-weight:800;
+      padding:13px 16px;
+    }
+    button:hover{background:#2a2a2a}
+    button.secondary{background:#fff;color:#111;border-color:var(--line-strong)}
+    button.secondary:hover{background:#f4f4f5}
+    button.danger{background:#fff;color:var(--danger);border-color:#f1b8b3}
+    button.danger:hover{background:#fff5f5}
+
+    .toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+    .toolbar input{flex:1;min-width:260px}
+    .toolbar select{min-width:170px}
+
+    .tableWrap{overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}
+    table{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+    th,td{padding:16px 14px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:middle}
+    th{
+      background:#fafafa;
+      color:#6b7280;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      font-weight:900;
+    }
+    tbody tr:last-child td{border-bottom:0}
+    tbody tr:hover td{background:#fcfcfc}
+    .right{text-align:right}
+    .actions{display:flex;gap:8px;justify-content:flex-end}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:84px;
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      font-weight:850;
+      border:1px solid #ead7a0;
+      color:#8a5a00;
+      background:#fffaf0;
+    }
+    .pill.send{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}
+    .pill.ok{color:#087f5b;background:#ecfdf5;border-color:#a7f3d0}
+
+    .ranking{display:grid;gap:14px}
+    .rankRow{
+      display:grid;
+      grid-template-columns:36px minmax(0,1fr) auto;
+      align-items:center;
+      gap:14px;
+      padding:16px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:#fff;
+    }
+    .rankNo{font-weight:900;color:#737373}
+    .bar{height:7px;background:#eeeeee;margin-top:10px;overflow:hidden}
+    .bar span{display:block;height:100%;background:#111}
+
+    .activity{display:grid;gap:10px;max-height:420px;overflow:auto}
+    .activityItem{
+      padding:14px 0;
+      border-bottom:1px solid var(--line);
+      color:#3f3f46;
+      font-size:14px;
+      line-height:1.45;
+    }
+    .activityItem:last-child{border-bottom:0}
+    .activityItem time{display:block;color:var(--muted);font-size:12px;margin-top:5px}
+
+    .clientGrid{display:grid;grid-template-columns:1fr;gap:18px}
+    .widePanel{padding:24px}
+    .statGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+    .statBlock{padding:22px;border:1px solid var(--line);background:#fff;border-radius:var(--radius)}
+    .bigName{font-size:28px;font-weight:850;letter-spacing:-.04em}
+    .miniStats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .mini{background:#fafafa;border:1px solid var(--line);padding:14px;border-radius:8px}
+    .mini span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:850;margin-bottom:7px}
+    .mini strong{font-size:20px}
+
+    .toast{
+      position:fixed;
+      right:24px;
+      bottom:24px;
+      background:#111;
+      color:#fff;
+      padding:14px 16px;
+      border-radius:8px;
+      box-shadow:var(--shadow);
+      opacity:0;
+      transform:translateY(10px);
+      pointer-events:none;
+      transition:.2s ease;
+      z-index:50;
+      max-width:360px;
+      font-size:14px;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+    .empty{padding:26px;color:var(--muted);text-align:center}
+
+    @media(max-width:1050px){
+      .app{grid-template-columns:1fr}
+      aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:22px}
+      nav{grid-template-columns:repeat(3,1fr)}
+      .sideFooter{position:static;margin-top:18px}
+      main{padding:28px 18px 44px}
+      .cards,.layout,.statGrid{grid-template-columns:1fr}
+      .sync{min-width:0;width:100%}
+      .topbar{display:grid}
+    }
+    @media(max-width:700px){
+      h1{font-size:34px}
+      form,.miniStats{grid-template-columns:1fr}
+      nav{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr}
+      th:nth-child(3),td:nth-child(3),th:nth-child(6),td:nth-child(6){display:none}
+    }
   </style>
 </head>
 <body>
-<div class="overlay" id="overlay" onclick="toggleMenu(false)"></div>
 <div class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand"><div class="logo">DU</div><div><strong>Duo Update Pro</strong><span>Temps réel • Firestore</span></div></div>
-    <nav class="nav" id="nav">
-      <a href="#dashboard" data-page="dashboard">Dashboard <span class="badge" id="navTotal">0</span></a>
-      <a href="#ajout" data-page="ajout">Ajout rapide</a>
-      <a href="#lignes" data-page="lignes">Toutes les lignes</a>
-      <a href="#confirmes" data-page="confirmes">Confirmés <span class="badge" id="navConfirmed">0</span></a>
-      <a href="#asend" data-page="asend">À envoyer</a>
-      <a href="#send" data-page="send">Envoyés</a>
-      <a href="#stats" data-page="stats">Statistiques</a>
-      <a href="#historique" data-page="historique">Historique</a>
-      <a href="#parametres" data-page="parametres">Paramètres</a>
+  <aside>
+    <div class="brand">
+      <small>Duo Update</small>
+      <strong>Commandes</strong>
+    </div>
+    <nav>
+      <button class="navBtn active" data-page="dashboard">Dashboard</button>
+      <button class="navBtn" data-page="clients">Clients</button>
+      <button class="navBtn" data-page="stats">Stats</button>
     </nav>
-    <div class="sideFoot">Même lien = mêmes données.<br>Performance calculée uniquement sur <b>Confirmer</b>.</div>
+    <div class="sideFooter">
+      <button class="secondary" style="width:100%;margin-bottom:10px" onclick="enableNotifications()">Activer le son</button>
+      <button class="secondary" style="width:100%" onclick="exportCSV()">Exporter Excel</button>
+    </div>
   </aside>
 
-  <main class="main">
+  <main>
     <div class="topbar">
-      <button class="secondary mobileBtn" onclick="toggleMenu(true)">Menu</button>
-      <div class="title"><h1 id="pageTitle">Dashboard</h1><p id="pageSub">Vue globale de votre activité duo.</p></div>
-      <div class="sync" id="syncState"><span class="dot"></span>Connexion...</div>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p id="pageSubtitle" class="subtitle">Suivi propre des commandes Vinted et Leboncoin, avec classement basé uniquement sur les ventes confirmées.</p>
+      </div>
+      <div class="sync" id="syncState"><span class="dot"></span>Connexion Firebase…</div>
     </div>
 
-    <section class="grid kpis">
-      <div class="card kpi"><span>Total confirmé</span><strong id="kpiConfirmedTotal">0 €</strong></div>
-      <div class="card kpi"><span>Lignes</span><strong id="kpiRows">0</strong></div>
-      <div class="card kpi"><span>Confirmés</span><strong id="kpiConfirmed">0</strong></div>
-      <div class="card kpi"><span>Moyenne confirmée</span><strong id="kpiAvg">0 €</strong></div>
+    <section class="cards">
+      <div class="card metric"><span>CA confirmé</span><strong id="mConfirmed">0 €</strong></div>
+      <div class="card metric"><span>Commandes</span><strong id="mOrders">0</strong></div>
+      <div class="card metric"><span>Confirmées</span><strong id="mConfirmedCount">0</strong></div>
+      <div class="card metric"><span>Panier moyen</span><strong id="mAvg">0 €</strong></div>
     </section>
 
-    <section class="page active" id="page-dashboard">
+    <section id="dashboard" class="section active">
       <div class="layout">
         <div class="card panel">
-          <h2>Dernières lignes</h2>
-          <div class="toolbar">
-            <input id="qDash" placeholder="Recherche rapide..." oninput="renderAll()">
-            <button class="secondary" onclick="location.hash='#ajout'">Ajouter</button>
-            <button class="secondary" onclick="exportCSV()">Export CSV</button>
+          <div class="panelHeader">
+            <div>
+              <h2>Commandes</h2>
+              <p class="muted" style="margin:8px 0 0">Ajout, modification et suivi en temps réel.</p>
+            </div>
+            <button class="secondary" onclick="clearForm()">Nouvelle commande</button>
           </div>
-          <div class="tableWrap"><table class="table"><thead id="theadDash"></thead><tbody id="tbodyDash"></tbody></table></div>
+
+          <form id="entryForm" style="margin-bottom:24px">
+            <input type="hidden" id="docId">
+            <label>Date<input id="date" type="date"></label>
+            <label>Vendeur<input id="vendeur" required placeholder="Nom du vendeur"></label>
+            <label>Client<input id="client" required placeholder="Nom du client"></label>
+            <label>Plateforme
+              <select id="plateforme" required>
+                <option value="">Choisir</option>
+                <option value="Vinted">Vinted</option>
+                <option value="Leboncoin">Leboncoin</option>
+              </select>
+            </label>
+            <label>Produit
+              <select id="produit" required>
+                <option value="">Choisir</option>
+                <option value="Perth Mint">Perth Mint</option>
+                <option value="PAMP">PAMP</option>
+              </select>
+            </label>
+            <label>Poids
+              <select id="poids" required>
+                <option value="">Choisir</option>
+                <option value="5g">5g</option>
+                <option value="10g">10g</option>
+              </select>
+            </label>
+            <label>Série<input id="serie" placeholder="Référence"></label>
+            <label>Statut
+              <select id="statut" required>
+                <option value="">Choisir</option>
+                <option value="A Send">A Send</option>
+                <option value="Send">Send</option>
+                <option value="Confirmer">Confirmer</option>
+              </select>
+            </label>
+            <label>Prix<input id="prix" type="number" min="0" step="0.01" placeholder="0"></label>
+            <label class="full">Note<input id="note" placeholder="Note interne"></label>
+            <div class="full actions" style="justify-content:flex-start">
+              <button type="submit">Enregistrer</button>
+              <button type="button" class="secondary" onclick="clearForm()">Annuler</button>
+            </div>
+          </form>
+
+          <div class="toolbar">
+            <input id="q" placeholder="Rechercher client, série, vendeur…" oninput="renderAll()">
+            <select id="filterStatus" onchange="renderAll()">
+              <option value="">Tous statuts</option>
+              <option value="A Send">A Send</option>
+              <option value="Send">Send</option>
+              <option value="Confirmer">Confirmer</option>
+            </select>
+            <select id="filterPlatform" onchange="renderAll()">
+              <option value="">Toutes plateformes</option>
+              <option value="Vinted">Vinted</option>
+              <option value="Leboncoin">Leboncoin</option>
+            </select>
+          </div>
+
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Produit</th><th>Poids</th><th>Statut</th><th class="right">Prix</th><th class="right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
         </div>
-        <aside class="card panel">
-          <h2>Performance duo</h2>
-          <p class="muted">Chiffre confirmé par vendeur.</p>
-          <div id="sellerPerformance"></div>
-        </aside>
-      </div>
-    </section>
 
-    <section class="page" id="page-ajout">
-      <div class="card panel">
-        <h2>Ajouter ou modifier une ligne</h2>
-        <form id="entryForm" class="form">
-          <input type="hidden" id="docId">
-          <label>Vendeur<input id="vendeur" required placeholder="Nom"></label>
-          <label>Client<input id="client" placeholder="Client"></label>
-          <label>Compte<input id="compte" placeholder="Compte"></label>
-          <label>Produit<select id="produit" required><option value="">Choisir...</option><option>Perth Mint</option><option>PAMP</option></select></label>
-          <label>Poids<select id="poids" required><option value="">Choisir...</option><option>10g</option><option>5g</option></select></label>
-          <label>Série<input id="serie" placeholder="Référence"></label>
-          <label>Plateforme<select id="plateforme" required><option value="">Choisir...</option><option>Vinted</option><option>Leboncoin</option></select></label>
-          <label>Statut<select id="statut" required><option value="">Choisir...</option><option>A Send</option><option>Send</option><option>Confirmer</option></select></label>
-          <label>Prix<input id="prix" type="number" min="0" step="0.01" placeholder="0"></label>
-          <label class="full">Note<input id="note" placeholder="Note privée"></label>
-          <div class="full actions"><button type="submit">Enregistrer</button><button type="button" class="secondary" onclick="clearForm()">Nouveau</button></div>
-        </form>
-      </div>
-    </section>
+        <div class="card panel">
+          <h2>Classement rapide</h2>
+          <p class="muted">Basé uniquement sur les commandes confirmées.</p>
+          <div id="quickRanking" class="ranking"></div>
 
-    <section class="page" id="page-lignes"><div class="card panel"><h2>Toutes les lignes</h2><div id="mainToolbar" class="toolbar"></div><div class="tableWrap"><table class="table"><thead id="theadMain"></thead><tbody id="tbodyMain"></tbody></table></div></div></section>
-    <section class="page" id="page-confirmes"><div class="card panel"><h2>Lignes confirmées</h2><div class="tableWrap"><table class="table"><thead id="theadConfirmed"></thead><tbody id="tbodyConfirmed"></tbody></table></div></div></section>
-    <section class="page" id="page-asend"><div class="card panel"><h2>À envoyer</h2><div class="tableWrap"><table class="table"><thead id="theadASend"></thead><tbody id="tbodyASend"></tbody></table></div></div></section>
-    <section class="page" id="page-send"><div class="card panel"><h2>Envoyés</h2><div class="tableWrap"><table class="table"><thead id="theadSend"></thead><tbody id="tbodySend"></tbody></table></div></div></section>
-
-    <section class="page" id="page-stats">
-      <div class="miniGrid">
-        <div class="card panel"><h2>Par vendeur</h2><div id="statsVendeur"></div></div>
-        <div class="card panel"><h2>Par plateforme</h2><div id="statsPlateforme"></div></div>
-        <div class="card panel"><h2>Par produit</h2><div id="statsProduit"></div></div>
-        <div class="card panel"><h2>Par poids</h2><div id="statsPoids"></div></div>
-      </div>
-    </section>
-
-    <section class="page" id="page-historique"><div class="card panel"><h2>Historique</h2><div class="actions" style="margin-bottom:12px"><button class="secondary" onclick="renderHistory()">Rafraîchir</button></div><div id="historyList" class="history"></div></div></section>
-
-    <section class="page" id="page-parametres">
-      <div class="card panel">
-        <h2>Paramètres</h2>
-        <p class="muted">Outils de gestion de votre espace partagé.</p>
-        <div class="actions">
-          <button class="secondary" onclick="seedDemoData()">Réimporter données de départ</button>
-          <button class="secondary" onclick="exportCSV()">Exporter CSV</button>
+          <h2 style="margin-top:34px">Activité</h2>
+          <p class="muted">Dernières actions synchronisées.</p>
+          <div id="activityList" class="activity"></div>
         </div>
-        <p class="muted" style="margin-top:16px">Collection Firestore : <span class="mono">duos/duo-principal/entries</span></p>
+      </div>
+    </section>
+
+    <section id="clients" class="section">
+      <div class="card widePanel">
+        <div class="panelHeader">
+          <div>
+            <h2>Clients</h2>
+            <p class="muted" style="margin:8px 0 0">Nom, nombre de commandes et dépense totale confirmée.</p>
+          </div>
+          <input id="clientSearch" placeholder="Rechercher un client…" oninput="renderClients()" style="min-width:280px">
+        </div>
+        <div class="tableWrap">
+          <table>
+            <thead><tr><th>Nom</th><th class="right">Nombre de commandes</th><th class="right">Dépense totale confirmée</th><th>Dernière plateforme</th><th>Dernière commande</th></tr></thead>
+            <tbody id="clientsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="stats" class="section">
+      <div class="card widePanel">
+        <div class="panelHeader">
+          <div>
+            <h2>Stats par vendeur</h2>
+            <p class="muted" style="margin:8px 0 0">CA confirmé, nombre de ventes, taux de confirmation et panier moyen.</p>
+          </div>
+        </div>
+        <div id="sellerStats" class="statGrid"></div>
       </div>
     </section>
   </main>
 </div>
 
+<div id="toast" class="toast"></div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getFirestore, collection, addDoc, setDoc, doc, deleteDoc, onSnapshot,
-  serverTimestamp, query, orderBy, getDocs, writeBatch, limit
+  serverTimestamp, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -179,108 +468,316 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-const initialRows = [
-  {"vendeur":"ZerleZZ","client":"DM","compte":"el•••@gm•••","produit":"Perth Mint","poids":"10g","serie":"B017483","plateforme":"Leboncoin","statut":"A Send","prix":800,"note":""},
-  {"vendeur":"Dora","client":"DM","compte":"ma•••@ou•••","produit":"Perth Mint","poids":"10g","serie":"C019927","plateforme":"Leboncoin","statut":"Confirmer","prix":400,"note":""},
-  {"vendeur":"Dora","client":"DM","compte":"ma•••@ou•••","produit":"Perth Mint","poids":"10g","serie":"C015286","plateforme":"Leboncoin","statut":"Send","prix":800,"note":""},
-  {"vendeur":"Dora","client":"Spain","compte":"Raph","produit":"Perth Mint","poids":"10g","serie":"C019927","plateforme":"Vinted","statut":"Send","prix":380,"note":""}
-];
+let rows = [];
+let db = null;
+let colRef = null;
+let firstLoad = true;
+let soundEnabled = localStorage.getItem("duoSound") === "1";
+let lastLocalWrite = 0;
 
-let rows=[], historyRows=[], db=null, colRef=null, historyRef=null;
-const $=id=>document.getElementById(id);
-const euro=n=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
-const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const isConfirmed=r=>String(r.statut||'').trim().toLowerCase().includes('confirm');
-const isSend=r=>String(r.statut||'').trim().toLowerCase()==='send';
-const isASend=r=>String(r.statut||'').trim().toLowerCase()==='a send';
+const $ = id => document.getElementById(id);
+const euro = n => new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Number(n||0));
+const esc = v => String(v ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const today = () => new Date().toISOString().slice(0,10);
+const isConfirmed = r => String(r.statut || "").trim().toLowerCase().includes("confirm");
+const asDate = r => r.date || "";
 
-function setSync(text,type=""){ $("syncState").innerHTML=`<span class="dot ${type}"></span>${esc(text)}`; }
-function toggleMenu(show){$("sidebar").classList.toggle("open",show);$("overlay").classList.toggle("show",show)}
-window.toggleMenu=toggleMenu;
-
-function tableHead(){return `<tr><th>Vendeur</th><th>Client</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Série</th><th>Plateforme</th><th>Statut</th><th class="right">Prix</th><th class="right">Actions</th></tr>`}
-function badge(s){const v=String(s||'');const c=v.toLowerCase()==='send'?'send':v.toLowerCase().includes('confirm')?'ok':'';return `<span class="pill ${c}">${esc(v||'—')}</span>`}
-function rowHtml(r){return `<tr><td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td><td class="mono muted">${esc(r.compte)}</td><td>${esc(r.produit)}</td><td>${esc(r.poids||'—')}</td><td class="mono">${esc(r.serie)}</td><td>${esc(r.plateforme)}</td><td>${badge(r.statut)}</td><td class="right"><strong>${euro(r.prix)}</strong></td><td class="right"><div class="actions" style="justify-content:flex-end"><button class="secondary" onclick="editRow('${esc(r.id)}')">Modifier</button><button class="danger" onclick="removeRow('${esc(r.id)}')">Supprimer</button></div></td></tr>`}
-function renderTable(thead,tbody,list){$(thead).innerHTML=tableHead();$(tbody).innerHTML=list.map(rowHtml).join('')||`<tr><td colspan="10" class="muted">Aucun résultat.</td></tr>`}
-
-function filteredAll(){
-  const q=($("globalQ")?.value||"").trim().toLowerCase();
-  const seller=$("filterSeller")?.value||"", status=$("filterStatus")?.value||"", platform=$("filterPlatform")?.value||"";
-  return rows.filter(r=>(!seller||r.vendeur===seller)&&(!status||r.statut===status)&&(!platform||r.plateforme===platform)&&(!q||Object.values(r).join(' ').toLowerCase().includes(q)));
-}
-function unique(key){return [...new Set(rows.map(r=>r[key]).filter(Boolean))].sort()}
-function buildToolbar(){
-  $("mainToolbar").innerHTML = `
-    <input id="globalQ" placeholder="Recherche..." oninput="renderAll()">
-    <select id="filterSeller" onchange="renderAll()"><option value="">Tous vendeurs</option>${unique('vendeur').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
-    <select id="filterStatus" onchange="renderAll()"><option value="">Tous statuts</option>${unique('statut').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
-    <select id="filterPlatform" onchange="renderAll()"><option value="">Toutes plateformes</option>${unique('plateforme').map(v=>`<option>${esc(v)}</option>`).join('')}</select>
-    <button class="secondary" onclick="resetFilters()">Reset</button><button class="secondary" onclick="exportCSV()">Export CSV</button>`;
+function setSync(text, type=""){
+  $("syncState").innerHTML = `<span class="dot ${type}"></span>${esc(text)}`;
 }
 
-function renderKPIs(){
-  const confirmed=rows.filter(isConfirmed), total=confirmed.reduce((s,r)=>s+Number(r.prix||0),0);
-  $("kpiConfirmedTotal").textContent=euro(total);$("kpiRows").textContent=rows.length;$("kpiConfirmed").textContent=confirmed.length;$("kpiAvg").textContent=euro(confirmed.length?total/confirmed.length:0);
-  $("navTotal").textContent=rows.length;$("navConfirmed").textContent=confirmed.length;
+function toast(text){
+  const el = $("toast");
+  el.textContent = text;
+  el.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>el.classList.remove("show"), 3200);
 }
-function renderSellers(){
-  const totals={};rows.filter(isConfirmed).forEach(r=>totals[r.vendeur||"Sans vendeur"]=(totals[r.vendeur||"Sans vendeur"]||0)+Number(r.prix||0));
-  const max=Math.max(1,...Object.values(totals));
-  $("sellerPerformance").innerHTML=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<div class="seller"><div style="width:100%"><strong>${esc(n)}</strong><div class="bar"><span style="width:${Math.round(v/max*100)}%"></span></div></div><strong>${euro(v)}</strong></div>`).join('')||'<p class="muted">Aucune vente confirmée.</p>';
+
+function beep(){
+  if(!soundEnabled || firstLoad) return;
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = "sine";
+  osc.frequency.value = 880;
+  gain.gain.value = 0.001;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+  osc.stop(ctx.currentTime + 0.24);
 }
-function statBlock(key,id){
-  const totals={};rows.filter(isConfirmed).forEach(r=>{const k=r[key]||"Non défini";totals[k]=(totals[k]||0)+Number(r.prix||0)});
-  $(id).innerHTML=Object.entries(totals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="statLine"><strong>${esc(k)}</strong><span>${euro(v)}</span></div>`).join('')||'<p class="muted">Aucune donnée confirmée.</p>';
+
+window.enableNotifications = async () => {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("duoSound", soundEnabled ? "1" : "0");
+  if("Notification" in window && Notification.permission === "default"){
+    await Notification.requestPermission();
+  }
+  toast(soundEnabled ? "Son activé" : "Son désactivé");
+};
+
+function notify(message){
+  if(Date.now() - lastLocalWrite < 1200) return;
+  beep();
+  toast(message);
+  if(document.hidden && "Notification" in window && Notification.permission === "granted"){
+    new Notification("Duo Update", { body: message });
+  }
 }
-function renderHistory(){
-  $("historyList").innerHTML=historyRows.map(h=>`<div class="historyItem"><strong>${esc(h.action||'Action')}</strong><small>${esc(h.label||'')} • ${h.date?.toDate ? h.date.toDate().toLocaleString('fr-FR') : ''}</small></div>`).join('')||'<p class="muted">Aucun historique.</p>';
+
+function getFilteredRows(){
+  const q = $("q")?.value.trim().toLowerCase() || "";
+  const status = $("filterStatus")?.value || "";
+  const platform = $("filterPlatform")?.value || "";
+  return rows.filter(r =>
+    (!status || r.statut === status) &&
+    (!platform || r.plateforme === platform) &&
+    (!q || Object.values(r).join(" ").toLowerCase().includes(q))
+  );
 }
+
+function renderMetrics(){
+  const confirmed = rows.filter(isConfirmed);
+  const confirmedTotal = confirmed.reduce((s,r)=>s+Number(r.prix||0),0);
+  $("mConfirmed").textContent = euro(confirmedTotal);
+  $("mOrders").textContent = rows.length;
+  $("mConfirmedCount").textContent = confirmed.length;
+  $("mAvg").textContent = euro(confirmed.length ? confirmedTotal / confirmed.length : 0);
+}
+
+function badge(status){
+  const s = String(status || "—");
+  const cls = s.toLowerCase()==="send" ? "send" : s.toLowerCase().includes("confirm") ? "ok" : "";
+  return `<span class="pill ${cls}">${esc(s)}</span>`;
+}
+
+function renderOrders(){
+  const list = getFilteredRows();
+  $("ordersBody").innerHTML = list.map(r => `
+    <tr>
+      <td>${esc(r.date || "—")}</td>
+      <td><strong>${esc(r.vendeur)}</strong></td>
+      <td>${esc(r.client)}</td>
+      <td>${esc(r.plateforme)}</td>
+      <td>${esc(r.produit)}</td>
+      <td>${esc(r.poids)}</td>
+      <td>${badge(r.statut)}</td>
+      <td class="right"><strong>${euro(r.prix)}</strong></td>
+      <td class="right">
+        <div class="actions">
+          <button class="secondary" onclick="editRow('${esc(r.id)}')">Modifier</button>
+          <button class="danger" onclick="removeRow('${esc(r.id)}')">Supprimer</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="9" class="empty">Aucune commande.</td></tr>`;
+}
+
+function sellersSummary(){
+  const grouped = {};
+  rows.forEach(r => {
+    const name = r.vendeur || "Sans vendeur";
+    grouped[name] ||= {name, total:0, orders:0, confirmed:0, allAmount:0};
+    grouped[name].orders += 1;
+    grouped[name].allAmount += Number(r.prix||0);
+    if(isConfirmed(r)){
+      grouped[name].confirmed += 1;
+      grouped[name].total += Number(r.prix||0);
+    }
+  });
+  return Object.values(grouped).sort((a,b)=>b.total-a.total);
+}
+
+function renderRanking(){
+  const list = sellersSummary();
+  const max = Math.max(1, ...list.map(x=>x.total));
+  $("quickRanking").innerHTML = list.map((s,i)=>`
+    <div class="rankRow">
+      <div class="rankNo">${i+1}</div>
+      <div>
+        <strong>${esc(s.name)}</strong>
+        <div class="bar"><span style="width:${Math.round(s.total/max*100)}%"></span></div>
+      </div>
+      <strong>${euro(s.total)}</strong>
+    </div>
+  `).join("") || `<div class="empty">Aucune vente confirmée.</div>`;
+}
+
+function renderActivity(){
+  const list = [...rows].slice(0,8);
+  $("activityList").innerHTML = list.map(r => `
+    <div class="activityItem">
+      <strong>${esc(r.vendeur || "—")}</strong> · ${esc(r.statut || "—")} · ${esc(r.client || "client")}
+      <time>${esc(r.date || "Sans date")} · ${esc(r.plateforme || "—")} · ${euro(r.prix)}</time>
+    </div>
+  `).join("") || `<div class="empty">Aucune activité.</div>`;
+}
+
+function renderClients(){
+  const q = ($("clientSearch")?.value || "").trim().toLowerCase();
+  const grouped = {};
+  rows.forEach(r => {
+    const name = (r.client || "Sans nom").trim();
+    if(q && !name.toLowerCase().includes(q)) return;
+    grouped[name] ||= {name, orders:0, total:0, lastPlatform:"—", lastDate:"—"};
+    grouped[name].orders += 1;
+    if(isConfirmed(r)) grouped[name].total += Number(r.prix || 0);
+    if((r.date || "") >= (grouped[name].lastDate === "—" ? "" : grouped[name].lastDate)){
+      grouped[name].lastDate = r.date || "—";
+      grouped[name].lastPlatform = r.plateforme || "—";
+    }
+  });
+  const list = Object.values(grouped).sort((a,b)=>b.total-a.total || b.orders-a.orders);
+  $("clientsBody").innerHTML = list.map(c => `
+    <tr>
+      <td><strong>${esc(c.name)}</strong></td>
+      <td class="right">${c.orders}</td>
+      <td class="right"><strong>${euro(c.total)}</strong></td>
+      <td>${esc(c.lastPlatform)}</td>
+      <td>${esc(c.lastDate)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="5" class="empty">Aucun client.</td></tr>`;
+}
+
+function renderSellerStats(){
+  const list = sellersSummary();
+  $("sellerStats").innerHTML = list.map(s => {
+    const rate = s.orders ? Math.round((s.confirmed / s.orders) * 100) : 0;
+    const avg = s.confirmed ? s.total / s.confirmed : 0;
+    return `
+      <div class="statBlock">
+        <div class="bigName">${esc(s.name)}</div>
+        <div class="miniStats">
+          <div class="mini"><span>CA confirmé</span><strong>${euro(s.total)}</strong></div>
+          <div class="mini"><span>Ventes</span><strong>${s.confirmed}</strong></div>
+          <div class="mini"><span>Taux</span><strong>${rate}%</strong></div>
+          <div class="mini"><span>Commandes</span><strong>${s.orders}</strong></div>
+          <div class="mini"><span>Panier moyen</span><strong>${euro(avg)}</strong></div>
+          <div class="mini"><span>Total brut</span><strong>${euro(s.allAmount)}</strong></div>
+        </div>
+      </div>
+    `;
+  }).join("") || `<div class="empty">Aucune donnée vendeur.</div>`;
+}
+
 function renderAll(){
-  renderKPIs(); buildToolbar();
-  const dashQ=($("qDash")?.value||"").trim().toLowerCase();
-  const dash=rows.filter(r=>!dashQ||Object.values(r).join(' ').toLowerCase().includes(dashQ)).slice(0,8);
-  renderTable("theadDash","tbodyDash",dash);
-  renderTable("theadMain","tbodyMain",filteredAll());
-  renderTable("theadConfirmed","tbodyConfirmed",rows.filter(isConfirmed));
-  renderTable("theadASend","tbodyASend",rows.filter(isASend));
-  renderTable("theadSend","tbodySend",rows.filter(isSend));
-  renderSellers(); statBlock('vendeur','statsVendeur'); statBlock('plateforme','statsPlateforme'); statBlock('produit','statsProduit'); statBlock('poids','statsPoids'); renderHistory();
+  renderMetrics();
+  renderOrders();
+  renderRanking();
+  renderActivity();
+  renderClients();
+  renderSellerStats();
 }
-window.renderAll=renderAll;
 
-function getFormData(){return {vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),compte:$("compte").value.trim(),produit:$("produit").value.trim(),poids:$("poids").value.trim(),serie:$("serie").value.trim(),plateforme:$("plateforme").value.trim(),statut:$("statut").value.trim(),prix:Number($("prix").value||0),note:$("note").value.trim(),updatedAt:serverTimestamp()}}
-async function addHistory(action,label){ if(historyRef) await addDoc(historyRef,{action,label,date:serverTimestamp()}); }
+function formData(){
+  return {
+    date: $("date").value || today(),
+    vendeur: $("vendeur").value.trim(),
+    client: $("client").value.trim(),
+    plateforme: $("plateforme").value,
+    produit: $("produit").value,
+    poids: $("poids").value,
+    serie: $("serie").value.trim(),
+    statut: $("statut").value,
+    prix: Number($("prix").value || 0),
+    note: $("note").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+}
 
-$("entryForm").addEventListener("submit",async e=>{
-  e.preventDefault(); const id=$("docId").value; const data=getFormData();
-  if(!data.vendeur) return alert("Le vendeur est obligatoire."); if(!data.poids) return alert("Le poids est obligatoire.");
-  if(id){ await setDoc(doc(colRef,id),data,{merge:true}); await addHistory("Modification",`${data.vendeur} • ${data.statut} • ${data.prix}€`);}
-  else{ await addDoc(colRef,{...data,createdAt:serverTimestamp()}); await addHistory("Ajout",`${data.vendeur} • ${data.statut} • ${data.prix}€`);}
-  clearForm(); location.hash="#lignes";
+$("entryForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = formData();
+  if(!data.vendeur || !data.client || !data.plateforme || !data.produit || !data.poids || !data.statut){
+    alert("Remplis les champs obligatoires.");
+    return;
+  }
+  lastLocalWrite = Date.now();
+  const id = $("docId").value;
+  if(id) await setDoc(doc(colRef, id), data, {merge:true});
+  else await addDoc(colRef, {...data, createdAt:serverTimestamp()});
+  clearForm();
 });
-window.editRow=id=>{const r=rows.find(x=>x.id===id); if(!r)return; ["docId","vendeur","client","compte","produit","poids","serie","plateforme","statut","prix","note"].forEach(k=>$(k).value=k==="docId"?id:(r[k]??"")); location.hash="#ajout"; window.scrollTo({top:0,behavior:"smooth"});}
-window.removeRow=async id=>{if(!confirm("Supprimer cette ligne ?"))return; const r=rows.find(x=>x.id===id); await deleteDoc(doc(colRef,id)); await addHistory("Suppression",`${r?.vendeur||''} • ${r?.statut||''}`);}
-window.clearForm=()=>{$("entryForm").reset();$("docId").value=""}
-window.resetFilters=()=>{["globalQ","filterSeller","filterStatus","filterPlatform"].forEach(id=>{if($(id))$(id).value=""});renderAll()}
-window.exportCSV=()=>{const header=["vendeur","client","compte","produit","poids","serie","plateforme","statut","prix","note"];const csv=[header.join(";"),...rows.map(r=>header.map(k=>`"${String(r[k]??'').replaceAll('"','""')}"`).join(";"))].join("\n");const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="duo-update.csv";a.click();URL.revokeObjectURL(a.href)}
-window.seedDemoData=async()=>{if(!confirm("Réimporter les données de départ ?"))return;const snap=await getDocs(colRef);const batch=writeBatch(db);snap.docs.forEach(d=>batch.delete(d.ref));initialRows.forEach(r=>batch.set(doc(colRef),{...r,createdAt:serverTimestamp(),updatedAt:serverTimestamp()}));await batch.commit();await addHistory("Réimport","Données de départ réimportées");}
 
-function route(){
-  const page=(location.hash||"#dashboard").slice(1);
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  const el=$("page-"+page)||$("page-dashboard"); el.classList.add("active");
-  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("active",a.dataset.page===page));
-  const titles={dashboard:["Dashboard","Vue globale de votre activité duo."],ajout:["Ajout rapide","Créer ou modifier une ligne."],lignes:["Toutes les lignes","Recherche, filtres et gestion complète."],confirmes:["Confirmés","Toutes les lignes validées."],asend:["À envoyer","Lignes en attente d'envoi."],send:["Envoyés","Lignes déjà envoyées."],stats:["Statistiques","Analyse par vendeur, plateforme, produit et poids."],historique:["Historique","Journal des ajouts, modifications et suppressions."],parametres:["Paramètres","Outils et configuration."]};
-  $("pageTitle").textContent=(titles[page]||titles.dashboard)[0]; $("pageSub").textContent=(titles[page]||titles.dashboard)[1]; toggleMenu(false);
+window.editRow = id => {
+  const r = rows.find(x=>x.id===id);
+  if(!r) return;
+  ["docId","date","vendeur","client","plateforme","produit","poids","serie","statut","prix","note"].forEach(k => $(k).value = k==="docId" ? id : (r[k] ?? ""));
+  showPage("dashboard");
+  window.scrollTo({top:0, behavior:"smooth"});
+};
+
+window.removeRow = async id => {
+  if(!confirm("Supprimer cette commande ?")) return;
+  lastLocalWrite = Date.now();
+  await deleteDoc(doc(colRef, id));
+};
+
+window.clearForm = () => {
+  $("entryForm").reset();
+  $("docId").value = "";
+  $("date").value = today();
+};
+
+window.exportCSV = () => {
+  const headers = ["Date","Vendeur","Client","Plateforme","Produit","Poids","Serie","Statut","Prix","Note"];
+  const data = rows.map(r => [r.date,r.vendeur,r.client,r.plateforme,r.produit,r.poids,r.serie,r.statut,r.prix,r.note]);
+  const csv = [headers, ...data].map(line => line.map(v => `"${String(v ?? "").replaceAll('"','""')}"`).join(";")).join("\n");
+  const blob = new Blob(["\ufeff" + csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `commandes-duo-${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+function showPage(page){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".navBtn").forEach(b=>b.classList.toggle("active", b.dataset.page===page));
+  $(page).classList.add("active");
+  const titles = {
+    dashboard:["Dashboard","Suivi propre des commandes Vinted et Leboncoin, avec classement basé uniquement sur les ventes confirmées."],
+    clients:["Clients","Nom, nombre de commandes et dépense totale confirmée par client."],
+    stats:["Stats","Statistiques claires par vendeur pour comparer les performances réelles."]
+  };
+  $("pageTitle").textContent = titles[page][0];
+  $("pageSubtitle").textContent = titles[page][1];
+  renderAll();
 }
-window.addEventListener("hashchange",route);
+window.showPage = showPage;
+document.querySelectorAll(".navBtn").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
 
-try{
-  const app=initializeApp(firebaseConfig); db=getFirestore(app); colRef=collection(db,"duos",duoId,"entries"); historyRef=collection(db,"duos",duoId,"history");
-  onSnapshot(query(colRef,orderBy("createdAt","desc")),snap=>{rows=snap.docs.map(d=>({id:d.id,...d.data()}));setSync("Connecté : temps réel activé.","ok");renderAll();});
-  onSnapshot(query(historyRef,orderBy("date","desc"),limit(60)),snap=>{historyRows=snap.docs.map(d=>({id:d.id,...d.data()}));renderHistory();});
-}catch(err){console.error(err);setSync("Erreur Firebase : vérifie les règles Firestore.","bad");}
-route();
+function start(){
+  $("date").value = today();
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  colRef = collection(db, "duos", duoId, "entries");
+  const qRef = query(colRef, orderBy("createdAt", "desc"));
+
+  onSnapshot(qRef, snap => {
+    rows = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    setSync("Connecté · temps réel actif", "ok");
+
+    if(!firstLoad){
+      for(const change of snap.docChanges()){
+        if(change.type === "added") notify("Nouvelle commande ajoutée");
+        if(change.type === "modified") notify("Commande modifiée");
+        if(change.type === "removed") notify("Commande supprimée");
+      }
+    }
+    firstLoad = false;
+    renderAll();
+  }, err => {
+    console.error(err);
+    setSync("Erreur Firebase · vérifie les règles Firestore", "bad");
+    toast("Erreur Firebase");
+  });
+}
+
+start();
 </script>
 </body>
 </html>
