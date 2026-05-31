@@ -300,6 +300,7 @@
     <nav>
       <button class="navBtn active" data-page="dashboard">Dashboard</button>
       <button class="navBtn" data-page="clients">Clients</button>
+      <button class="navBtn" data-page="comptes">Comptes</button>
       <button class="navBtn" data-page="stats">Stats</button>
     </nav>
     <div class="sideFooter">
@@ -435,6 +436,58 @@
       </div>
     </section>
 
+
+    <section id="comptes" class="section">
+      <div class="card widePanel">
+        <div class="panelHeader">
+          <div>
+            <h2>Comptes</h2>
+            <p class="muted" style="margin:8px 0 0">Comptes Vinted et Leboncoin, annonces actives et accès masqués.</p>
+          </div>
+          <button class="secondary" onclick="clearAccountForm()">Nouveau compte</button>
+        </div>
+
+        <div class="accountGrid">
+          <div class="accountMetric"><span>Comptes enregistrés</span><strong id="aTotal">0</strong></div>
+          <div class="accountMetric"><span>Annonces en cours</span><strong id="aListings">0</strong></div>
+          <div class="accountMetric"><span>Plateformes actives</span><strong id="aPlatforms">0</strong></div>
+        </div>
+
+        <form id="accountForm" style="margin-bottom:28px">
+          <input type="hidden" id="accountId">
+          <label>Plateforme
+            <select id="accountPlatform" required>
+              <option value="">Choisir</option>
+              <option value="Vinted">Vinted</option>
+              <option value="Leboncoin">Leboncoin</option>
+            </select>
+          </label>
+          <label>Nom du compte<input id="accountName" required placeholder="Ex : Vinted Dora 1"></label>
+          <label>Vendeur lié<input id="accountSeller" placeholder="Dora / ZerleZZ"></label>
+          <label>Email<input id="accountEmail" type="email" required placeholder="email@exemple.com"></label>
+          <label>Mot de passe<input id="accountPassword" type="password" required placeholder="Mot de passe"></label>
+          <label>Annonces en cours<input id="accountListings" type="number" min="0" step="1" placeholder="0"></label>
+          <label class="full">Note<input id="accountNote" placeholder="Note interne"></label>
+          <div class="full actions" style="justify-content:flex-start">
+            <button type="submit">Enregistrer le compte</button>
+            <button type="button" class="secondary" onclick="clearAccountForm()">Annuler</button>
+          </div>
+        </form>
+
+        <div class="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Plateforme</th><th>Compte</th><th>Vendeur</th><th>Email</th><th>Mot de passe</th><th class="right">Annonces</th><th class="right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accountsBody"></tbody>
+          </table>
+        </div>
+        <p class="muted" style="margin-top:18px">Important : tant que l'accès au site n'est pas protégé par connexion, évite de stocker des mots de passe réels.</p>
+      </div>
+    </section>
+
     <section id="stats" class="section">
       <div class="card widePanel">
         <div class="panelHeader">
@@ -469,8 +522,10 @@ const firebaseConfig = {
 
 const duoId = "duo-principal";
 let rows = [];
+let accounts = [];
 let db = null;
 let colRef = null;
+let accountsRef = null;
 let firstLoad = true;
 let soundEnabled = localStorage.getItem("duoSound") === "1";
 let lastLocalWrite = 0;
@@ -663,12 +718,112 @@ function renderSellerStats(){
   }).join("") || `<div class="empty">Aucune donnée vendeur.</div>`;
 }
 
+function renderAccounts(){
+  const totalListings = accounts.reduce((sum,a)=>sum+Number(a.annonces||0),0);
+  $("aTotal").textContent = accounts.length;
+  $("aListings").textContent = totalListings;
+  $("aPlatforms").textContent = new Set(accounts.map(a=>a.plateforme).filter(Boolean)).size;
+
+  $("accountsBody").innerHTML = accounts.map(a => {
+    const shown = window.__visiblePasswords?.has(a.id);
+    const pass = shown ? (a.password || "") : "••••••••••••";
+    return `
+      <tr>
+        <td>${esc(a.plateforme || "—")}</td>
+        <td><strong>${esc(a.nom || "—")}</strong></td>
+        <td>${esc(a.vendeur || "—")}</td>
+        <td class="secret">${esc(a.email || "—")}</td>
+        <td class="secret">${esc(pass)}</td>
+        <td class="right"><strong>${Number(a.annonces || 0)}</strong></td>
+        <td class="right">
+          <div class="actions">
+            <button class="secondary smallBtn" onclick="togglePassword('${esc(a.id)}')">${shown ? "Masquer" : "Voir"}</button>
+            <button class="secondary smallBtn" onclick="copyPassword('${esc(a.id)}')">Copier</button>
+            <button class="secondary smallBtn" onclick="editAccount('${esc(a.id)}')">Modifier</button>
+            <button class="danger smallBtn" onclick="removeAccount('${esc(a.id)}')">Supprimer</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("") || `<tr><td colspan="7" class="empty">Aucun compte enregistré.</td></tr>`;
+}
+
+function accountData(){
+  return {
+    plateforme: $("accountPlatform").value,
+    nom: $("accountName").value.trim(),
+    vendeur: $("accountSeller").value.trim(),
+    email: $("accountEmail").value.trim(),
+    password: $("accountPassword").value,
+    annonces: Number($("accountListings").value || 0),
+    note: $("accountNote").value.trim(),
+    updatedAt: serverTimestamp()
+  };
+}
+
+$("accountForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const data = accountData();
+  if(!data.plateforme || !data.nom || !data.email || !data.password){
+    alert("Remplis les champs obligatoires du compte.");
+    return;
+  }
+  lastLocalWrite = Date.now();
+  const id = $("accountId").value;
+  if(id) await setDoc(doc(accountsRef, id), data, {merge:true});
+  else await addDoc(accountsRef, {...data, createdAt:serverTimestamp()});
+  clearAccountForm();
+});
+
+window.clearAccountForm = () => {
+  $("accountForm").reset();
+  $("accountId").value = "";
+};
+
+window.editAccount = id => {
+  const a = accounts.find(x=>x.id===id);
+  if(!a) return;
+  $("accountId").value = id;
+  $("accountPlatform").value = a.plateforme || "";
+  $("accountName").value = a.nom || "";
+  $("accountSeller").value = a.vendeur || "";
+  $("accountEmail").value = a.email || "";
+  $("accountPassword").value = a.password || "";
+  $("accountListings").value = a.annonces ?? 0;
+  $("accountNote").value = a.note || "";
+  showPage("comptes");
+  window.scrollTo({top:0, behavior:"smooth"});
+};
+
+window.removeAccount = async id => {
+  if(!confirm("Supprimer ce compte ?")) return;
+  lastLocalWrite = Date.now();
+  await deleteDoc(doc(accountsRef, id));
+};
+
+window.__visiblePasswords = new Set();
+
+window.togglePassword = id => {
+  if(window.__visiblePasswords.has(id)) window.__visiblePasswords.delete(id);
+  else window.__visiblePasswords.add(id);
+  renderAccounts();
+};
+
+window.copyPassword = async id => {
+  const a = accounts.find(x=>x.id===id);
+  if(!a?.password) return toast("Aucun mot de passe à copier");
+  await navigator.clipboard.writeText(a.password);
+  toast("Mot de passe copié");
+};
+
+
 function renderAll(){
   renderMetrics();
   renderOrders();
   renderRanking();
   renderActivity();
   renderClients();
+  renderAccounts();
   renderSellerStats();
 }
 
@@ -741,6 +896,7 @@ function showPage(page){
   const titles = {
     dashboard:["Dashboard","Suivi propre des commandes Vinted et Leboncoin, avec classement basé uniquement sur les ventes confirmées."],
     clients:["Clients","Nom, nombre de commandes et dépense totale confirmée par client."],
+    comptes:["Comptes","Comptes Vinted et Leboncoin, emails, mots de passe masqués et annonces en cours."],
     stats:["Stats","Statistiques claires par vendeur pour comparer les performances réelles."]
   };
   $("pageTitle").textContent = titles[page][0];
@@ -755,7 +911,25 @@ function start(){
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
   colRef = collection(db, "duos", duoId, "entries");
+  accountsRef = collection(db, "duos", duoId, "accounts");
   const qRef = query(colRef, orderBy("createdAt", "desc"));
+  const accountsQuery = query(accountsRef, orderBy("createdAt", "desc"));
+
+
+  onSnapshot(accountsQuery, snap => {
+    accounts = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    if(!firstLoad){
+      for(const change of snap.docChanges()){
+        if(change.type === "added") notify("Nouveau compte ajouté");
+        if(change.type === "modified") notify("Compte modifié");
+        if(change.type === "removed") notify("Compte supprimé");
+      }
+    }
+    renderAccounts();
+  }, err => {
+    console.error(err);
+    toast("Erreur Firebase comptes");
+  });
 
   onSnapshot(qRef, snap => {
     rows = snap.docs.map(d => ({id:d.id, ...d.data()}));
