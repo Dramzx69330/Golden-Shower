@@ -94,6 +94,15 @@
     .dot.ok{background:#16a34a}.dot.bad{background:#dc2626}
     .activity{max-height:520px;overflow:auto}
     .mobileMenu{display:none}
+
+    .checkLine{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
+    .checkLine input{min-width:auto}
+    .noteItem,.taskItem{border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:#fff;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .taskItem.done{opacity:.6;text-decoration:line-through}
+    .star{color:#b45309;font-weight:900}
+    .alertZero{color:var(--red);font-weight:800}
+    .miniForm{display:grid;gap:10px}
+    .chatTools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -157,6 +166,9 @@
             <label>Série<input id="serie" placeholder="Référence"></label>
             <label>Statut<select id="statut"><option>A Send</option><option>Send</option><option>Confirmer</option><option>Annulé</option></select></label>
             <label>Prix<input id="prix" type="number" min="0" step="0.01" placeholder="0"></label>
+            <label>Compte utilisé<select id="orderAccount"><option value="">Aucun compte lié</option></select></label>
+            <label>Date d'envoi<input id="shippedAt" type="date"></label>
+            <label>Suivi<input id="tracking" placeholder="Numéro de suivi"></label>
             <label class="full">Note<input id="note" placeholder="Note interne"></label>
             <div class="full" style="display:flex;gap:10px">
               <button class="primary" type="submit">Enregistrer</button>
@@ -177,7 +189,7 @@
           <select id="filterPlatform" onchange="renderAll()"><option value="">Toutes plateformes</option><option>Vinted</option><option>Leboncoin</option></select>
         </div>
         <table>
-          <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Produit</th><th>Poids</th><th>Statut</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
+          <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Suivi</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
           <tbody id="ordersTbody"></tbody>
         </table>
       </div>
@@ -188,7 +200,7 @@
         <h2>Clients</h2>
         <p class="muted">Nom, nombre de commandes et dépense totale confirmée.</p>
         <table>
-          <thead><tr><th>Nom</th><th>Nombre de commandes</th><th>Dépense totale confirmée</th><th>Dernière commande</th></tr></thead>
+          <thead><tr><th>Nom</th><th>Commandes</th><th>Dépense totale confirmée</th><th>Panier moyen</th><th>Plateforme favorite</th><th>Dernier achat</th></tr></thead>
           <tbody id="clientsTbody"></tbody>
         </table>
       </div>
@@ -206,6 +218,7 @@
             <label>Email<input id="accEmail" type="email" placeholder="email@exemple.com"></label>
             <label>Mot de passe<input id="accPassword" type="password" placeholder="Mot de passe"></label>
             <label>Annonces en cours<input id="accListings" type="number" min="0" step="1" placeholder="0"></label>
+            <label>Favori<select id="accFavorite"><option value="non">Non</option><option value="oui">Oui</option></select></label>
             <label class="full">Note<input id="accNote" placeholder="Infos utiles"></label>
             <div class="full" style="display:flex;gap:10px">
               <button class="primary" type="submit">Enregistrer compte</button>
@@ -236,6 +249,30 @@
         </div>
         <div class="grid chatSide" style="align-content:start">
           <div class="card pad">
+            <h2>Actions</h2>
+            <div class="chatTools">
+              <button class="secondary" onclick="pingPartner()">🔔 Ping associé</button>
+              <button class="danger" onclick="clearChatForBoth()">Effacer conversation</button>
+            </div>
+            <p class="muted" style="margin:0">Le clear supprime le chat chez vous deux.</p>
+          </div>
+          <div class="card pad">
+            <h2>Notes épinglées</h2>
+            <form id="noteForm" class="miniForm">
+              <input id="noteText" placeholder="Ajouter une note importante">
+              <button class="primary" type="submit">Ajouter note</button>
+            </form>
+            <div id="notesList" class="list" style="margin-top:14px"></div>
+          </div>
+          <div class="card pad">
+            <h2>Tâches partagées</h2>
+            <form id="taskForm" class="miniForm">
+              <input id="taskText" placeholder="Nouvelle tâche">
+              <button class="primary" type="submit">Ajouter tâche</button>
+            </form>
+            <div id="tasksList" class="list" style="margin-top:14px"></div>
+          </div>
+          <div class="card pad">
             <h2>Réponses rapides</h2>
             <div class="quickGrid" id="quickReplies"></div>
           </div>
@@ -258,6 +295,10 @@
         <div class="card pad"><h2>Stats par vendeur</h2><div id="sellerStats" class="list"></div></div>
         <div class="card pad"><h2>Stats par plateforme</h2><div id="platformStats" class="list"></div></div>
         <div class="card pad"><h2>Stats produits</h2><div id="productStats" class="list"></div></div>
+      </div>
+      <div class="grid two" style="margin-top:20px">
+        <div class="card pad"><h2>Stats par compte</h2><div id="accountStats" class="list"></div></div>
+        <div class="card pad"><h2>Stats par poids</h2><div id="weightStats" class="list"></div></div>
       </div>
       <div class="card pad" style="margin-top:20px">
         <h2>Activité récente</h2>
@@ -284,8 +325,8 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef;
-let orders=[], accounts=[], messages=[], activities=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 
 const $ = id => document.getElementById(id);
@@ -343,7 +384,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderChat(); renderStats(); renderActivity();
+  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks();
 }
 
 function renderDashboard(){
@@ -375,55 +416,82 @@ function renderRanking(){
     </div>`).join('') || '<p class="muted">Aucune vente confirmée.</p>';
 }
 
+function accountLabel(id){
+  if(!id) return '';
+  const a=accounts.find(x=>x.id===id);
+  return a ? `${a.plateforme} · ${a.name}` : '';
+}
+
+function renderAccountSelect(){
+  const opts = '<option value="">Aucun compte lié</option>' + accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.favorite==='oui'?'★ ':'')}${esc(a.plateforme)} · ${esc(a.name)}</option>`).join('');
+  if($("orderAccount")){
+    const old=$("orderAccount").value;
+    $("orderAccount").innerHTML=opts;
+    $("orderAccount").value=old;
+  }
+}
+
 function renderOrders(){
   const list=filteredOrders();
   $("ordersTbody").innerHTML=list.map(r=>`
     <tr>
       <td>${esc(r.date||'')}</td><td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td>
-      <td>${esc(r.plateforme)}</td><td>${esc(r.produit)}</td><td>${esc(r.poids)}</td><td>${badge(r.statut)}</td>
+      <td>${esc(r.plateforme)}</td><td>${esc(accountLabel(r.accountId))}</td><td>${esc(r.produit)}</td><td>${esc(r.poids)}</td><td>${badge(r.statut)}</td><td>${esc(r.tracking||'')}</td>
       <td class="right"><strong>${euro(r.prix)}</strong></td>
       <td class="right"><button class="secondary small" onclick="editOrder('${esc(r.id)}')">Modifier</button> <button class="danger small" onclick="removeOrder('${esc(r.id)}')">Supprimer</button></td>
-    </tr>`).join('') || '<tr><td colspan="9" class="muted">Aucune commande.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="11" class="muted">Aucune commande.</td></tr>';
 }
 
 function renderClients(){
   const map={};
   orders.forEach(r=>{
     const name=(r.client||'Sans nom').trim();
-    if(!map[name]) map[name]={count:0,total:0,last:''};
+    if(!map[name]) map[name]={count:0,total:0,last:'',platforms:{}};
     map[name].count++;
+    map[name].platforms[r.plateforme||'Autre']=(map[name].platforms[r.plateforme||'Autre']||0)+1;
     if(isConfirmed(r)) map[name].total+=Number(r.prix||0);
     if(!map[name].last || String(r.date||'') > String(map[name].last||'')) map[name].last=r.date||'';
   });
-  $("clientsTbody").innerHTML=Object.entries(map).sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>`
-    <tr><td><strong>${esc(name)}</strong></td><td>${v.count}</td><td>${euro(v.total)}</td><td>${esc(v.last)}</td></tr>
-  `).join('') || '<tr><td colspan="4" class="muted">Aucun client.</td></tr>';
+  $("clientsTbody").innerHTML=Object.entries(map).sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>{
+    const fav=Object.entries(v.platforms).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
+    return `<tr><td><strong>${esc(name)}</strong></td><td>${v.count}</td><td>${euro(v.total)}</td><td>${euro(v.count?v.total/v.count:0)}</td><td>${esc(fav)}</td><td>${esc(v.last)}</td></tr>`;
+  }).join('') || '<tr><td colspan="6" class="muted">Aucun client.</td></tr>';
+}
+
+function accountRevenue(id){
+  const confirmed=orders.filter(r=>isConfirmed(r) && r.accountId===id);
+  return {sum:confirmed.reduce((s,r)=>s+Number(r.prix||0),0), count:confirmed.length};
 }
 
 function renderAccounts(){
-  $("accountsList").innerHTML=accounts.map(a=>`
-    <div class="row">
+  $("accountsList").innerHTML=accounts.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>{
+    const perf=accountRevenue(a.id);
+    return `<div class="row">
       <div>
-        <strong>${esc(a.name)}</strong>
-        <div class="muted">${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · ${Number(a.listings||0)} annonce(s)</div>
+        <strong>${a.favorite==='oui'?'<span class="star">★</span> ':''}${esc(a.name)}</strong>
+        <div class="muted">${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · <span class="${Number(a.listings||0)===0?'alertZero':''}">${Number(a.listings||0)} annonce(s)</span></div>
+        <div class="muted" style="margin-top:5px">${perf.count} vente(s) confirmée(s) · ${euro(perf.sum)}</div>
         <div style="margin-top:8px">Email: <span class="secret">${esc(a.email||'')}</span></div>
         <div style="margin-top:6px">Mot de passe: <span class="secret" id="pw-${esc(a.id)}">••••••••</span></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="secondary small" onclick="toggleFavorite('${esc(a.id)}')">${a.favorite==='oui'?'Retirer ★':'Favori ★'}</button>
+        <button class="secondary small" onclick="editAccount('${esc(a.id)}')">Modifier</button>
         <button class="secondary small" onclick="togglePassword('${esc(a.id)}')">Afficher</button>
         <button class="secondary small" onclick="copyAccount('${esc(a.id)}')">Copier</button>
         <button class="secondary small" onclick="shareAccountToChat('${esc(a.id)}')">Envoyer chat</button>
         <button class="danger small" onclick="removeAccount('${esc(a.id)}')">Supprimer</button>
       </div>
-    </div>`).join('') || '<p class="muted">Aucun compte enregistré.</p>';
-  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.plateforme)} · ${esc(a.name)}</option>`).join('');
+    </div>`;
+  }).join('') || '<p class="muted">Aucun compte enregistré.</p>';
+  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>`<option value="${esc(a.id)}">${a.favorite==='oui'?'★ ':''}${esc(a.name)} · ${esc(a.plateforme)}</option>`).join('');
 }
 
 function renderAccountCard(a, reveal=false){
   return `<div class="accountCard">
     <strong>Compte partagé</strong>
-    <div style="margin-top:8px">Plateforme: ${esc(a.plateforme)}</div>
-    <div>Nom: ${esc(a.name)}</div>
+    <div style="margin-top:8px">Nom: ${esc(a.name)}</div>
+    <div>Plateforme: ${esc(a.plateforme)}</div>
     <div>Email: <span class="secret">${esc(a.email||'')}</span></div>
     <div>Mot de passe: <span class="secret">${reveal ? esc(a.password||'') : '••••••••'}</span></div>
     <div>Annonces: ${Number(a.listings||0)}</div>
@@ -457,15 +525,41 @@ function statBlock(groupKey, targetId){
   `).join('') || '<p class="muted">Aucune donnée confirmée.</p>';
 }
 
-function renderStats(){ statBlock('vendeur','sellerStats'); statBlock('plateforme','platformStats'); statBlock('produit','productStats'); }
+function renderStats(){ 
+  statBlock('vendeur','sellerStats'); 
+  statBlock('plateforme','platformStats'); 
+  statBlock('produit','productStats'); 
+  statBlock('poids','weightStats');
+  const map={};
+  orders.filter(isConfirmed).forEach(r=>{
+    const k=accountLabel(r.accountId)||'Sans compte lié';
+    if(!map[k]) map[k]={sum:0,count:0};
+    map[k].sum+=Number(r.prix||0); map[k].count++;
+  });
+  const max=Math.max(1,...Object.values(map).map(v=>v.sum));
+  $("accountStats").innerHTML=Object.entries(map).sort((a,b)=>b[1].sum-a[1].sum).map(([k,v])=>`
+    <div class="row"><div style="width:100%"><strong>${esc(k)}</strong><div class="muted">${v.count} vente(s)</div><div class="bar"><span style="width:${Math.round(v.sum/max*100)}%"></span></div></div><strong>${euro(v.sum)}</strong></div>
+  `).join('') || '<p class="muted">Aucune donnée confirmée.</p>';
+}
 function renderActivity(){
   $("activity").innerHTML=activities.map(a=>`<div class="row"><div>${esc(a.text)}</div><span class="muted">${stamp(a.createdAt)}</span></div>`).join('') || '<p class="muted">Aucune activité.</p>';
+}
+
+
+function renderNotes(){
+  if(!$("notesList")) return;
+  $("notesList").innerHTML=notes.map(n=>`<div class="noteItem"><div>${esc(n.text)}</div><button class="danger small" onclick="removeNote('${esc(n.id)}')">Supprimer</button></div>`).join('') || '<p class="muted">Aucune note épinglée.</p>';
+}
+
+function renderTasks(){
+  if(!$("tasksList")) return;
+  $("tasksList").innerHTML=tasks.map(t=>`<div class="taskItem ${t.done?'done':''}"><label style="display:flex;gap:10px;align-items:flex-start"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${esc(t.id)}', this.checked)"><span>${esc(t.text)}</span></label><button class="danger small" onclick="removeTask('${esc(t.id)}')">Supprimer</button></div>`).join('') || '<p class="muted">Aucune tâche.</p>';
 }
 
 $("orderForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const id=$("orderId").value;
-  const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),note:$("note").value.trim(),updatedAt:serverTimestamp()};
+  const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),accountId:$("orderAccount").value,shippedAt:$("shippedAt").value,tracking:$("tracking").value.trim(),note:$("note").value.trim(),updatedAt:serverTimestamp()};
   if(!data.vendeur) return alert("Vendeur obligatoire.");
   if(id){ await setDoc(doc(ordersRef,id),data,{merge:true}); await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`); }
   else{ await addDoc(ordersRef,{...data,createdAt:serverTimestamp()}); await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`); }
@@ -475,7 +569,7 @@ $("orderForm").addEventListener("submit", async e=>{
 $("accountForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const id=$("accountId").value;
-  const data={plateforme:$("accPlateforme").value,name:$("accName").value.trim(),owner:$("accOwner").value.trim(),email:$("accEmail").value.trim(),password:$("accPassword").value, listings:Number($("accListings").value||0),note:$("accNote").value.trim(),updatedAt:serverTimestamp()};
+  const data={plateforme:$("accPlateforme").value,name:$("accName").value.trim(),owner:$("accOwner").value.trim(),email:$("accEmail").value.trim(),password:$("accPassword").value, listings:Number($("accListings").value||0),favorite:$("accFavorite").value,note:$("accNote").value.trim(),updatedAt:serverTimestamp()};
   if(!data.name) return alert("Nom du compte obligatoire.");
   if(id){ await setDoc(doc(accountsRef,id),data,{merge:true}); await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`); }
   else{ await addDoc(accountsRef,{...data,createdAt:serverTimestamp()}); await logActivity(`Nouveau compte ajouté : ${data.plateforme} · ${data.name}`); }
@@ -495,13 +589,22 @@ $("chatForm").addEventListener("submit", async e=>{
 
 window.editOrder=id=>{
   const r=orders.find(x=>x.id===id); if(!r) return;
-  ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','note'].forEach(k=>$(k).value=k==='orderId'?id:(r[k]??''));
+  ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','orderAccount','shippedAt','tracking','note'].forEach(k=>$(k).value=k==='orderId'?id:(k==='orderAccount'?(r.accountId||''):(r[k]??'')));
   goPage('dashboard');
 };
 window.removeOrder=async id=>{ if(confirm('Supprimer cette commande ?')){ await deleteDoc(doc(ordersRef,id)); await logActivity('Une commande a été supprimée'); } };
 window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date").value=today(); };
 
 window.clearAccount=()=>{ $("accountForm").reset(); $("accountId").value=''; };
+window.editAccount=id=>{
+  const a=accounts.find(x=>x.id===id); if(!a) return;
+  $("accountId").value=id; $("accPlateforme").value=a.plateforme||'Vinted'; $("accName").value=a.name||''; $("accOwner").value=a.owner||''; $("accEmail").value=a.email||''; $("accPassword").value=a.password||''; $("accListings").value=a.listings||0; $("accFavorite").value=a.favorite||'non'; $("accNote").value=a.note||'';
+  goPage('comptes');
+};
+window.toggleFavorite=async id=>{
+  const a=accounts.find(x=>x.id===id); if(!a) return;
+  await setDoc(doc(accountsRef,id),{favorite:a.favorite==='oui'?'non':'oui',updatedAt:serverTimestamp()},{merge:true});
+};
 window.removeAccount=async id=>{ if(confirm('Supprimer ce compte ?')){ await deleteDoc(doc(accountsRef,id)); await logActivity('Un compte a été supprimé'); } };
 window.togglePassword=id=>{
   const a=accounts.find(x=>x.id===id); const el=$(`pw-${id}`); if(!a||!el) return;
@@ -538,8 +641,41 @@ $("quickReplies").addEventListener("click", e => {
 window.insertText=t=>{ $("chatText").value = ($("chatText").value ? $("chatText").value + "\n" : "") + t; $("chatText").focus(); };
 window.clearChatRead=()=>alert('Messages marqués comme lus sur cet appareil.');
 
+window.clearChatForBoth=async()=>{
+  if(!confirm('Effacer toute la conversation pour vous deux ?')) return;
+  const snap=await getDocs(chatRef);
+  const batch=writeBatch(db);
+  snap.docs.forEach(d=>batch.delete(d.ref));
+  await batch.commit();
+  await logActivity('Conversation chat effacée');
+};
+
+window.pingPartner=async()=>{
+  const sender=$("senderName").value.trim() || localStorage.getItem('duoSender') || 'Quelqu’un';
+  localStorage.setItem('duoSender',sender);
+  await addDoc(chatRef,{text:`🔔 ${sender} demande ton attention.`,sender,priority:'important',createdAt:serverTimestamp()});
+};
+
+$("noteForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const text=$("noteText").value.trim(); if(!text) return;
+  await addDoc(notesRef,{text,createdAt:serverTimestamp()});
+  $("noteText").value='';
+});
+
+$("taskForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const text=$("taskText").value.trim(); if(!text) return;
+  await addDoc(tasksRef,{text,done:false,createdAt:serverTimestamp()});
+  $("taskText").value='';
+});
+
+window.removeNote=async id=>{ await deleteDoc(doc(notesRef,id)); };
+window.removeTask=async id=>{ await deleteDoc(doc(tasksRef,id)); };
+window.toggleTask=async(id,done)=>{ await setDoc(doc(tasksRef,id),{done,updatedAt:serverTimestamp()},{merge:true}); };
+
 window.exportCSV=()=>{
-  const headers=['date','vendeur','client','plateforme','produit','poids','serie','statut','prix','note'];
+  const headers=['date','vendeur','client','plateforme','produit','poids','serie','statut','prix','accountId','shippedAt','tracking','note'];
   const csv=[headers.join(';'),...filteredOrders().map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='commandes-duo-update.csv'; a.click();
@@ -564,6 +700,8 @@ async function start(){
     accountsRef=collection(db,'duos',duoId,'accounts');
     chatRef=collection(db,'duos',duoId,'chat');
     activityRef=collection(db,'duos',duoId,'activity');
+    notesRef=collection(db,'duos',duoId,'notes');
+    tasksRef=collection(db,'duos',duoId,'tasks');
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
       orders=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -583,6 +721,14 @@ async function start(){
 
     onSnapshot(query(activityRef,orderBy('createdAt','desc'),limit(60)), snap=>{
       activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity();
+    });
+
+    onSnapshot(query(notesRef,orderBy('createdAt','desc'),limit(40)), snap=>{
+      notes=snap.docs.map(d=>({id:d.id,...d.data()})); renderNotes();
+    });
+
+    onSnapshot(query(tasksRef,orderBy('createdAt','desc'),limit(80)), snap=>{
+      tasks=snap.docs.map(d=>({id:d.id,...d.data()})); renderTasks();
     });
 
   }catch(e){ console.error(e); setSync('Firebase non disponible','bad'); }
