@@ -1813,6 +1813,22 @@ let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banH
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
+let notifDedupe = new Map();
+let toastDedupe = new Map();
+
+function dedupeKey(title, body, type=''){
+  return `${String(type||'info')}|${String(title||'')}|${String(body||'')}`.toLowerCase().replace(/\s+/g,' ').trim();
+}
+
+function shouldDisplayOnce(map, key, ttl=4500){
+  const now = Date.now();
+  for(const [k, until] of map.entries()){
+    if(until <= now) map.delete(k);
+  }
+  if(map.has(key)) return false;
+  map.set(key, now + ttl);
+  return true;
+}
 let currentReplyTo=null, currentThreadRootId=null, typingTimer=null, presenceTimer=null, currentPageId="dashboard", currentLiveAction="";
 
 const $ = id => document.getElementById(id);
@@ -2112,23 +2128,37 @@ function shortText(v, max=72){
 }
 
 function pushWidgetNotif(title, body, type='info'){
-  widgetNotifs.unshift({title, body, type, at:new Date().toISOString()});
+  const key = dedupeKey(title, body, type);
+
+  // Une seule notification visible/listée pour le même événement.
+  if(!shouldDisplayOnce(notifDedupe, key, 5000)) return;
+
+  widgetNotifs.unshift({title, body, type, at:new Date().toISOString(), key});
   widgetNotifs = widgetNotifs.slice(0, 40);
   if(!widgetOpen) widgetUnread++;
   renderWidget();
-  showToast(title, body);
+  showToast(title, body, key);
 }
 
-function showToast(title, body){
+function showToast(title, body, keyOverride=''){
   const stack = $("toastStack");
   if(!stack) return;
-  const toast = document.createElement("div");
-  toast.className = "toast";
-  toast.innerHTML = `<strong>${esc(title)}</strong><p>${esc(shortText(body, 90))}</p>`;
-  toast.onclick = () => toggleWidget(true);
-  stack.prepend(toast);
-  setTimeout(() => toast.remove(), 5200);
+
+  const key = keyOverride || dedupeKey(title, body, 'toast');
+
+  // Empêche les doublons visibles, même si showToast/toast est appelé plusieurs fois.
+  if(!shouldDisplayOnce(toastDedupe, key, 5200)) return;
+
+  const toastEl = document.createElement("div");
+  toastEl.className = "toast";
+  toastEl.innerHTML = `<strong>${esc(title)}</strong><p>${esc(shortText(body, 90))}</p>`;
+  toastEl.onclick = () => toggleWidget(true);
+  stack.prepend(toastEl);
+  setTimeout(() => toastEl.remove(), 5200);
 }
+
+// Compatibilité avec les anciens appels toast(...).
+const toast = (title, body) => showToast(title, body, dedupeKey(title, body, 'account-status'));
 
 function resetWidgetUnread(){
   widgetUnread = 0;
