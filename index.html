@@ -1529,142 +1529,143 @@ tbody tr:hover td{background:#1b1f29!important}
 
 
 
-/* V26 — Thèmes rapides + Canal vocal */
-.themeSelect{
-  min-width:150px!important;
-  width:150px!important;
-  height:35px;
-  padding:7px 10px!important;
-  border-radius:8px!important;
-  font-size:12px!important;
-  font-weight:900!important;
-  text-transform:none!important;
-}
-.widgetQuickLine{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-.voiceQuickBtn{
-  border:1px solid rgba(96,165,250,.35)!important;
-  background:rgba(96,165,250,.12)!important;
-  color:#dbeafe!important;
-  border-radius:10px!important;
-  padding:10px 12px!important;
-  font-weight:900!important;
-  cursor:pointer;
-}
-.voiceQuickBtn:hover{background:rgba(96,165,250,.18)!important}
-.voiceBackdrop{
-  position:fixed;
-  inset:0;
-  z-index:32000;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-}
-.voiceBackdrop.open{display:flex}
-.voiceModal{
-  width:min(520px,100%);
-  background:#171a22;
-  color:#f3f4f6;
-  border:1px solid #343b49;
-  border-radius:18px;
-  overflow:hidden;
-  box-shadow:0 34px 110px rgba(0,0,0,.62);
-}
-.voiceHead{
-  padding:22px 24px;
-  display:flex;
-  gap:14px;
-  align-items:center;
-  background:#111827;
-  border-bottom:1px solid #303542;
-}
-.voiceIcon{
-  width:44px;height:44px;border-radius:999px;
-  background:#2563eb;
-  display:grid;place-items:center;
-  font-size:22px;
-}
-.voiceHead strong{display:block;font-size:20px;letter-spacing:-.035em}
-.voiceHead span{display:block;color:#cbd5e1;font-size:13px;margin-top:3px}
-.voiceBody{padding:22px 24px;display:grid;gap:16px}
-.voiceStatus{
-  border:1px solid #303542;
-  background:#101218;
-  color:#d1d5db;
-  border-radius:12px;
-  padding:14px;
-  font-weight:800;
-  line-height:1.45;
-}
-.voiceActions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.voiceActions button{
-  border-radius:10px;
-  padding:11px 13px;
-  font-weight:900;
-  cursor:pointer;
-  border:1px solid #303542;
-}
-.voicePrimary{background:#e5e7eb;color:#111827;border-color:#e5e7eb}
-.voiceSecondary{background:#171a22;color:#f3f4f6}
-.voiceDanger{background:#2a161b;color:#fca5a5;border-color:#5f252b!important}
-#remoteVoiceAudio{width:100%;display:none}
+    /* V26 — Sélecteur de thèmes stable */
+    .themeSwitcher{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      justify-content:flex-end;
+      margin-top:10px;
+    }
+    .themeSwitcher select{
+      min-width:150px!important;
+      padding:8px 10px!important;
+      border-radius:999px!important;
+      font-size:12px!important;
+      font-weight:900!important;
+    }
+    body[data-theme="discord"]{
+      --bg:#313338;
+      --panel:#2b2d31;
+      --panel2:#1e1f22;
+      --text:#f2f3f5;
+      --muted:#b5bac1;
+      --line:#3f4147;
+      --line2:#4e5058;
+      --accent2:#5865f2;
+    }
+    body[data-theme="github"]{
+      --bg:#0d1117;
+      --panel:#161b22;
+      --panel2:#0d1117;
+      --text:#e6edf3;
+      --muted:#8b949e;
+      --line:#30363d;
+      --line2:#30363d;
+      --accent2:#2f81f7;
+    }
+    body[data-theme="linear"]{
+      --bg:#08090a;
+      --panel:#111113;
+      --panel2:#18181b;
+      --text:#f4f4f5;
+      --muted:#a1a1aa;
+      --line:#27272a;
+      --line2:#3f3f46;
+      --accent2:#8b5cf6;
+    }
+    body[data-theme="minimal"]{
+      --bg:#050505;
+      --panel:#0c0c0c;
+      --panel2:#111111;
+      --text:#f5f5f5;
+      --muted:#8a8a8a;
+      --line:#1f1f1f;
+      --line2:#2a2a2a;
+      --accent2:#ffffff;
+    }
+    body[data-theme] aside,
+    body[data-theme] .card,
+    body[data-theme] .messengerPanel,
+    body[data-theme] .messengerHead,
+    body[data-theme] .messengerTabs,
+    body[data-theme] .messengerComposer,
+    body[data-theme] input,
+    body[data-theme] select,
+    body[data-theme] textarea{
+      transition:background .18s ease,border-color .18s ease,color .18s ease;
+    }
 
-/* Thèmes */
-body[data-theme="minimal"]{
-  --bg:#050608; --panel:#0b0d11; --panel2:#101318; --text:#f8fafc; --muted:#8b94a6;
-  --line:#1d222c; --line2:#2b3240; --accent2:#f8fafc;
-}
-body[data-theme="discord"]{
-  --bg:#1e1f22; --panel:#2b2d31; --panel2:#313338; --text:#f2f3f5; --muted:#b5bac1;
-  --line:#3f4147; --line2:#4e5058; --accent2:#5865f2;
-}
-body[data-theme="github"]{
-  --bg:#0d1117; --panel:#161b22; --panel2:#21262d; --text:#e6edf3; --muted:#8b949e;
-  --line:#30363d; --line2:#484f58; --accent2:#2f81f7;
-}
-body[data-theme="linear"]{
-  --bg:#0f0f13; --panel:#16161d; --panel2:#1c1c24; --text:#f7f7fb; --muted:#9b9aa8;
-  --line:#292934; --line2:#3a3948; --accent2:#8b5cf6;
-}
-body[data-theme="discord"] .nav button.active{background:#5865f2!important;color:#fff!important}
-body[data-theme="github"] .nav button.active{background:#238636!important;color:#fff!important}
-body[data-theme="linear"] .nav button.active{background:#8b5cf6!important;color:#fff!important}
-body[data-theme="minimal"] .nav button.active{background:#f8fafc!important;color:#050608!important}
-body[data-theme="discord"] button.primary,
-body[data-theme="discord"] .messengerComposer button,
-body[data-theme="discord"] .voicePrimary{background:#5865f2!important;border-color:#5865f2!important;color:#fff!important}
-body[data-theme="github"] button.primary,
-body[data-theme="github"] .messengerComposer button,
-body[data-theme="github"] .voicePrimary{background:#238636!important;border-color:#238636!important;color:#fff!important}
-body[data-theme="linear"] button.primary,
-body[data-theme="linear"] .messengerComposer button,
-body[data-theme="linear"] .voicePrimary{background:#8b5cf6!important;border-color:#8b5cf6!important;color:#fff!important}
-body[data-theme="minimal"] button.primary,
-body[data-theme="minimal"] .messengerComposer button,
-body[data-theme="minimal"] .voicePrimary{background:#f8fafc!important;border-color:#f8fafc!important;color:#050608!important}
-body[data-theme] .card,
-body[data-theme] .livePresenceBox,
-body[data-theme] .liveNowCard,
-body[data-theme] .voiceModal{
-  background:linear-gradient(180deg,var(--panel),var(--panel2))!important;
-  border-color:var(--line)!important;
-}
-body[data-theme] input,
-body[data-theme] select,
-body[data-theme] textarea{
-  background:#0b0e14!important;
-  border-color:var(--line2)!important;
-  color:var(--text)!important;
-}
-body[data-theme] .messengerPanel,
-body[data-theme] .voiceHead{border-color:var(--line)!important}
+    /* V26 — Canal vocal widget */
+    .voiceQuickBtn{
+      width:100%;
+      border:1px solid rgba(96,165,250,.45)!important;
+      background:linear-gradient(180deg,rgba(96,165,250,.18),rgba(37,99,235,.10))!important;
+      color:#dbeafe!important;
+      border-radius:10px!important;
+      padding:10px 12px!important;
+      font-weight:900!important;
+      cursor:pointer;
+    }
+    .voiceQuickBtn.active{
+      border-color:rgba(34,197,94,.55)!important;
+      background:linear-gradient(180deg,rgba(34,197,94,.18),rgba(22,163,74,.10))!important;
+      color:#bbf7d0!important;
+    }
+    .voiceBackdrop{
+      position:fixed;
+      inset:0;
+      z-index:31000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:rgba(0,0,0,.72);
+      backdrop-filter:blur(10px);
+    }
+    .voiceBackdrop.open{display:flex}
+    .voiceModal{
+      width:min(480px,100%);
+      border:1px solid #343b49;
+      background:#171a22;
+      color:#f3f4f6;
+      border-radius:18px;
+      box-shadow:0 34px 110px rgba(0,0,0,.55);
+      overflow:hidden;
+    }
+    .voiceHead{
+      display:flex;
+      gap:14px;
+      align-items:center;
+      padding:20px 22px;
+      background:#101218;
+      border-bottom:1px solid #343b49;
+    }
+    .voiceIcon{
+      width:42px;height:42px;border-radius:999px;
+      display:grid;place-items:center;
+      background:#2563eb;
+      font-size:22px;
+    }
+    .voiceHead strong{display:block;font-size:20px}
+    .voiceHead span{display:block;margin-top:3px;color:#aeb6c5;font-size:13px}
+    .voiceBody{padding:22px;display:grid;gap:14px}
+    .voiceStatus{
+      border:1px solid #343b49;
+      background:#101218;
+      border-radius:12px;
+      padding:13px 14px;
+      color:#d1d5db;
+      line-height:1.4;
+      font-weight:800;
+    }
+    .voiceActions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .voiceActions button{
+      border-radius:10px;
+      padding:11px 13px;
+      font-weight:900;
+      cursor:pointer;
+    }
 
 </style>
 </head>
@@ -1694,17 +1695,19 @@ body[data-theme] .voiceHead{border-color:var(--line)!important}
       </div>
       <div>
         <div id="syncState" class="sync"><span class="dot" id="syncDot"></span>Connexion...</div>
+        <div class="themeSwitcher">
+          <select id="themeSelect" onchange="setTheme(this.value)" title="Changer le thème">
+            <option value="discord">Discord</option>
+            <option value="github">GitHub</option>
+            <option value="linear">Linear</option>
+            <option value="minimal">Minimal Black</option>
+          </select>
+        </div>
         <div id="livePresenceBox" class="livePresenceBox">
           <div class="livePresenceTitle"><span>Présence live</span><span id="presenceCount">0 en ligne</span></div>
           <div id="livePresenceList" class="livePresenceList"></div>
         </div>
         <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
-          <select id="themeSelect" class="themeSelect" onchange="setTheme(this.value)" title="Changer le thème">
-            <option value="minimal">Minimal Black</option>
-            <option value="discord">Discord</option>
-            <option value="github">GitHub</option>
-            <option value="linear">Linear</option>
-          </select>
           <button class="secondary small" onclick="enableNotifications()">Activer son</button>
           <button class="secondary small" onclick="exportCSV()">Export CSV</button>
         </div>
@@ -1989,10 +1992,8 @@ body[data-theme] .voiceHead{border-color:var(--line)!important}
   <form class="messengerComposer" id="miniChatForm">
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div id="miniAttachmentPreview" class="miniAttachmentPreview"></div>
-    <div class="widgetQuickLine">
-      <button type="button" class="voiceQuickBtn" onclick="startVoiceCall()">🎤 Appeler</button>
-      <button type="button" class="emergencyQuickBtn" onclick="openEmergencyComposer()">🚨 Urgence</button>
-    </div>
+    <button type="button" id="voiceQuickBtn" class="voiceQuickBtn" onclick="toggleVoiceCall()">🎤 Appeler</button>
+    <button type="button" class="emergencyQuickBtn" onclick="openEmergencyComposer()">🚨 Urgence</button>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
       <input id="miniAttachmentUrl" placeholder="GIF / image URL">
@@ -2002,29 +2003,6 @@ body[data-theme] .voiceHead{border-color:var(--line)!important}
   </form>
 </div>
 
-
-
-<div id="voiceCallBackdrop" class="voiceBackdrop" role="dialog" aria-modal="true">
-  <div class="voiceModal">
-    <div class="voiceHead">
-      <div class="voiceIcon">🎤</div>
-      <div>
-        <strong id="voiceTitle">Canal vocal</strong>
-        <span id="voiceSubtitle">Audio direct navigateur ↔ navigateur.</span>
-      </div>
-    </div>
-    <div class="voiceBody">
-      <div id="voiceStatus" class="voiceStatus">Prêt.</div>
-      <div class="voiceActions">
-        <button type="button" class="voiceSecondary" id="voiceAcceptBtn" onclick="acceptVoiceCall()" style="display:none">Accepter</button>
-        <button type="button" class="voicePrimary" id="voiceCallBtn" onclick="startVoiceCall()">Appeler l'associé</button>
-        <button type="button" class="voiceDanger" onclick="hangupVoiceCall()">Raccrocher</button>
-        <button type="button" class="voiceSecondary" onclick="closeVoicePanel()">Fermer</button>
-      </div>
-      <audio id="remoteVoiceAudio" autoplay playsinline></audio>
-    </div>
-  </div>
-</div>
 
 <div id="mentionSuggest" class="mentionSuggest"></div>
 
@@ -2122,6 +2100,28 @@ body[data-theme] .voiceHead{border-color:var(--line)!important}
   </div>
 </div>
 
+
+<div id="voiceCallBackdrop" class="voiceBackdrop" role="dialog" aria-modal="true">
+  <div class="voiceModal">
+    <div class="voiceHead">
+      <div class="voiceIcon">🎤</div>
+      <div>
+        <strong id="voiceCallTitle">Canal vocal</strong>
+        <span id="voiceCallSubtitle">Audio direct navigateur ↔ navigateur.</span>
+      </div>
+    </div>
+    <div class="voiceBody">
+      <div id="voiceCallStatus" class="voiceStatus">Prêt.</div>
+      <div class="voiceActions">
+        <button type="button" class="secondary" id="voiceAcceptBtn" onclick="acceptVoiceCall()" style="display:none">Accepter</button>
+        <button type="button" class="secondary" onclick="closeVoiceModal()">Fermer</button>
+        <button type="button" class="danger" onclick="hangupVoiceCall()">Raccrocher</button>
+      </div>
+    </div>
+  </div>
+</div>
+<audio id="remoteVoiceAudio" autoplay playsinline></audio>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -2139,7 +2139,7 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, voiceCallsRef;
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, voiceCallRef;
 let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
@@ -2167,205 +2167,6 @@ const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'
 const esc = v => String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const today = () => new Date().toISOString().slice(0,10);
 const isConfirmed = r => String(r.statut||'').toLowerCase().includes('confirm');
-
-
-/* V26 — Thèmes */
-function setTheme(theme){
-  const value = theme || 'minimal';
-  document.body.setAttribute('data-theme', value);
-  localStorage.setItem('duoTheme', value);
-  if($("themeSelect")) $("themeSelect").value = value;
-}
-window.setTheme=setTheme;
-setTheme(localStorage.getItem('duoTheme') || 'minimal');
-
-/* V26 — Canal vocal WebRTC via Firebase signaling */
-let voiceCallsRef=null, voicePc=null, voiceLocalStream=null, voiceCallId=null, incomingVoiceCall=null;
-let voiceUnsubs=[];
-
-function voiceName(){
-  return ($("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem('duoSender') || 'Utilisateur').trim();
-}
-function voicePartnerName(){
-  const n = voiceName().toLowerCase();
-  return n.includes('dora') ? 'Zerlezz' : 'Dora';
-}
-function setVoiceStatus(txt){
-  if($("voiceStatus")) $("voiceStatus").textContent = txt;
-}
-function openVoicePanel(){
-  $("voiceCallBackdrop")?.classList.add('open');
-}
-function closeVoicePanel(){
-  $("voiceCallBackdrop")?.classList.remove('open');
-}
-function cleanupVoice(){
-  voiceUnsubs.forEach(fn=>{try{fn()}catch{}});
-  voiceUnsubs=[];
-  if(voicePc){ try{voicePc.close()}catch{} }
-  voicePc=null;
-  if(voiceLocalStream){
-    voiceLocalStream.getTracks().forEach(t=>{try{t.stop()}catch{}});
-  }
-  voiceLocalStream=null;
-  voiceCallId=null;
-  incomingVoiceCall=null;
-  const audio=$("remoteVoiceAudio");
-  if(audio) audio.srcObject=null;
-  if($("voiceAcceptBtn")) $("voiceAcceptBtn").style.display='none';
-  if($("voiceCallBtn")) $("voiceCallBtn").style.display='';
-}
-async function createVoicePeer(candidateCollectionPath){
-  voicePc = new RTCPeerConnection({
-    iceServers:[
-      {urls:'stun:stun.l.google.com:19302'},
-      {urls:'stun:stun1.l.google.com:19302'}
-    ]
-  });
-  voicePc.ontrack = ev=>{
-    const audio=$("remoteVoiceAudio");
-    if(audio){
-      audio.srcObject=ev.streams[0];
-      audio.play?.().catch(()=>{});
-    }
-    setVoiceStatus('Connecté. Audio en cours.');
-  };
-  voicePc.onconnectionstatechange=()=>{
-    if(!voicePc) return;
-    if(['failed','disconnected'].includes(voicePc.connectionState)){
-      setVoiceStatus('Connexion audio interrompue.');
-    }
-    if(voicePc.connectionState==='connected') setVoiceStatus('Connecté. Audio en cours.');
-  };
-  voiceLocalStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-  voiceLocalStream.getTracks().forEach(track=>voicePc.addTrack(track, voiceLocalStream));
-  voicePc.onicecandidate = ev=>{
-    if(ev.candidate && candidateCollectionPath){
-      addDoc(candidateCollectionPath, ev.candidate.toJSON()).catch(console.error);
-    }
-  };
-  return voicePc;
-}
-async function startVoiceCall(){
-  try{
-    if(!voiceCallsRef || !db){
-      setVoiceStatus('Firebase non disponible pour le canal vocal.');
-      openVoicePanel();
-      return;
-    }
-    openVoicePanel();
-    cleanupVoice();
-    openVoicePanel();
-    const from=voiceName();
-    const to=voicePartnerName();
-    setVoiceStatus(`Appel de ${to} en cours... Accepte l'autorisation micro.`);
-    const callDoc = doc(voiceCallsRef);
-    voiceCallId = callDoc.id;
-    const offerCandidates = collection(db,'duos',duoId,'voiceCalls',voiceCallId,'offerCandidates');
-    const answerCandidates = collection(db,'duos',duoId,'voiceCalls',voiceCallId,'answerCandidates');
-    await createVoicePeer(offerCandidates);
-    const offer = await voicePc.createOffer();
-    await voicePc.setLocalDescription(offer);
-    await setDoc(callDoc,{
-      from,to,status:'ringing',
-      offer:{type:offer.type,sdp:offer.sdp},
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp()
-    });
-    voiceUnsubs.push(onSnapshot(callDoc, async snap=>{
-      const data=snap.data();
-      if(!data) return;
-      if(data.status==='ended'){
-        setVoiceStatus('Appel terminé.');
-        cleanupVoice();
-        return;
-      }
-      if(data.answer && voicePc && !voicePc.currentRemoteDescription){
-        await voicePc.setRemoteDescription(new RTCSessionDescription(data.answer));
-        setVoiceStatus('Appel accepté. Connexion audio...');
-      }
-    }));
-    voiceUnsubs.push(onSnapshot(answerCandidates, snap=>{
-      snap.docChanges().forEach(change=>{
-        if(change.type==='added' && voicePc){
-          voicePc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(console.error);
-        }
-      });
-    }));
-    await addDoc(activityRef,{type:'voice', text:`🎤 ${from} appelle ${to}`, createdAt:serverTimestamp()}).catch(()=>{});
-  }catch(e){
-    console.error(e);
-    setVoiceStatus("Impossible de lancer l'appel. Vérifie l'autorisation micro et HTTPS.");
-  }
-}
-async function acceptVoiceCall(){
-  try{
-    const call=incomingVoiceCall;
-    if(!call || !db || !voiceCallsRef) return;
-    cleanupVoice();
-    openVoicePanel();
-    if($("voiceAcceptBtn")) $("voiceAcceptBtn").style.display='none';
-    if($("voiceCallBtn")) $("voiceCallBtn").style.display='none';
-    voiceCallId=call.id;
-    setVoiceStatus('Acceptation de l’appel... Autorise le micro.');
-    const callDoc=doc(db,'duos',duoId,'voiceCalls',voiceCallId);
-    const offerCandidates=collection(db,'duos',duoId,'voiceCalls',voiceCallId,'offerCandidates');
-    const answerCandidates=collection(db,'duos',duoId,'voiceCalls',voiceCallId,'answerCandidates');
-    await createVoicePeer(answerCandidates);
-    await voicePc.setRemoteDescription(new RTCSessionDescription(call.offer));
-    const answer=await voicePc.createAnswer();
-    await voicePc.setLocalDescription(answer);
-    await setDoc(callDoc,{
-      answer:{type:answer.type,sdp:answer.sdp},
-      status:'active',
-      acceptedBy:voiceName(),
-      updatedAt:serverTimestamp()
-    },{merge:true});
-    voiceUnsubs.push(onSnapshot(offerCandidates, snap=>{
-      snap.docChanges().forEach(change=>{
-        if(change.type==='added' && voicePc){
-          voicePc.addIceCandidate(new RTCIceCandidate(change.doc.data())).catch(console.error);
-        }
-      });
-    }));
-    voiceUnsubs.push(onSnapshot(callDoc, snap=>{
-      const data=snap.data();
-      if(data?.status==='ended'){
-        setVoiceStatus('Appel terminé.');
-        cleanupVoice();
-      }
-    }));
-  }catch(e){
-    console.error(e);
-    setVoiceStatus("Impossible d'accepter l'appel. Vérifie l'autorisation micro.");
-  }
-}
-async function hangupVoiceCall(){
-  const id=voiceCallId || incomingVoiceCall?.id;
-  if(id && db){
-    await setDoc(doc(db,'duos',duoId,'voiceCalls',id),{
-      status:'ended',
-      endedBy:voiceName(),
-      updatedAt:serverTimestamp()
-    },{merge:true}).catch(()=>{});
-  }
-  setVoiceStatus('Appel terminé.');
-  cleanupVoice();
-}
-function showIncomingVoiceCall(call){
-  incomingVoiceCall=call;
-  openVoicePanel();
-  if($("voiceTitle")) $("voiceTitle").textContent='Appel entrant';
-  if($("voiceSubtitle")) $("voiceSubtitle").textContent=`${call.from || 'Associé'} veut ouvrir un canal vocal.`;
-  setVoiceStatus(`🎤 Appel entrant de ${call.from || 'Associé'}.`);
-  if($("voiceAcceptBtn")) $("voiceAcceptBtn").style.display='';
-  if($("voiceCallBtn")) $("voiceCallBtn").style.display='none';
-  playNotify();
-}
-window.startVoiceCall=startVoiceCall;
-window.acceptVoiceCall=acceptVoiceCall;
-window.hangupVoiceCall=hangupVoiceCall;
-window.closeVoicePanel=closeVoicePanel;
 
 const MENTION_MEMBERS = ["Zerlezz", "Dora"];
 let mentionTargetInput = null;
@@ -4117,8 +3918,238 @@ function goPage(id){
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.page)));
 window.goPage=goPage; window.renderAll=renderAll;
 
+
+/* V26 — Thèmes */
+function setTheme(theme){
+  const allowed = ["discord","github","linear","minimal"];
+  const selected = allowed.includes(theme) ? theme : "discord";
+  document.body.dataset.theme = selected;
+  localStorage.setItem("duoTheme", selected);
+  const select = $("themeSelect");
+  if(select) select.value = selected;
+}
+window.setTheme = setTheme;
+
+/* V26 — Canal vocal WebRTC via Firestore */
+const voiceClientId = localStorage.getItem("duoVoiceClientId") || (() => {
+  const id = "vc_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  localStorage.setItem("duoVoiceClientId", id);
+  return id;
+})();
+let voicePc = null;
+let voiceLocalStream = null;
+let voiceCallData = null;
+let voiceCandidateSeq = 0;
+let voiceSeenCandidates = new Set();
+let voiceMode = "";
+let voiceUnsub = null;
+
+function voiceName(){
+  return $("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem("duoSender") || "Anonyme";
+}
+function setVoiceStatus(text){
+  const el = $("voiceCallStatus");
+  if(el) el.textContent = text;
+}
+function setVoiceButton(active=false, label="🎤 Appeler"){
+  const btn = $("voiceQuickBtn");
+  if(!btn) return;
+  btn.classList.toggle("active", !!active);
+  btn.textContent = label;
+}
+function openVoiceModal(title="Canal vocal", subtitle="Audio direct navigateur ↔ navigateur."){
+  $("voiceCallTitle").textContent = title;
+  $("voiceCallSubtitle").textContent = subtitle;
+  $("voiceCallBackdrop").classList.add("open");
+}
+function closeVoiceModal(){
+  $("voiceCallBackdrop")?.classList.remove("open");
+}
+window.closeVoiceModal = closeVoiceModal;
+
+function createVoicePc(){
+  const pc = new RTCPeerConnection({
+    iceServers:[
+      {urls:"stun:stun.l.google.com:19302"},
+      {urls:"stun:stun1.l.google.com:19302"}
+    ]
+  });
+  pc.ontrack = event => {
+    const audio = $("remoteVoiceAudio");
+    if(audio && event.streams && event.streams[0]){
+      audio.srcObject = event.streams[0];
+      audio.play().catch(()=>{});
+    }
+  };
+  pc.onicecandidate = async event => {
+    if(!event.candidate || !voiceCallRef) return;
+    const field = voiceMode === "caller" ? "callerCandidates" : "calleeCandidates";
+    const arr = Array.isArray(voiceCallData?.[field]) ? voiceCallData[field].slice() : [];
+    arr.push({id:`${voiceClientId}_${Date.now()}_${voiceCandidateSeq++}`, candidate:event.candidate.toJSON()});
+    try{
+      await setDoc(voiceCallRef, {[field]: arr, updatedAt: serverTimestamp()}, {merge:true});
+    }catch(e){ console.warn("Candidate vocal non envoyé", e); }
+  };
+  pc.onconnectionstatechange = () => {
+    if(["connected"].includes(pc.connectionState)){
+      setVoiceStatus("Connecté. Appel vocal actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+    if(["failed","disconnected","closed"].includes(pc.connectionState)){
+      setVoiceStatus("Appel terminé ou connexion coupée.");
+      setVoiceButton(false);
+    }
+  };
+  return pc;
+}
+
+async function ensureVoiceStream(){
+  if(voiceLocalStream) return voiceLocalStream;
+  voiceLocalStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+  return voiceLocalStream;
+}
+
+async function startVoiceCall(){
+  if(!voiceCallRef) return alert("Firebase pas encore prêt.");
+  if(!navigator.mediaDevices?.getUserMedia) return alert("Micro non supporté par ce navigateur.");
+  try{
+    openVoiceModal("Appel vocal", "Demande d'appel en cours...");
+    setVoiceStatus("Autorisation micro...");
+    voiceMode = "caller";
+    voiceSeenCandidates.clear();
+    voicePc = createVoicePc();
+    const stream = await ensureVoiceStream();
+    stream.getTracks().forEach(t=>voicePc.addTrack(t, stream));
+    const offer = await voicePc.createOffer();
+    await voicePc.setLocalDescription(offer);
+    await setDoc(voiceCallRef, {
+      status:"ringing",
+      caller:voiceClientId,
+      callerName:voiceName(),
+      callee:"",
+      calleeName:"",
+      offer:{type:offer.type, sdp:offer.sdp},
+      answer:null,
+      callerCandidates:[],
+      calleeCandidates:[],
+      createdAt:serverTimestamp(),
+      updatedAt:serverTimestamp()
+    });
+    setVoiceStatus("Appel envoyé. En attente de réponse...");
+    setVoiceButton(true, "🎤 Appel...");
+    try{ notify("Appel vocal", `${voiceName()} lance un appel vocal`); }catch{}
+  }catch(e){
+    console.error(e);
+    setVoiceStatus("Impossible de lancer l'appel. Vérifie l'autorisation micro.");
+    setVoiceButton(false);
+  }
+}
+
+async function acceptVoiceCall(){
+  if(!voiceCallRef || !voiceCallData?.offer) return;
+  try{
+    $("voiceAcceptBtn").style.display = "none";
+    voiceMode = "callee";
+    voiceSeenCandidates.clear();
+    setVoiceStatus("Connexion au canal vocal...");
+    voicePc = createVoicePc();
+    const stream = await ensureVoiceStream();
+    stream.getTracks().forEach(t=>voicePc.addTrack(t, stream));
+    await voicePc.setRemoteDescription(new RTCSessionDescription(voiceCallData.offer));
+    const answer = await voicePc.createAnswer();
+    await voicePc.setLocalDescription(answer);
+    await setDoc(voiceCallRef, {
+      status:"accepted",
+      callee:voiceClientId,
+      calleeName:voiceName(),
+      answer:{type:answer.type, sdp:answer.sdp},
+      updatedAt:serverTimestamp()
+    }, {merge:true});
+    setVoiceButton(true, "🎤 En appel");
+    setVoiceStatus("Appel accepté. Connexion...");
+  }catch(e){
+    console.error(e);
+    setVoiceStatus("Impossible d'accepter l'appel.");
+  }
+}
+window.acceptVoiceCall = acceptVoiceCall;
+
+async function hangupVoiceCall(){
+  try{
+    if(voiceCallRef){
+      await setDoc(voiceCallRef, {status:"ended", endedBy:voiceClientId, updatedAt:serverTimestamp()}, {merge:true});
+    }
+  }catch(e){}
+  cleanupVoice();
+}
+window.hangupVoiceCall = hangupVoiceCall;
+
+function cleanupVoice(){
+  try{ voicePc?.close(); }catch{}
+  voicePc = null;
+  try{ voiceLocalStream?.getTracks().forEach(t=>t.stop()); }catch{}
+  voiceLocalStream = null;
+  voiceMode = "";
+  voiceSeenCandidates.clear();
+  setVoiceButton(false);
+  $("voiceAcceptBtn") && ($("voiceAcceptBtn").style.display = "none");
+  closeVoiceModal();
+}
+async function addRemoteVoiceCandidates(data){
+  if(!voicePc) return;
+  const field = voiceMode === "caller" ? "calleeCandidates" : "callerCandidates";
+  const list = Array.isArray(data?.[field]) ? data[field] : [];
+  for(const item of list){
+    if(!item?.id || voiceSeenCandidates.has(item.id)) continue;
+    voiceSeenCandidates.add(item.id);
+    try{ await voicePc.addIceCandidate(new RTCIceCandidate(item.candidate)); }catch(e){ console.warn("ICE distant ignoré", e); }
+  }
+}
+function toggleVoiceCall(){
+  if(voicePc || voiceMode) hangupVoiceCall();
+  else startVoiceCall();
+}
+window.toggleVoiceCall = toggleVoiceCall;
+
+function handleVoiceSnapshot(snap){
+  if(!snap.exists()){
+    voiceCallData = null;
+    return;
+  }
+  const data = snap.data() || {};
+  voiceCallData = data;
+
+  if(data.status === "ended"){
+    if(voicePc || voiceMode) cleanupVoice();
+    return;
+  }
+
+  if(data.status === "ringing" && data.caller !== voiceClientId){
+    if(!voicePc && !voiceMode){
+      openVoiceModal("Appel entrant", `${data.callerName || "Associé"} t'appelle.`);
+      setVoiceStatus("Appel vocal entrant. Tu peux accepter ou fermer.");
+      $("voiceAcceptBtn").style.display = "";
+      setVoiceButton(true, "🎤 Appel entrant");
+      try{ playNotify(); }catch{}
+    }
+  }
+
+  if(data.status === "accepted" && data.caller === voiceClientId && data.answer && voicePc && !voicePc.currentRemoteDescription){
+    voicePc.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(console.warn);
+    setVoiceStatus(`${data.calleeName || "Associé"} a accepté. Connexion...`);
+  }
+
+  if(data.status === "accepted" && (data.caller === voiceClientId || data.callee === voiceClientId)){
+    setVoiceButton(true, "🎤 En appel");
+    addRemoteVoiceCandidates(data);
+  }else if(data.status === "ringing" && data.caller === voiceClientId){
+    addRemoteVoiceCandidates(data);
+  }
+}
+
 async function start(){
-  setTheme(localStorage.getItem("duoTheme") || "minimal");
+  setTheme(localStorage.getItem("duoTheme") || "discord");
   $("date").value=today(); $("senderName").value=localStorage.getItem('duoSender')||''; if($("miniSenderName")) $("miniSenderName").value=localStorage.getItem('duoSender')||'';
   ["senderName","miniSenderName","threadSenderName"].forEach(id=>$(id)?.addEventListener("input",()=>updatePresence()));
   try{
@@ -4134,7 +4165,9 @@ async function start(){
     typingRef=collection(db,'duos',duoId,'typing');
     presenceRef=collection(db,'duos',duoId,'presence');
     urgenciesRef=collection(db,'duos',duoId,'urgencies');
-    voiceCallsRef=collection(db,'duos',duoId,'voiceCalls');
+    voiceCallRef=doc(db,'duos',duoId,'voice','main');
+    if(voiceUnsub) voiceUnsub();
+    voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
 
     onSnapshot(query(urgenciesRef,orderBy('createdAt','desc'),limit(30)), snap=>{
       const changes=snap.docChanges().map(c=>({type:c.type,data:{id:c.doc.id,...c.doc.data()}}));
@@ -4147,24 +4180,6 @@ async function start(){
         }
       });
       renderWidget();
-    });
-
-
-    onSnapshot(query(voiceCallsRef,orderBy('createdAt','desc'),limit(8)), snap=>{
-      const me=voiceName().toLowerCase();
-      snap.docChanges().forEach(change=>{
-        const call={id:change.doc.id,...change.doc.data()};
-        const isMine=String(call.from||'').toLowerCase()===me;
-        const isEnded=call.status==='ended';
-        if(change.type==='added' && !isMine && !isEnded && call.status==='ringing'){
-          showIncomingVoiceCall(call);
-          pushWidgetNotif('Appel vocal entrant', `${call.from || 'Associé'} veut parler en direct`, 'voice');
-        }
-        if(change.type==='modified' && call.id===(voiceCallId || incomingVoiceCall?.id) && isEnded){
-          setVoiceStatus('Appel terminé.');
-          cleanupVoice();
-        }
-      });
     });
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
