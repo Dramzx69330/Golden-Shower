@@ -305,6 +305,45 @@
       .toastStack{right:12px;bottom:88px;width:calc(100vw - 24px)}
     }
 
+
+    /* V13 — recherche globale, fiche client, timeline et widget amélioré */
+    .globalSearchWrap{position:relative;margin-top:18px;max-width:680px}
+    .globalSearch{
+      width:100%;font-size:16px;padding:15px 16px;border-radius:10px;background:#fff;
+      border:1px solid var(--line2);box-shadow:0 12px 30px rgba(17,24,39,.06)
+    }
+    .globalResults{
+      position:absolute;top:56px;left:0;right:0;background:#fff;border:1px solid var(--line);
+      border-radius:12px;box-shadow:0 24px 70px rgba(17,24,39,.18);z-index:60;overflow:hidden;display:none
+    }
+    .globalResults.open{display:block}
+    .globalResult{
+      padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;justify-content:space-between;gap:12px
+    }
+    .globalResult:hover{background:#f9fafb}
+    .globalResult:last-child{border-bottom:0}
+    .globalType{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}
+    .clientLink{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+    .modalBackdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;z-index:10000;padding:18px}
+    .modalBackdrop.open{display:flex}
+    .clientModal{width:min(760px,100%);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 30px 90px rgba(0,0,0,.28);overflow:hidden}
+    .clientModalHead{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+    .clientModalBody{padding:24px}
+    .clientMetrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+    .clientMetric{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fafafa}
+    .clientMetric span{display:block;font-size:12px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .clientMetric strong{display:block;margin-top:7px;font-size:22px}
+    .timeline{display:grid;gap:14px}
+    .timelineDay{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding-top:8px}
+    .timelineItem{display:grid;grid-template-columns:72px 1fr;gap:14px;border-left:2px solid #111827;padding-left:16px}
+    .timelineTime{font-size:13px;color:var(--muted);font-weight:800}
+    .timelineCard{background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 14px}
+    .timelineCard strong{display:block;margin-bottom:4px}
+    .messengerTabs{grid-template-columns:repeat(4,1fr)}
+    .miniNotifActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .miniNotifActions button{padding:7px 9px!important;font-size:12px!important}
+    @media(max-width:700px){.clientMetrics{grid-template-columns:1fr 1fr}.timelineItem{grid-template-columns:54px 1fr}}
+
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -336,6 +375,10 @@
       <div>
         <h1 id="pageTitle">Dashboard</h1>
         <p class="muted" id="pageDesc">Vue globale de vos commandes confirmées et en cours.</p>
+        <div class="globalSearchWrap">
+          <input id="globalSearch" class="globalSearch" placeholder="Recherche globale : client, commande, compte, message..." autocomplete="off">
+          <div id="globalResults" class="globalResults"></div>
+        </div>
       </div>
       <div>
         <div id="syncState" class="sync"><span class="dot" id="syncDot"></span>Connexion...</div>
@@ -510,6 +553,20 @@
   </main>
 </div>
 
+
+<div class="modalBackdrop" id="clientModalBackdrop" onclick="closeClientProfile(event)">
+  <div class="clientModal" onclick="event.stopPropagation()">
+    <div class="clientModalHead">
+      <div>
+        <h2 id="clientModalName" style="margin:0">Client</h2>
+        <p class="muted" id="clientModalSub" style="margin:8px 0 0">Fiche détaillée</p>
+      </div>
+      <button class="secondary small" onclick="closeClientProfile()">Fermer</button>
+    </div>
+    <div class="clientModalBody" id="clientModalBody"></div>
+  </div>
+</div>
+
 <button class="floatingChatBtn" id="floatingChatBtn" onclick="toggleWidget()">
   💬
   <span class="badge" id="widgetBadge">0</span>
@@ -526,10 +583,12 @@
     <button class="active" data-widget-tab="miniChat" onclick="setWidgetTab('miniChat')">Chat</button>
     <button data-widget-tab="miniNotifs" onclick="setWidgetTab('miniNotifs')">Notifs</button>
     <button data-widget-tab="miniTasks" onclick="setWidgetTab('miniTasks')">Tâches</button>
+    <button data-widget-tab="miniActivity" onclick="setWidgetTab('miniActivity')">Activité</button>
   </div>
   <div id="miniChat" class="messengerBody active"></div>
   <div id="miniNotifs" class="messengerBody"></div>
   <div id="miniTasks" class="messengerBody"></div>
+  <div id="miniActivity" class="messengerBody"></div>
   <form class="messengerComposer" id="miniChatForm">
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div class="line">
@@ -677,12 +736,16 @@ function renderWidget(){
 
   const miniNotifs = $("miniNotifs");
   if(miniNotifs){
-    const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt}));
+    const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt, type:"activity"}));
     const items = [...widgetNotifs, ...activityItems].slice(0, 30);
-    miniNotifs.innerHTML = items.map(n => `<div class="miniNotif" onclick="setWidgetTab('miniChat')">
+    miniNotifs.innerHTML = items.map(n => `<div class="miniNotif">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.body)}</p>
       <span class="miniMeta">${esc(stamp(n.at))}</span>
+      <div class="miniNotifActions">
+        <button class="secondary small" onclick="${n.type==='chat' ? "setWidgetTab('miniChat')" : n.type==='activity' ? "setWidgetTab('miniActivity')" : "goPage('dashboard');toggleWidget(false)"}">Voir</button>
+        <button class="secondary small" onclick="this.closest('.miniNotif').remove()">Ignorer</button>
+      </div>
     </div>`).join("") || '<p class="muted">Aucune notification.</p>';
   }
 
@@ -693,6 +756,15 @@ function renderWidget(){
       <span>${esc(t.text)}</span>
     </label>`).join("") || '<p class="muted">Aucune tâche.</p>';
   }
+
+  const miniActivity = $("miniActivity");
+  if(miniActivity){
+    miniActivity.innerHTML = activities.slice(0, 25).map(a => `<div class="miniNotif">
+      <strong>${activityIcon(a.text)} Activité</strong>
+      <p>${esc(a.text||'')}</p>
+      <span class="miniMeta">${esc(stamp(a.createdAt))}</span>
+    </div>`).join("") || '<p class="muted">Aucune activité.</p>';
+  }
 }
 
 document.addEventListener("click", e => {
@@ -700,6 +772,58 @@ document.addEventListener("click", e => {
 });
 
 
+
+function collectGlobalResults(term){
+  const q=String(term||'').trim().toLowerCase();
+  if(q.length<2) return [];
+  const res=[];
+  orders.forEach(r=>{
+    const blob=Object.values(r).join(' ').toLowerCase();
+    if(blob.includes(q)) res.push({type:'Commande',title:`${r.client||'Client'} · ${r.produit||''} ${r.poids||''}`,body:`${r.vendeur||''} · ${r.plateforme||''} · ${r.statut||''} · ${euro(r.prix||0)}`,action:()=>{goPage('dashboard'); $("search").value=r.client||r.serie||''; renderAll();}});
+  });
+  Object.entries(buildClientMap()).forEach(([name,c])=>{
+    if(name.toLowerCase().includes(q)) res.push({type:'Client',title:name,body:`${c.count} commande(s) · ${euro(c.total)} confirmé`,action:()=>openClientProfile(name)});
+  });
+  accounts.forEach(a=>{
+    const blob=[a.name,a.plateforme,a.owner,a.email].join(' ').toLowerCase();
+    if(blob.includes(q)) res.push({type:'Compte',title:`${a.name||'Compte'} · ${a.plateforme||''}`,body:`${a.owner||'Non attribué'} · ${Number(a.listings||0)} annonce(s)`,action:()=>{goPage('comptes');}});
+  });
+  messages.forEach(m=>{
+    const blob=[m.sender,m.text].join(' ').toLowerCase();
+    if(blob.includes(q)) res.push({type:'Message',title:m.sender||'Message',body:shortText(m.text||'Compte partagé',90),action:()=>{toggleWidget(true); setWidgetTab('miniChat');}});
+  });
+  activities.forEach(a=>{
+    if(String(a.text||'').toLowerCase().includes(q)) res.push({type:'Activité',title:'Activité',body:a.text||'',action:()=>{goPage('stats');}});
+  });
+  return res.slice(0,12);
+}
+
+function renderGlobalSearch(){
+  const input=$("globalSearch"), box=$("globalResults");
+  if(!input||!box) return;
+  const results=collectGlobalResults(input.value);
+  box.classList.toggle('open', results.length>0);
+  box.innerHTML=results.map((r,i)=>`
+    <div class="globalResult" data-global-index="${i}">
+      <div><div class="globalType">${esc(r.type)}</div><strong>${esc(r.title)}</strong><div class="muted">${esc(r.body)}</div></div>
+      <span class="muted">Ouvrir</span>
+    </div>`).join('');
+  window.__globalResults=results;
+}
+
+document.addEventListener('input', e=>{
+  if(e.target && e.target.id==='globalSearch') renderGlobalSearch();
+});
+document.addEventListener('click', e=>{
+  const item=e.target.closest('[data-global-index]');
+  if(item && window.__globalResults){
+    const r=window.__globalResults[Number(item.dataset.globalIndex)];
+    $("globalResults")?.classList.remove('open');
+    if(r?.action) r.action();
+  } else if(!e.target.closest('.globalSearchWrap')) {
+    $("globalResults")?.classList.remove('open');
+  }
+});
 function filteredOrders(){
   const q = $("search")?.value?.trim().toLowerCase() || "";
   const st = $("filterStatus")?.value || "";
@@ -718,7 +842,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks(); renderWidget();
+  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks(); renderGlobalSearch(); renderWidget();
 }
 
 function renderDashboard(){
@@ -779,21 +903,60 @@ function renderOrders(){
     </tr>`).join('') || '<tr><td colspan="11" class="muted">Aucune commande.</td></tr>';
 }
 
-function renderClients(){
+function buildClientMap(){
   const map={};
   orders.forEach(r=>{
     const name=(r.client||'Sans nom').trim();
-    if(!map[name]) map[name]={count:0,total:0,last:'',platforms:{}};
+    if(!map[name]) map[name]={name,count:0,total:0,allTotal:0,last:'',platforms:{},orders:[]};
     map[name].count++;
+    map[name].allTotal+=Number(r.prix||0);
+    map[name].orders.push(r);
     map[name].platforms[r.plateforme||'Autre']=(map[name].platforms[r.plateforme||'Autre']||0)+1;
     if(isConfirmed(r)) map[name].total+=Number(r.prix||0);
     if(!map[name].last || String(r.date||'') > String(map[name].last||'')) map[name].last=r.date||'';
   });
+  return map;
+}
+
+function renderClients(){
+  const map=buildClientMap();
   $("clientsTbody").innerHTML=Object.entries(map).sort((a,b)=>b[1].total-a[1].total).map(([name,v])=>{
     const fav=Object.entries(v.platforms).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
-    return `<tr><td><strong>${esc(name)}</strong></td><td>${v.count}</td><td>${euro(v.total)}</td><td>${euro(v.count?v.total/v.count:0)}</td><td>${esc(fav)}</td><td>${esc(v.last)}</td></tr>`;
+    return `<tr>
+      <td><strong class="clientLink" onclick="openClientProfile('${esc(name)}')">${esc(name)}</strong></td>
+      <td>${v.count}</td><td>${euro(v.total)}</td><td>${euro(v.count?v.total/v.count:0)}</td><td>${esc(fav)}</td><td>${esc(v.last)}</td>
+    </tr>`;
   }).join('') || '<tr><td colspan="6" class="muted">Aucun client.</td></tr>';
 }
+
+window.openClientProfile = (name) => {
+  const client = buildClientMap()[name];
+  if(!client) return;
+  const fav = Object.entries(client.platforms).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+  $("clientModalName").textContent = name;
+  $("clientModalSub").textContent = `${client.count} commande(s) · ${euro(client.total)} confirmé`;
+  const rows = client.orders.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(r=>`
+    <tr>
+      <td>${esc(r.date||'')}</td><td>${esc(r.plateforme||'')}</td><td>${esc(r.produit||'')}</td><td>${esc(r.poids||'')}</td><td>${badge(r.statut)}</td><td class="right"><strong>${euro(r.prix)}</strong></td>
+    </tr>`).join('');
+  $("clientModalBody").innerHTML = `
+    <div class="clientMetrics">
+      <div class="clientMetric"><span>Commandes</span><strong>${client.count}</strong></div>
+      <div class="clientMetric"><span>Confirmé</span><strong>${euro(client.total)}</strong></div>
+      <div class="clientMetric"><span>Panier moyen</span><strong>${euro(client.count?client.total/client.count:0)}</strong></div>
+      <div class="clientMetric"><span>Plateforme</span><strong>${esc(fav)}</strong></div>
+    </div>
+    <h3>Historique client</h3>
+    <div style="overflow:auto">
+      <table><thead><tr><th>Date</th><th>Plateforme</th><th>Produit</th><th>Poids</th><th>Statut</th><th class="right">Prix</th></tr></thead><tbody>${rows}</tbody></table>
+    </div>`;
+  $("clientModalBackdrop").classList.add("open");
+};
+
+window.closeClientProfile = (event) => {
+  if(event && event.target !== $("clientModalBackdrop")) return;
+  $("clientModalBackdrop").classList.remove("open");
+};
 
 function accountRevenue(id){
   const confirmed=orders.filter(r=>isConfirmed(r) && r.accountId===id);
@@ -878,10 +1041,35 @@ function renderStats(){
     <div class="row"><div style="width:100%"><strong>${esc(k)}</strong><div class="muted">${v.count} vente(s)</div><div class="bar"><span style="width:${Math.round(v.sum/max*100)}%"></span></div></div><strong>${euro(v.sum)}</strong></div>
   `).join('') || '<p class="muted">Aucune donnée confirmée.</p>';
 }
-function renderActivity(){
-  $("activity").innerHTML=activities.map(a=>`<div class="row"><div>${esc(a.text)}</div><span class="muted">${stamp(a.createdAt)}</span></div>`).join('') || '<p class="muted">Aucune activité.</p>';
+function activityIcon(text=''){
+  const t=String(text).toLowerCase();
+  if(t.includes('commande')) return '📦';
+  if(t.includes('compte')) return '👤';
+  if(t.includes('conversation') || t.includes('message')) return '💬';
+  if(t.includes('confirm')) return '💰';
+  if(t.includes('tâche') || t.includes('task')) return '✅';
+  return '🔔';
 }
 
+function renderActivity(){
+  const grouped={};
+  activities.forEach(a=>{
+    const d = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || Date.now());
+    const day = d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'});
+    if(!grouped[day]) grouped[day]=[];
+    grouped[day].push({a,d});
+  });
+  $("activity").innerHTML=Object.entries(grouped).map(([day,items])=>`
+    <div class="timelineDay">${esc(day)}</div>
+    <div class="timeline">
+      ${items.map(({a,d})=>`
+        <div class="timelineItem">
+          <div class="timelineTime">${esc(d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))}</div>
+          <div class="timelineCard"><strong>${activityIcon(a.text)} ${esc(a.text||'Activité')}</strong><span class="muted">${esc(stamp(a.createdAt))}</span></div>
+        </div>`).join('')}
+    </div>
+  `).join('') || '<p class="muted">Aucune activité.</p>';
+}
 
 function renderNotes(){
   if(!$("notesList")) return;
