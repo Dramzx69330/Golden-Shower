@@ -462,6 +462,41 @@
       overflow-x:hidden;
     }
 
+
+
+    /* V19 — graphiques, alertes intelligentes, mentions et upload réel */
+    .smartAlerts{margin-top:20px}
+    .alertList{display:grid;gap:10px}
+    .smartAlert{
+      display:flex;justify-content:space-between;gap:14px;align-items:flex-start;
+      border:1px solid #fed7aa;background:#fff7ed;color:#7c2d12;
+      border-radius:10px;padding:12px 14px
+    }
+    .smartAlert.high{border-color:#fecaca;background:#fef2f2;color:#7f1d1d}
+    .smartAlert strong{display:block;margin-bottom:3px}
+    .chartGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
+    .chartBox{display:grid;gap:12px}
+    .chartRow{display:grid;grid-template-columns:86px 1fr 90px;gap:12px;align-items:center;font-size:14px}
+    .chartLabel{font-weight:800;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .chartTrack{height:13px;background:#eef2f7;border-radius:999px;overflow:hidden}
+    .chartFill{height:100%;background:#111827;border-radius:999px}
+    .chartValue{text-align:right;font-weight:900}
+    .mention{font-weight:900;color:#2563eb;background:#eff6ff;border-radius:6px;padding:1px 4px}
+    .msg.me .mention{color:#dbeafe;background:rgba(255,255,255,.15)}
+    .miniMsg .mention{color:#93c5fd;background:rgba(37,99,235,.16)}
+    .fileLabel{
+      display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:8px;
+      padding:12px 13px;background:#fff;color:#111827;font-weight:800;cursor:pointer
+    }
+    .fileLabel input{display:none}
+    .miniFileLabel{
+      display:inline-flex;align-items:center;justify-content:center;min-width:42px;border:1px solid rgba(255,255,255,.16);
+      border-radius:10px;background:#0b0f16;color:#fff;font-weight:900;cursor:pointer
+    }
+    .miniFileLabel input{display:none}
+    .uploadHint{font-size:12px;color:var(--muted)}
+    @media(max-width:900px){.chartGrid{grid-template-columns:1fr}.chartRow{grid-template-columns:70px 1fr 76px}}
+
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -513,6 +548,12 @@
         <div class="card pad metric"><span>A Send</span><strong id="mASend">0 €</strong></div>
         <div class="card pad metric"><span>Send</span><strong id="mSend">0 €</strong></div>
         <div class="card pad metric"><span>Confirmé</span><strong id="mConfirmed">0 €</strong></div>
+      </div>
+
+      <div class="card pad smartAlerts">
+        <h2>Centre d'alertes intelligent</h2>
+        <p class="muted">Commandes bloquées ou à surveiller automatiquement.</p>
+        <div id="smartAlerts" class="alertList"></div>
       </div>
 
       <div class="grid two" style="margin-top:20px">
@@ -623,6 +664,7 @@
               <select id="chatPriority"><option value="">Normal</option><option value="important">Important</option></select>
               <select id="shareAccountSelect"><option value="">Joindre un compte...</option></select>
               <input id="attachmentUrl" placeholder="Image / GIF / lien" style="min-width:210px">
+              <label class="fileLabel">📎 Image<input id="attachmentFile" type="file" accept="image/*,.gif"></label>
               <button class="primary" type="submit">Envoyer</button>
             </div>
           </form>
@@ -687,7 +729,18 @@
         </div>
         <div id="seasonRanking" class="list"></div>
       </div>
-      <div class="grid three">
+      <div class="chartGrid">
+        <div class="card pad">
+          <h2>Graphique ventes par mois</h2>
+          <div id="monthlyChart" class="chartBox"></div>
+        </div>
+        <div class="card pad">
+          <h2>Dora vs ZerleZZ — 30 derniers jours</h2>
+          <div id="seller30Chart" class="chartBox"></div>
+        </div>
+      </div>
+
+      <div class="grid three" style="margin-top:20px">
         <div class="card pad"><h2>Stats par vendeur</h2><div id="sellerStats" class="list"></div></div>
         <div class="card pad"><h2>Stats par plateforme</h2><div id="platformStats" class="list"></div></div>
         <div class="card pad"><h2>Stats produits</h2><div id="productStats" class="list"></div></div>
@@ -745,6 +798,7 @@
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
       <input id="miniAttachmentUrl" placeholder="GIF / image URL">
+      <label class="miniFileLabel" title="Uploader une image">📎<input id="miniAttachmentFile" type="file" accept="image/*,.gif"></label>
       <button type="submit">Envoyer</button>
     </div>
   </form>
@@ -808,6 +862,113 @@ function notify(title, body){
   if(document.hidden && "Notification" in window && Notification.permission === "granted"){
     new Notification(title,{body});
   }
+}
+
+function extractMentions(text=''){
+  return [...String(text).matchAll(/@([A-Za-zÀ-ÿ0-9_.-]+)/g)].map(m=>m[1].toLowerCase());
+}
+
+function textHasMentionForMe(text=''){
+  const me=(localStorage.getItem('duoSender')||$("senderName")?.value||$("miniSenderName")?.value||'').trim().toLowerCase();
+  if(!me) return false;
+  return extractMentions(text).includes(me);
+}
+
+function renderTextWithMentions(text=''){
+  return esc(text).replace(/@([A-Za-zÀ-ÿ0-9_.-]+)/g, '<span class="mention">@$1</span>');
+}
+
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    if(!file) return resolve("");
+    if(file.size > 950000){
+      return reject(new Error("Image trop lourde. Compresse-la ou colle un lien GIF/image."));
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Lecture impossible"));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function getAttachmentValue(urlId, fileId){
+  const direct = $(urlId)?.value?.trim() || "";
+  const file = $(fileId)?.files?.[0];
+  if(file){
+    try { return await fileToDataURL(file); }
+    catch(e){ alert(e.message || "Image impossible à charger."); return direct; }
+  }
+  return direct;
+}
+
+function daysBetween(dateStr){
+  if(!dateStr) return 0;
+  const d = new Date(dateStr);
+  if(Number.isNaN(d.getTime())) return 0;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function getSmartAlerts(){
+  return orders
+    .filter(r => !String(r.statut||'').toLowerCase().includes('confirm') && String(r.statut||'') !== 'Annulé')
+    .map(r => {
+      const status = String(r.statut || '');
+      const d = daysBetween(r.date);
+      const high = (status === 'A Send' && d >= 3) || (status === 'Send' && d >= 10);
+      const warn = (status === 'A Send' && d >= 2) || (status === 'Send' && d >= 7);
+      if(!high && !warn) return null;
+      return {
+        id:r.id,
+        high,
+        title: high ? 'Commande bloquée' : 'Commande à surveiller',
+        body:`${r.client || 'Client inconnu'} · ${status} depuis ${d} jour(s) · ${euro(r.prix||0)}`
+      };
+    })
+    .filter(Boolean)
+    .sort((a,b)=>Number(b.high)-Number(a.high));
+}
+
+function renderSmartAlerts(){
+  const box=$("smartAlerts");
+  if(!box) return;
+  const alerts=getSmartAlerts();
+  box.innerHTML = alerts.slice(0,8).map(a=>`
+    <div class="smartAlert ${a.high?'high':''}">
+      <div><strong>${a.high?'⚠️':'⏱️'} ${esc(a.title)}</strong><span>${esc(a.body)}</span></div>
+      <button class="secondary small" onclick="goPage('dashboard');toggleWidget(false)">Voir</button>
+    </div>`).join('') || '<p class="muted">Aucune alerte pour le moment.</p>';
+}
+
+function renderBarChart(targetId, rows, empty='Aucune donnée.'){
+  const box=$(targetId);
+  if(!box) return;
+  const max=Math.max(1,...rows.map(r=>r.value));
+  box.innerHTML = rows.map(r=>`
+    <div class="chartRow">
+      <div class="chartLabel" title="${esc(r.label)}">${esc(r.label)}</div>
+      <div class="chartTrack"><div class="chartFill" style="width:${Math.round((r.value/max)*100)}%"></div></div>
+      <div class="chartValue">${r.format ? r.format(r.value) : euro(r.value)}</div>
+    </div>`).join('') || `<p class="muted">${esc(empty)}</p>`;
+}
+
+function renderCharts(){
+  const byMonth={};
+  orders.filter(isConfirmed).forEach(r=>{
+    const key = String(r.date || '').slice(0,7) || 'Sans date';
+    if(!byMonth[key]) byMonth[key]={sum:0,count:0};
+    byMonth[key].sum += Number(r.prix||0);
+    byMonth[key].count++;
+  });
+  const monthly = Object.entries(byMonth).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8).map(([label,v])=>({label,value:v.sum}));
+  renderBarChart('monthlyChart', monthly, 'Aucune vente confirmée.');
+
+  const cutoff = Date.now() - 30*86400000;
+  const seller30={};
+  orders.filter(r=>isConfirmed(r) && new Date(r.date||0).getTime() >= cutoff).forEach(r=>{
+    const k=r.vendeur || 'Sans vendeur';
+    seller30[k]=(seller30[k]||0)+Number(r.prix||0);
+  });
+  renderBarChart('seller30Chart', Object.entries(seller30).sort((a,b)=>b[1]-a[1]).map(([label,value])=>({label,value})), 'Aucune vente sur 30 jours.');
 }
 
 function shortText(v, max=72){
@@ -879,7 +1040,7 @@ function renderWidget(){
       const acc = m.accountId ? accounts.find(a => a.id === m.accountId) : null;
       return `<div class="miniMsg ${mine ? 'me' : ''}">
         <div class="miniMeta"><strong>${esc(m.sender || 'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
-        <div class="miniText">${esc(m.text || (acc ? 'Compte partagé' : ''))}</div>
+        <div class="miniText">${renderTextWithMentions(m.text || (acc ? 'Compte partagé' : ''))}</div>
         ${acc ? renderMiniAccount(acc) : ''}
         ${renderAttachment(m.attachmentUrl)}
         ${renderReactions(m)}
@@ -890,8 +1051,9 @@ function renderWidget(){
 
   const miniNotifs = $("miniNotifs");
   if(miniNotifs){
+    const alertItems = getSmartAlerts().slice(0,8).map(a => ({title:a.high ? "⚠️ Commande bloquée" : "⏱️ Commande à surveiller", body:a.body, at:new Date().toISOString(), type:"alert"}));
     const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt, type:"activity"}));
-    const items = [...widgetNotifs, ...activityItems].slice(0, 30);
+    const items = [...alertItems, ...widgetNotifs, ...activityItems].slice(0, 30);
     miniNotifs.innerHTML = items.map(n => `<div class="miniNotif">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.body)}</p>
@@ -996,7 +1158,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget();
+  renderDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget();
 }
 
 function renderDashboard(){
@@ -1304,7 +1466,7 @@ function renderChat(){
     const acc = m.accountId ? accounts.find(a=>a.id===m.accountId) : null;
     return `<div class="msg ${mine?'me':''} ${m.priority==='important'?'important':''}">
       <div class="msgMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span>${m.priority==='important'?'<span class="pill warn">Important</span>':''}</div>
-      <div class="msgText">${esc(m.text||'')}</div>
+      <div class="msgText">${renderTextWithMentions(m.text||'')}</div>
       ${acc?renderAccountCard(acc,false):''}
       ${renderAttachment(m.attachmentUrl)}
       ${renderReactions(m)}
@@ -1450,26 +1612,28 @@ $("accountForm").addEventListener("submit", async e=>{
 $("miniChatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text = $("miniChatText").value.trim();
-  const attachmentUrl = $("miniAttachmentUrl")?.value.trim() || "";
+  const attachmentUrl = await getAttachmentValue("miniAttachmentUrl","miniAttachmentFile");
   const sender = $("miniSenderName").value.trim() || localStorage.getItem("duoSender") || "Anonyme";
   if(!text && !attachmentUrl) return;
   localStorage.setItem("duoSender", sender);
   if($("senderName")) $("senderName").value = sender;
-  await addDoc(chatRef,{text,attachmentUrl,sender,priority:"",createdAt:serverTimestamp()});
+  await addDoc(chatRef,{text,attachmentUrl,sender,priority:textHasMentionForMe(text) ? "important" : "",mentions:extractMentions(text),createdAt:serverTimestamp()});
   $("miniChatText").value = "";
   if($("miniAttachmentUrl")) $("miniAttachmentUrl").value = "";
+  if($("miniAttachmentFile")) $("miniAttachmentFile").value = "";
 });
 
 $("chatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text=$("chatText").value.trim();
   const accountId=$("shareAccountSelect").value;
-  const attachmentUrl=$("attachmentUrl")?.value.trim() || "";
+  const attachmentUrl=await getAttachmentValue("attachmentUrl","attachmentFile");
   const sender=$("senderName").value.trim() || 'Anonyme';
   localStorage.setItem('duoSender',sender);
   if(!text && !accountId && !attachmentUrl) return;
-  await addDoc(chatRef,{text,accountId,attachmentUrl,sender,priority:$("chatPriority").value,createdAt:serverTimestamp()});
-  $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value=''; if($("attachmentUrl")) $("attachmentUrl").value='';
+  const priority = $("chatPriority").value || (textHasMentionForMe(text) ? "important" : "");
+  await addDoc(chatRef,{text,accountId,attachmentUrl,sender,priority,mentions:extractMentions(text),createdAt:serverTimestamp()});
+  $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value=''; if($("attachmentUrl")) $("attachmentUrl").value=''; if($("attachmentFile")) $("attachmentFile").value='';
 });
 
 window.editOrder=id=>{
@@ -1641,9 +1805,10 @@ async function start(){
           const m=c.data;
           const localSender=(localStorage.getItem('duoSender')||'').toLowerCase();
           if(String(m.sender||'').toLowerCase() !== localSender){
-            const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : 'Nouveau message'), 90)}`;
-            notify('Nouveau message', body);
-            pushWidgetNotif('Nouveau message', body, 'chat');
+            const mentioned = textHasMentionForMe(m.text || "") || (m.mentions || []).includes((localStorage.getItem('duoSender')||'').toLowerCase());
+            const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : m.attachmentUrl ? 'Image envoyée' : 'Nouveau message'), 90)}`;
+            notify(mentioned ? 'Mention dans le chat' : 'Nouveau message', body);
+            pushWidgetNotif(mentioned ? 'Mention dans le chat' : 'Nouveau message', body, mentioned ? 'mention' : 'chat');
           }
         });
       }
