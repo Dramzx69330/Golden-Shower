@@ -3243,6 +3243,7 @@ window.setAccountStatusQuick=async(id,status)=>{
 
   const previousStatus = a.status;
   const previousReason = a.statusReason;
+  const previousBannedAt = a.bannedAt;
 
   const needsReason = ['CHAUFFE','RISQUE','BANNI'].includes(to);
   const defaultReason = a.statusReason || (
@@ -3256,15 +3257,17 @@ window.setAccountStatusQuick=async(id,status)=>{
     : (to==='ACTIF' ? 'Compte réactivé' : '');
 
   /*
-    Fix V25.4:
-    On met à jour l'objet local AVANT le retour Firestore.
-    Comme ça le badge à gauche, la bordure de la carte et les compteurs changent immédiatement.
-    Avant, seul le select passait visuellement sur BANNI pendant que le badge restait ACTIF.
+    Fix V25.5:
+    Le changement de statut Firestore est séparé de l'historique / notifications.
+    Avant, si le statut était bien sauvegardé mais que l'historique échouait,
+    le site affichait une erreur puis Firebase remettait quand même le compte en BANNI.
   */
+
   a.status = to;
   a.statusReason = reason;
   a.updatedAt = new Date().toISOString();
   if(to==='BANNI') a.bannedAt = new Date().toISOString();
+  if(to!=='BANNI') delete a.bannedAt;
 
   renderAccounts();
   renderAccountStatusDashboard();
@@ -3273,21 +3276,57 @@ window.setAccountStatusQuick=async(id,status)=>{
   window.__accountStatusLocks.add(id);
 
   try{
-    const payload={status:to,statusReason:reason,updatedAt:serverTimestamp()};
-    if(to==='BANNI') payload.bannedAt=serverTimestamp();
+    const payload={
+      status:to,
+      statusReason:reason,
+      updatedAt:serverTimestamp()
+    };
 
+    if(to==='BANNI'){
+      payload.bannedAt=serverTimestamp();
+    }else{
+      payload.bannedAt=null;
+    }
+
+    // Seule cette écriture est critique.
     await setDoc(doc(accountsRef,id),payload,{merge:true});
-    await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from,to,reason,createdAt:serverTimestamp()});
-    await logActivity(`Statut compte changé : ${a.plateforme} · ${a.name} (${from} → ${to})`);
 
-    pushWidgetNotif('Statut compte changé', `${a.name} : ${from} → ${to}`, 'account-status');
-    toast('Statut compte changé', `${a.name} : ${from} → ${to}`);
+    // Le reste est utile, mais ne doit JAMAIS annuler le changement de statut.
+    try{
+      if(typeof banHistoryRef !== 'undefined' && banHistoryRef){
+        await addDoc(banHistoryRef,{
+          accountId:id,
+          accountName:a.name,
+          from,
+          to,
+          reason,
+          createdAt:serverTimestamp()
+        });
+      }
+    }catch(historyErr){
+      console.warn('Historique statut non enregistré:', historyErr);
+    }
+
+    try{
+      await logActivity(`Statut compte changé : ${a.plateforme} · ${a.name} (${from} → ${to})`);
+    }catch(activityErr){
+      console.warn('Activité statut non enregistrée:', activityErr);
+    }
+
+    try{
+      pushWidgetNotif('Statut compte changé', `${a.name} : ${from} → ${to}`, 'account-status');
+      toast('Statut compte changé', `${a.name} : ${from} → ${to}`);
+    }catch(notifErr){
+      console.warn('Notification statut non affichée:', notifErr);
+    }
+
   }catch(err){
-    console.error(err);
+    console.error('Erreur changement statut compte:', err);
 
-    // Rollback visuel si Firebase refuse l'écriture.
+    // Rollback uniquement si l'écriture principale Firestore échoue vraiment.
     a.status = previousStatus;
     a.statusReason = previousReason;
+    a.bannedAt = previousBannedAt;
     renderAccounts();
     renderAccountStatusDashboard();
     renderAccountSelect();
