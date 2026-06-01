@@ -1312,6 +1312,115 @@ tbody tr:hover td{background:#1b1f29!important}
       .liveNowStrip{grid-template-columns:1fr}
     }
 
+
+    /* V25.3 — Comptes épurés : aucun bouton favori/envoyer chat/bannir, statut en étiquette */
+    .statusMini{
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:5px 8px;
+      margin:0 4px 6px 0;
+      font-weight:900;
+      font-size:12px;
+      background:var(--panel2);
+    }
+    .cleanAccountRow{
+      display:grid!important;
+      grid-template-columns:minmax(0,1fr) 170px;
+      gap:16px!important;
+      align-items:start!important;
+      padding:16px!important;
+      border-radius:12px!important;
+    }
+    .accountHeader{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:7px;
+    }
+    .accountHeader strong{
+      font-size:15px;
+      color:#fff;
+    }
+    .accountMeta{
+      font-size:13px;
+      line-height:1.45;
+    }
+    .accountActionsCompact{
+      display:grid;
+      gap:10px;
+      justify-items:end;
+    }
+    .accountStatusSelect{
+      min-width:145px!important;
+      width:145px!important;
+      padding:9px 10px!important;
+      border-radius:999px!important;
+      font-size:12px!important;
+      font-weight:900!important;
+    }
+    .accountButtons{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      width:100%;
+    }
+    .accountButtons button{
+      width:100%;
+      padding:8px 9px!important;
+      font-size:12px!important;
+    }
+    .accountDetails{
+      margin-top:10px;
+    }
+    .accountDetails summary{
+      cursor:pointer;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:900;
+      user-select:none;
+    }
+    .banReason{
+      margin-top:8px;
+      display:inline-flex;
+      max-width:100%;
+      color:#fecaca;
+      background:rgba(239,68,68,.12);
+      border:1px solid rgba(239,68,68,.28);
+      border-radius:8px;
+      padding:7px 9px;
+      font-size:13px;
+      font-weight:800;
+    }
+    .cleanAccountRow.status-banni{
+      background:
+        linear-gradient(180deg, rgba(239,68,68,.12), rgba(239,68,68,.045)),
+        var(--panel2)!important;
+      border-color:rgba(239,68,68,.50)!important;
+      box-shadow:inset 0 0 0 1px rgba(239,68,68,.16), 0 16px 38px rgba(0,0,0,.20)!important;
+      opacity:1!important;
+    }
+    .cleanAccountRow.status-banni .accountHeader strong{
+      color:#fecaca!important;
+    }
+    .cleanAccountRow.status-banni .statusBadge.banni{
+      box-shadow:0 0 0 4px rgba(239,68,68,.10)!important;
+    }
+    .cleanAccountRow.status-actif{border-left:4px solid #22c55e!important}
+    .cleanAccountRow.status-chauffe{border-left:4px solid #eab308!important}
+    .cleanAccountRow.status-risque{border-left:4px solid #f97316!important}
+    .cleanAccountRow.status-banni{border-left:4px solid #ef4444!important}
+    .cleanAccountRow.status-verif{border-left:4px solid #60a5fa!important}
+    .cleanAccountRow.status-pause{border-left:4px solid #6b7280!important}
+    @media(max-width:720px){
+      .cleanAccountRow{grid-template-columns:1fr!important}
+      .accountActionsCompact{justify-items:stretch}
+      .accountStatusSelect{width:100%!important}
+    }
+
 </style>
 </head>
 <body>
@@ -1448,7 +1557,7 @@ tbody tr:hover td{background:#1b1f29!important}
             <label>Email<input id="accEmail" type="email" placeholder="email@exemple.com"></label>
             <label>Mot de passe<input id="accPassword" type="password" placeholder="Mot de passe"></label>
             <label>Annonces en cours<input id="accListings" type="number" min="0" step="1" placeholder="0"></label>
-            <label>Favori<select id="accFavorite"><option value="non">Non</option><option value="oui">Oui</option></select></label>
+            <input type="hidden" id="accFavorite" value="non">
             <label>Statut<select id="accStatus"><option>ACTIF</option><option>CHAUFFE</option><option>RISQUE</option><option>BANNI</option><option>EN PAUSE</option><option>VÉRIFICATION</option></select></label>
             <label class="full">Raison statut / bannissement<input id="accStatusReason" placeholder="Ex : vérification identité, shadowban, compte à tester..."></label>
             <label class="full">Note<input id="accNote" placeholder="Infos utiles"></label>
@@ -2387,36 +2496,75 @@ function renderAccounts(){
   const filter = $("accountStatusFilter")?.value || "";
   const summary = accountStatusCounts();
   if($("accountStatusSummary")){
-    $("accountStatusSummary").innerHTML = `Actifs: <strong>${summary.ACTIF||0}</strong> · Chauffe: <strong>${summary.CHAUFFE||0}</strong> · Risque: <strong>${summary.RISQUE||0}</strong> · Bannis: <strong>${summary.BANNI||0}</strong> · En pause: <strong>${summary["EN PAUSE"]||0}</strong> · Vérification: <strong>${summary["VÉRIFICATION"]||0}</strong>`;
+    $("accountStatusSummary").innerHTML = `
+      <span class="statusMini actif">🟢 ${summary.ACTIF||0}</span>
+      <span class="statusMini chauffe">🟡 ${summary.CHAUFFE||0}</span>
+      <span class="statusMini risque">🟠 ${summary.RISQUE||0}</span>
+      <span class="statusMini banni">🔴 ${summary.BANNI||0}</span>
+      <span class="statusMini pause">⚪ ${summary["EN PAUSE"]||0}</span>
+      <span class="statusMini verif">🔵 ${summary["VÉRIFICATION"]||0}</span>
+    `;
   }
+
   const visible = accounts.filter(a=>!filter || normalizeAccountStatus(a.status)===filter);
-  $("accountsList").innerHTML=visible.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.status||'ACTIF').localeCompare(String(b.status||'ACTIF')) || String(a.name).localeCompare(String(b.name))).map(a=>{
-    const perf=accountRevenue(a.id);
-    const status=normalizeAccountStatus(a.status);
-    return `<div class="row accountRow status-${accountStatusClass(status)}">
-      <div>
-        <strong>${a.favorite==='oui'?'<span class="star">★</span> ':''}${esc(a.name)} ${accountStatusLabel(a)}</strong>
-        <div class="muted">${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · <span class="${Number(a.listings||0)===0?'alertZero':''}">${Number(a.listings||0)} annonce(s)</span></div>
-        ${a.statusReason?`<div class="muted" style="margin-top:5px">Raison : ${esc(a.statusReason)}</div>`:''}
-        <div class="muted" style="margin-top:5px">${perf.count} vente(s) confirmée(s) · ${euro(perf.sum)}</div>
-        <div style="margin-top:8px">Email: <span class="secret">${esc(a.email||'')}</span></div>
-        <div style="margin-top:6px">Mot de passe: <span class="secret" id="pw-${esc(a.id)}">••••••••</span></div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-        <div class="statusQuickActions" style="width:100%">
-          ${['ACTIF','CHAUFFE','RISQUE','BANNI','VÉRIFICATION'].filter(s=>s!==status).map(s=>`<button class="secondary small" onclick="setAccountStatusQuick('${esc(a.id)}','${s}')">${accountStatusIcon(s)} ${s}</button>`).join('')}
+  $("accountsList").innerHTML=visible
+    .slice()
+    .sort((a,b)=>String(a.status||'ACTIF').localeCompare(String(b.status||'ACTIF')) || String(a.name).localeCompare(String(b.name)))
+    .map(a=>{
+      const perf=accountRevenue(a.id);
+      const status=normalizeAccountStatus(a.status);
+      const statusOptions=['ACTIF','CHAUFFE','RISQUE','BANNI','EN PAUSE','VÉRIFICATION']
+        .map(s=>`<option value="${s}" ${s===status?'selected':''}>${accountStatusIcon(s)} ${s}</option>`)
+        .join('');
+
+      return `<div class="row accountRow cleanAccountRow status-${accountStatusClass(status)}">
+        <div class="accountMain">
+          <div class="accountHeader">
+            <strong>${esc(a.name)}</strong>
+            ${accountStatusLabel(a)}
+          </div>
+
+          <div class="muted accountMeta">
+            ${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · ${Number(a.listings||0)} annonce(s)
+          </div>
+
+          <div class="muted accountMeta">
+            ${perf.count} vente(s) confirmée(s) · ${euro(perf.sum)}
+          </div>
+
+          ${status==='BANNI' && a.statusReason ? `<div class="banReason">Raison : ${esc(a.statusReason)}</div>` : ''}
+
+          <details class="accountDetails">
+            <summary>Détails</summary>
+            <div style="margin-top:10px;display:grid;gap:7px">
+              <div>Email : <span class="secret">${esc(a.email||'')}</span></div>
+              <div>Mot de passe : <span class="secret" id="pw-${esc(a.id)}">••••••••</span></div>
+              ${a.note ? `<div class="muted">Note : ${esc(a.note)}</div>` : ''}
+              ${a.statusReason && status!=='BANNI' ? `<div class="muted">Raison : ${esc(a.statusReason)}</div>` : ''}
+            </div>
+          </details>
         </div>
-        <button class="secondary small" onclick="toggleFavorite('${esc(a.id)}')">${a.favorite==='oui'?'Retirer ★':'Favori ★'}</button>
-        <button class="${status==='BANNI'?'secondary':'danger'} small" onclick="quickToggleBan('${esc(a.id)}')">${status==='BANNI'?'Réactiver':'Bannir'}</button>
-        <button class="secondary small" onclick="editAccount('${esc(a.id)}')">Modifier</button>
-        <button class="secondary small" onclick="togglePassword('${esc(a.id)}')">Afficher</button>
-        <button class="secondary small" onclick="copyAccount('${esc(a.id)}')">Copier</button>
-        <button class="secondary small" onclick="shareAccountToChat('${esc(a.id)}')">Envoyer chat</button>
-        <button class="danger small" onclick="removeAccount('${esc(a.id)}')">Supprimer</button>
-      </div>
-    </div>`;
-  }).join('') || '<p class="muted">Aucun compte enregistré.</p>';
-  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts.slice().filter(a=>String(a.status||'ACTIF').toUpperCase()!=='BANNI').sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>`<option value="${esc(a.id)}">${a.favorite==='oui'?'★ ':''}${esc(a.name)} · ${esc(a.plateforme)}</option>`).join('');
+
+        <div class="accountActionsCompact">
+          <select class="accountStatusSelect" onchange="setAccountStatusQuick('${esc(a.id)}', this.value)">
+            ${statusOptions}
+          </select>
+          <div class="accountButtons">
+            <button class="secondary small" onclick="editAccount('${esc(a.id)}')">Modifier</button>
+            <button class="secondary small" onclick="togglePassword('${esc(a.id)}')">Afficher</button>
+            <button class="secondary small" onclick="copyAccount('${esc(a.id)}')">Copier</button>
+            <button class="danger small" onclick="removeAccount('${esc(a.id)}')">Supprimer</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') || '<p class="muted">Aucun compte enregistré.</p>';
+
+  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts
+    .slice()
+    .filter(a=>String(a.status||'ACTIF').toUpperCase()!=='BANNI')
+    .sort((a,b)=>String(a.name).localeCompare(String(b.name)))
+    .map(a=>`<option value="${esc(a.id)}">${esc(a.name)} · ${esc(a.plateforme)}</option>`)
+    .join('');
 }
 
 function renderAccountCard(a, reveal=false){
@@ -3083,21 +3231,73 @@ window.toggleFavorite=async id=>{
 };
 
 window.setAccountStatusQuick=async(id,status)=>{
-  const a=accounts.find(x=>x.id===id); if(!a) return;
+  const a=accounts.find(x=>x.id===id); 
+  if(!a) return;
+
+  window.__accountStatusLocks = window.__accountStatusLocks || new Set();
+  if(window.__accountStatusLocks.has(id)) return;
+
   const from=normalizeAccountStatus(a.status);
   const to=normalizeAccountStatus(status);
   if(from===to) return;
+
+  const previousStatus = a.status;
+  const previousReason = a.statusReason;
+
   const needsReason = ['CHAUFFE','RISQUE','BANNI'].includes(to);
-  const defaultReason = a.statusReason || (to==='CHAUFFE' ? 'Compte à surveiller' : to==='RISQUE' ? 'Risque détecté' : to==='BANNI' ? 'Compte banni' : '');
-  const reason = needsReason ? (prompt(`Raison du statut ${to} ?`, defaultReason) || defaultReason) : (to==='ACTIF' ? 'Compte remis actif' : '');
-  const payload={status:to,statusReason:reason,updatedAt:serverTimestamp()};
-  if(to==='BANNI') payload.bannedAt=serverTimestamp();
-  await setDoc(doc(accountsRef,id),payload,{merge:true});
-  await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from,to,reason,createdAt:serverTimestamp()});
-  await logActivity(`Statut compte changé : ${a.plateforme} · ${a.name} (${from} → ${to})`);
-  pushWidgetNotif('Statut compte changé', `${a.name} : ${from} → ${to}`, 'account-status');
-  toast('Statut compte changé', `${a.name} : ${from} → ${to}`);
+  const defaultReason = a.statusReason || (
+    to==='CHAUFFE' ? 'Compte à surveiller' :
+    to==='RISQUE' ? 'Risque détecté' :
+    to==='BANNI' ? 'Compte banni' : ''
+  );
+
+  const reason = needsReason
+    ? (prompt(`Raison du statut ${to} ?`, defaultReason) || defaultReason)
+    : (to==='ACTIF' ? 'Compte réactivé' : '');
+
+  /*
+    Fix V25.4:
+    On met à jour l'objet local AVANT le retour Firestore.
+    Comme ça le badge à gauche, la bordure de la carte et les compteurs changent immédiatement.
+    Avant, seul le select passait visuellement sur BANNI pendant que le badge restait ACTIF.
+  */
+  a.status = to;
+  a.statusReason = reason;
+  a.updatedAt = new Date().toISOString();
+  if(to==='BANNI') a.bannedAt = new Date().toISOString();
+
+  renderAccounts();
+  renderAccountStatusDashboard();
+  renderAccountSelect();
+
+  window.__accountStatusLocks.add(id);
+
+  try{
+    const payload={status:to,statusReason:reason,updatedAt:serverTimestamp()};
+    if(to==='BANNI') payload.bannedAt=serverTimestamp();
+
+    await setDoc(doc(accountsRef,id),payload,{merge:true});
+    await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from,to,reason,createdAt:serverTimestamp()});
+    await logActivity(`Statut compte changé : ${a.plateforme} · ${a.name} (${from} → ${to})`);
+
+    pushWidgetNotif('Statut compte changé', `${a.name} : ${from} → ${to}`, 'account-status');
+    toast('Statut compte changé', `${a.name} : ${from} → ${to}`);
+  }catch(err){
+    console.error(err);
+
+    // Rollback visuel si Firebase refuse l'écriture.
+    a.status = previousStatus;
+    a.statusReason = previousReason;
+    renderAccounts();
+    renderAccountStatusDashboard();
+    renderAccountSelect();
+
+    alert("Impossible de changer le statut du compte. Vérifie Firebase / connexion.");
+  }finally{
+    window.__accountStatusLocks.delete(id);
+  }
 };
+
 window.quickToggleBan=async id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
   const current=normalizeAccountStatus(a.status);
