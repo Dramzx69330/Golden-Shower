@@ -507,6 +507,74 @@
       .messages{min-height:460px}
       .form{grid-template-columns:1fr}
     }
+  
+    /* V20 — widget chat : bouton envoyer visible + Entrée pour envoyer */
+    .messengerPanel{
+      height:min(660px,calc(100vh - 110px));
+      max-height:calc(100vh - 110px);
+    }
+    .messengerBody{
+      min-height:0;
+      padding-bottom:14px;
+      overscroll-behavior:contain;
+    }
+    .messengerComposer{
+      flex-shrink:0;
+      gap:10px;
+      padding:12px;
+    }
+    .messengerComposer textarea{
+      min-height:48px;
+      max-height:96px;
+      line-height:1.35;
+    }
+    .messengerComposer .line{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px 92px;
+      gap:8px;
+      align-items:stretch;
+    }
+    .messengerComposer input{
+      width:100%;
+      min-width:0 !important;
+      flex:none !important;
+      font-size:13px;
+    }
+    .messengerComposer button[type="submit"]{
+      min-width:92px;
+      width:92px;
+      white-space:nowrap;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .miniFileLabel{
+      width:42px;
+      min-width:42px!important;
+      height:42px;
+      padding:0!important;
+      flex:none!important;
+    }
+    .miniAttachmentPreview{
+      display:none;
+      border:1px solid rgba(255,255,255,.12);
+      background:#0b0f16;
+      border-radius:10px;
+      padding:8px 10px;
+      color:#cbd5e1;
+      font-size:12px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .miniAttachmentPreview.show{display:block}
+    @media(max-width:420px){
+      .messengerComposer .line{
+        grid-template-columns:minmax(0,1fr) 42px 92px;
+      }
+      #miniAttachmentUrl{grid-column:1 / -1}
+    }
+
   </style>
 </head>
 <body>
@@ -795,6 +863,7 @@
   <div id="miniActivity" class="messengerBody"></div>
   <form class="messengerComposer" id="miniChatForm">
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
+    <div id="miniAttachmentPreview" class="miniAttachmentPreview"></div>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
       <input id="miniAttachmentUrl" placeholder="GIF / image URL">
@@ -1621,7 +1690,36 @@ $("miniChatForm").addEventListener("submit", async e=>{
   $("miniChatText").value = "";
   if($("miniAttachmentUrl")) $("miniAttachmentUrl").value = "";
   if($("miniAttachmentFile")) $("miniAttachmentFile").value = "";
+  updateMiniAttachmentPreview();
 });
+
+/* Entrée envoie dans le widget. Shift + Entrée fait un retour à la ligne. */
+$("miniChatText").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    $("miniChatForm").requestSubmit();
+  }
+});
+
+/* Même comportement dans la page Chat principale. */
+$("chatText").addEventListener("keydown", e => {
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    $("chatForm").requestSubmit();
+  }
+});
+
+function updateMiniAttachmentPreview(){
+  const preview = $("miniAttachmentPreview");
+  if(!preview) return;
+  const url = $("miniAttachmentUrl")?.value?.trim() || "";
+  const file = $("miniAttachmentFile")?.files?.[0]?.name || "";
+  const label = file || url;
+  preview.textContent = label ? `Pièce jointe : ${label}` : "";
+  preview.classList.toggle("show", Boolean(label));
+}
+if($("miniAttachmentUrl")) $("miniAttachmentUrl").addEventListener("input", updateMiniAttachmentPreview);
+if($("miniAttachmentFile")) $("miniAttachmentFile").addEventListener("change", updateMiniAttachmentPreview);
 
 $("chatForm").addEventListener("submit", async e=>{
   e.preventDefault();
