@@ -2123,21 +2123,257 @@ tbody tr:hover td{background:#1b1f29!important}
 <audio id="remoteVoiceAudio" autoplay playsinline></audio>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import {
-  getFirestore, collection, addDoc, setDoc, doc, deleteDoc, onSnapshot,
-  serverTimestamp, query, orderBy, getDocs, writeBatch, limit
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import PocketBase from "https://esm.sh/pocketbase@0.26.2";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBQBpxys9vtgEca5mvzXtbA6v9Pka5mGlc",
-  authDomain: "golden-shower-52a9e.firebaseapp.com",
-  projectId: "golden-shower-52a9e",
-  storageBucket: "golden-shower-52a9e.firebasestorage.app",
-  messagingSenderId: "134037392413",
-  appId: "1:134037392413:web:f99ba286e9f0ca257e4af4"
-};
+const PB_URL = "https://dramzx692.duckdns.org";
+const PB_RECORDS_COLLECTION = "duo_records";
+const pb = new PocketBase(PB_URL);
+pb.autoCancellation(false);
 
+async function ensurePbAuth(){
+  if(pb.authStore.isValid) return true;
+
+  let email = localStorage.getItem("duoPocketBaseEmail") || "";
+  if(!email) email = prompt("Email PocketBase (Dora ou Zerlezz)") || "";
+  if(!email) throw new Error("Connexion PocketBase annulée");
+
+  let password = sessionStorage.getItem("duoPocketBasePassword") || "";
+  if(!password) password = prompt("Mot de passe PocketBase") || "";
+  if(!password) throw new Error("Mot de passe PocketBase manquant");
+
+  const auth = await pb.collection("users").authWithPassword(email.trim(), password);
+  localStorage.setItem("duoPocketBaseEmail", email.trim());
+  sessionStorage.setItem("duoPocketBasePassword", password);
+  if(auth?.record?.name){
+    localStorage.setItem("duoSender", auth.record.name);
+  }
+  return true;
+}
+
+function initializeApp(){ return { pocketbase:true }; }
+function getFirestore(){ return { pocketbase:true }; }
+
+function escapePbValue(v){
+  return String(v ?? "").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function normalizeKind(kind){
+  if(kind === "chat") return "chat";
+  if(kind === "messages") return "chat";
+  return String(kind || "records");
+}
+
+function collection(db, ...segments){
+  const kind = normalizeKind(segments[segments.length - 1]);
+  return { __type:"collection", kind, path:segments.join("/") };
+}
+
+function doc(base, ...segments){
+  if(base?.__type === "collection"){
+    return { __type:"doc", kind:base.kind, firestoreId:String(segments[0] || ""), path:`${base.path}/${segments[0] || ""}` };
+  }
+
+  // Firestore style: doc(db, "duos", duoId, "voice", "main")
+  const kind = normalizeKind(segments[segments.length - 2]);
+  const firestoreId = String(segments[segments.length - 1] || "");
+  return { __type:"doc", kind, firestoreId, path:segments.join("/") };
+}
+
+function serverTimestamp(){
+  return new Date().toISOString();
+}
+
+function orderBy(field, direction="asc"){
+  return { type:"orderBy", field, direction };
+}
+
+function limit(count){
+  return { type:"limit", count:Number(count) || 50 };
+}
+
+function query(ref, ...constraints){
+  return { ...ref, constraints };
+}
+
+function recordToFirestoreDoc(record){
+  const data = record?.data && typeof record.data === "object" ? record.data : {};
+  const firestoreId = record?.firestoreId || data.id || record?.id;
+  return {
+    id: firestoreId,
+    ref: { __type:"doc", kind:record.kind, firestoreId },
+    data: () => ({
+      ...data,
+      id: firestoreId,
+      _pbId: record.id,
+      created: record.created,
+      updated: record.updated
+    })
+  };
+}
+
+function makeSnapshot(records, changes){
+  const docs = records.map(recordToFirestoreDoc);
+  return {
+    docs,
+    empty: docs.length === 0,
+    size: docs.length,
+    docChanges: () => (changes || records.map(r => ({ type:"added", doc:recordToFirestoreDoc(r) })))
+  };
+}
+
+function getQueryLimit(ref){
+  const c = (ref?.constraints || []).find(x => x.type === "limit");
+  return c?.count || 200;
+}
+
+function sortRecords(records, ref){
+  const ob = (ref?.constraints || []).find(x => x.type === "orderBy");
+  if(!ob) return records;
+  const dir = ob.direction === "asc" ? 1 : -1;
+  const field = ob.field;
+  return [...records].sort((a,b)=>{
+    const ad = a?.data || {};
+    const bd = b?.data || {};
+    const av = field === "createdAt" ? (ad.createdAt || a.created) : (ad[field] || a[field]);
+    const bv = field === "createdAt" ? (bd.createdAt || b.created) : (bd[field] || b[field]);
+    return String(av || "").localeCompare(String(bv || "")) * dir;
+  });
+}
+
+async function listRecords(ref){
+  await ensurePbAuth();
+  const kind = ref.kind;
+  let filter = `kind="${escapePbValue(kind)}"`;
+  if(ref.__type === "doc" && ref.firestoreId){
+    filter += ` && firestoreId="${escapePbValue(ref.firestoreId)}"`;
+  }
+
+  const result = await pb.collection(PB_RECORDS_COLLECTION).getList(1, getQueryLimit(ref), {
+    filter,
+    sort:"-created"
+  });
+
+  return sortRecords(result.items || [], ref).slice(0, getQueryLimit(ref));
+}
+
+async function getDocs(ref){
+  const records = await listRecords(ref);
+  return makeSnapshot(records);
+}
+
+async function findRecordByFirestoreId(kind, firestoreId){
+  await ensurePbAuth();
+  const filter = `kind="${escapePbValue(kind)}" && firestoreId="${escapePbValue(firestoreId)}"`;
+  try{
+    const list = await pb.collection(PB_RECORDS_COLLECTION).getList(1, 1, { filter });
+    return list.items?.[0] || null;
+  }catch(e){
+    return null;
+  }
+}
+
+async function addDoc(ref, data){
+  await ensurePbAuth();
+  const payload = {
+    kind: ref.kind,
+    firestoreId: "",
+    data: JSON.parse(JSON.stringify(data || {}))
+  };
+  const record = await pb.collection(PB_RECORDS_COLLECTION).create(payload);
+  await pb.collection(PB_RECORDS_COLLECTION).update(record.id, { firestoreId: record.id });
+  return { id: record.id, ref:{ __type:"doc", kind:ref.kind, firestoreId:record.id } };
+}
+
+async function setDoc(ref, data, options={}){
+  await ensurePbAuth();
+  const kind = ref.kind;
+  const firestoreId = ref.firestoreId || ref.id;
+  if(!firestoreId) throw new Error("setDoc sans id");
+
+  const existing = await findRecordByFirestoreId(kind, firestoreId);
+  const nextData = options?.merge && existing?.data && typeof existing.data === "object"
+    ? { ...existing.data, ...(data || {}) }
+    : { ...(data || {}) };
+
+  if(existing){
+    return pb.collection(PB_RECORDS_COLLECTION).update(existing.id, {
+      kind,
+      firestoreId,
+      data: JSON.parse(JSON.stringify(nextData))
+    });
+  }
+
+  return pb.collection(PB_RECORDS_COLLECTION).create({
+    kind,
+    firestoreId,
+    data: JSON.parse(JSON.stringify(nextData))
+  });
+}
+
+async function deleteDoc(ref){
+  await ensurePbAuth();
+  const existing = await findRecordByFirestoreId(ref.kind, ref.firestoreId);
+  if(existing) await pb.collection(PB_RECORDS_COLLECTION).delete(existing.id);
+}
+
+function writeBatch(){
+  const actions = [];
+  return {
+    delete(ref){ actions.push(()=>deleteDoc(ref)); },
+    async commit(){
+      for(const run of actions) await run();
+    }
+  };
+}
+
+function onSnapshot(ref, next, error){
+  let active = true;
+  let knownIds = new Set();
+
+  (async()=>{
+    try{
+      const initial = await listRecords(ref);
+      knownIds = new Set(initial.map(r => r.id));
+      if(active) next(makeSnapshot(initial));
+    }catch(e){
+      console.error("PocketBase initial snapshot error", e);
+      if(error) error(e);
+    }
+  })();
+
+  let unsubscribe = () => {};
+  ensurePbAuth()
+    .then(()=>pb.collection(PB_RECORDS_COLLECTION).subscribe("*", async event => {
+      if(!active) return;
+      const record = event.record;
+      if(!record || record.kind !== ref.kind) return;
+      if(ref.__type === "doc" && ref.firestoreId && record.firestoreId !== ref.firestoreId) return;
+
+      const type = event.action === "delete" ? "removed" : (knownIds.has(record.id) ? "modified" : "added");
+      if(type !== "removed") knownIds.add(record.id);
+      else knownIds.delete(record.id);
+
+      try{
+        const records = await listRecords(ref);
+        if(active) next(makeSnapshot(records, [{ type, doc:recordToFirestoreDoc(record) }]));
+      }catch(e){
+        if(error) error(e);
+      }
+    }))
+    .then(unsub => { unsubscribe = unsub; })
+    .catch(e => {
+      console.error("PocketBase realtime error", e);
+      if(error) error(e);
+    });
+
+  return () => {
+    active = false;
+    try{ unsubscribe(); }catch{}
+  };
+}
+
+// Ancien nom conservé pour éviter de modifier toute l'interface.
+const firebaseConfig = { pocketbaseUrl: PB_URL };
 const duoId = "duo-principal";
 let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, voiceCallRef;
 let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[];
@@ -4011,7 +4247,7 @@ async function ensureVoiceStream(){
 }
 
 async function startVoiceCall(){
-  if(!voiceCallRef) return alert("Firebase pas encore prêt.");
+  if(!voiceCallRef) return alert("PocketBase pas encore prêt.");
   if(!navigator.mediaDevices?.getUserMedia) return alert("Micro non supporté par ce navigateur.");
   try{
     openVoiceModal("Appel vocal", "Demande d'appel en cours...");
@@ -4153,6 +4389,7 @@ async function start(){
   $("date").value=today(); $("senderName").value=localStorage.getItem('duoSender')||''; if($("miniSenderName")) $("miniSenderName").value=localStorage.getItem('duoSender')||'';
   ["senderName","miniSenderName","threadSenderName"].forEach(id=>$(id)?.addEventListener("input",()=>updatePresence()));
   try{
+    await ensurePbAuth();
     const app=initializeApp(firebaseConfig);
     db=getFirestore(app);
     ordersRef=collection(db,'duos',duoId,'orders');
@@ -4194,7 +4431,7 @@ async function start(){
         });
       }
       firstOrders=false; setSync('Connecté en temps réel','ok'); renderAll();
-    }, err=>{console.error(err); setSync('Erreur Firebase','bad')});
+    }, err=>{console.error(err); setSync('Erreur PocketBase','bad')});
 
     let firstAccounts=true;
     onSnapshot(query(accountsRef,orderBy('createdAt','desc')), snap=>{
@@ -4342,7 +4579,7 @@ async function start(){
     $("orderForm")?.addEventListener("focusin",()=>setLiveAction("📦 modifie une commande"));
     $("accountForm")?.addEventListener("focusin",()=>setLiveAction("👤 modifie un compte"));
 
-  }catch(e){ console.error(e); setSync('Firebase non disponible','bad'); }
+  }catch(e){ console.error(e); setSync('PocketBase non disponible','bad'); }
 }
 start();
 </script>
