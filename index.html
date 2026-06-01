@@ -103,6 +103,208 @@
     .alertZero{color:var(--red);font-weight:800}
     .miniForm{display:grid;gap:10px}
     .chatTools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+
+    /* Widget flottant type Messenger */
+    .floatingChatBtn{
+      position:fixed;
+      right:24px;
+      bottom:24px;
+      width:62px;
+      height:62px;
+      border-radius:999px;
+      background:#0f172a;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow:0 18px 50px rgba(15,23,42,.35);
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      z-index:9998;
+      font-size:25px;
+      transition:transform .16s ease, box-shadow .16s ease;
+    }
+    .floatingChatBtn:hover{transform:translateY(-2px);box-shadow:0 22px 60px rgba(15,23,42,.42)}
+    .floatingChatBtn .badge{
+      position:absolute;
+      top:-5px;
+      right:-5px;
+      min-width:22px;
+      height:22px;
+      padding:0 6px;
+      border-radius:999px;
+      background:#dc2626;
+      color:#fff;
+      border:2px solid #fff;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-size:12px;
+      font-weight:900;
+    }
+    .floatingChatBtn .badge.show{display:flex}
+    .messengerPanel{
+      position:fixed;
+      right:24px;
+      bottom:98px;
+      width:min(390px,calc(100vw - 32px));
+      height:min(620px,calc(100vh - 130px));
+      background:#0f1115;
+      color:#f9fafb;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      box-shadow:0 24px 80px rgba(0,0,0,.42);
+      overflow:hidden;
+      z-index:9999;
+      display:none;
+      flex-direction:column;
+    }
+    .messengerPanel.open{display:flex}
+    .messengerHead{
+      height:56px;
+      background:#111827;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 14px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .messengerTitle{display:flex;align-items:center;gap:10px;font-weight:900}
+    .messengerTitle span{
+      width:30px;height:30px;border-radius:999px;background:#2563eb;display:grid;place-items:center;
+    }
+    .messengerClose{
+      background:transparent!important;
+      border:0!important;
+      color:#fff!important;
+      padding:8px!important;
+      box-shadow:none!important;
+      font-size:18px;
+      cursor:pointer;
+    }
+    .messengerTabs{display:grid;grid-template-columns:repeat(3,1fr);background:#151922;border-bottom:1px solid rgba(255,255,255,.08)}
+    .messengerTabs button{
+      background:transparent;
+      border:0;
+      color:#9ca3af;
+      padding:12px 8px;
+      font-weight:800;
+      cursor:pointer;
+      border-bottom:2px solid transparent;
+    }
+    .messengerTabs button.active{color:#fff;border-bottom-color:#2563eb}
+    .messengerBody{flex:1;overflow:auto;padding:14px;display:none}
+    .messengerBody.active{display:block}
+    .miniMsg{
+      border:1px solid rgba(255,255,255,.10);
+      background:#171b24;
+      border-radius:12px;
+      padding:11px 12px;
+      margin-bottom:10px;
+    }
+    .miniMsg.me{background:#1d4ed8;border-color:#1d4ed8;margin-left:36px}
+    .miniMeta{font-size:11px;color:#a7b0c0;display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
+    .miniMsg.me .miniMeta{color:#dbeafe}
+    .miniText{font-size:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+    .miniAccount{
+      margin-top:8px;
+      padding:9px;
+      border-radius:9px;
+      background:#fff;
+      color:#111827;
+      font-size:13px;
+    }
+    .miniNotif{
+      display:grid;
+      gap:4px;
+      padding:11px 12px;
+      border:1px solid rgba(255,255,255,.10);
+      background:#171b24;
+      border-radius:12px;
+      margin-bottom:10px;
+      cursor:pointer;
+    }
+    .miniNotif:hover{background:#1d2430}
+    .miniNotif strong{font-size:14px}
+    .miniNotif p{margin:0;color:#d1d5db;font-size:13px;line-height:1.35}
+    .miniTask{
+      display:flex;gap:10px;align-items:flex-start;
+      border:1px solid rgba(255,255,255,.10);
+      background:#171b24;
+      border-radius:12px;
+      padding:10px 11px;
+      margin-bottom:9px;
+      font-size:14px;
+    }
+    .miniTask input{min-width:auto;margin-top:2px}
+    .messengerComposer{
+      border-top:1px solid rgba(255,255,255,.08);
+      background:#10141c;
+      padding:12px;
+      display:grid;
+      gap:9px;
+    }
+    .messengerComposer textarea{
+      min-height:44px;
+      max-height:120px;
+      resize:none;
+      width:100%;
+      min-width:0;
+      color:#fff;
+      background:#0b0f16;
+      border-color:rgba(255,255,255,.16);
+      border-radius:10px;
+      padding:11px 12px;
+    }
+    .messengerComposer .line{display:flex;gap:8px}
+    .messengerComposer input{
+      min-width:0;
+      flex:1;
+      color:#fff;
+      background:#0b0f16;
+      border-color:rgba(255,255,255,.16);
+      border-radius:10px;
+      padding:10px 11px;
+    }
+    .messengerComposer button{
+      border-radius:10px;
+      padding:10px 12px;
+      background:#2563eb;
+      border:1px solid #2563eb;
+      color:#fff;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .toastStack{
+      position:fixed;
+      right:24px;
+      bottom:98px;
+      display:grid;
+      gap:10px;
+      z-index:9997;
+      width:min(340px,calc(100vw - 32px));
+      pointer-events:none;
+    }
+    .toast{
+      background:#111827;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      padding:12px 13px;
+      box-shadow:0 18px 50px rgba(15,23,42,.35);
+      animation:toastIn .18s ease-out;
+      pointer-events:auto;
+      cursor:pointer;
+    }
+    .toast strong{display:block;font-size:14px;margin-bottom:4px}
+    .toast p{margin:0;color:#d1d5db;font-size:13px;line-height:1.35}
+    @keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:640px){
+      .floatingChatBtn{right:16px;bottom:16px}
+      .messengerPanel{right:12px;bottom:88px;width:calc(100vw - 24px);height:calc(100vh - 108px)}
+      .toastStack{right:12px;bottom:88px;width:calc(100vw - 24px)}
+    }
+
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -146,10 +348,10 @@
 
     <section id="dashboard" class="page active">
       <div class="grid cards">
-        <div class="card pad metric"><span>CA confirmé</span><strong id="mConfirmed">0 €</strong></div>
-        <div class="card pad metric"><span>Commandes</span><strong id="mRows">0</strong></div>
-        <div class="card pad metric"><span>Confirmées</span><strong id="mConfirmedCount">0</strong></div>
-        <div class="card pad metric"><span>Panier moyen</span><strong id="mAvg">0 €</strong></div>
+        <div class="card pad metric"><span>Préjudice total</span><strong id="mPrejudice">0 €</strong></div>
+        <div class="card pad metric"><span>A Send</span><strong id="mASend">0 €</strong></div>
+        <div class="card pad metric"><span>Send</span><strong id="mSend">0 €</strong></div>
+        <div class="card pad metric"><span>Confirmé</span><strong id="mConfirmed">0 €</strong></div>
       </div>
 
       <div class="grid two" style="margin-top:20px">
@@ -308,6 +510,36 @@
   </main>
 </div>
 
+<button class="floatingChatBtn" id="floatingChatBtn" onclick="toggleWidget()">
+  💬
+  <span class="badge" id="widgetBadge">0</span>
+</button>
+
+<div class="toastStack" id="toastStack"></div>
+
+<div class="messengerPanel" id="messengerPanel">
+  <div class="messengerHead">
+    <div class="messengerTitle"><span>💬</span> Chat rapide</div>
+    <button class="messengerClose" onclick="toggleWidget(false)">×</button>
+  </div>
+  <div class="messengerTabs">
+    <button class="active" data-widget-tab="miniChat" onclick="setWidgetTab('miniChat')">Chat</button>
+    <button data-widget-tab="miniNotifs" onclick="setWidgetTab('miniNotifs')">Notifs</button>
+    <button data-widget-tab="miniTasks" onclick="setWidgetTab('miniTasks')">Tâches</button>
+  </div>
+  <div id="miniChat" class="messengerBody active"></div>
+  <div id="miniNotifs" class="messengerBody"></div>
+  <div id="miniTasks" class="messengerBody"></div>
+  <form class="messengerComposer" id="miniChatForm">
+    <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
+    <div class="line">
+      <input id="miniSenderName" placeholder="Ton nom">
+      <button type="submit">Envoyer</button>
+    </div>
+  </form>
+</div>
+
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -328,6 +560,7 @@ const duoId = "duo-principal";
 let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef;
 let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[];
 let firstOrders=true, firstChat=true, soundOn=false;
+let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
 
 const $ = id => document.getElementById(id);
 const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
@@ -366,6 +599,107 @@ function notify(title, body){
   }
 }
 
+function shortText(v, max=72){
+  const s = String(v || '').trim();
+  return s.length > max ? s.slice(0, max - 1) + '…' : s;
+}
+
+function pushWidgetNotif(title, body, type='info'){
+  widgetNotifs.unshift({title, body, type, at:new Date().toISOString()});
+  widgetNotifs = widgetNotifs.slice(0, 40);
+  if(!widgetOpen) widgetUnread++;
+  renderWidget();
+  showToast(title, body);
+}
+
+function showToast(title, body){
+  const stack = $("toastStack");
+  if(!stack) return;
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<strong>${esc(title)}</strong><p>${esc(shortText(body, 90))}</p>`;
+  toast.onclick = () => toggleWidget(true);
+  stack.prepend(toast);
+  setTimeout(() => toast.remove(), 5200);
+}
+
+function resetWidgetUnread(){
+  widgetUnread = 0;
+  const badge = $("widgetBadge");
+  if(badge){ badge.textContent = "0"; badge.classList.remove("show"); }
+}
+
+function updateWidgetBadge(){
+  const badge = $("widgetBadge");
+  if(!badge) return;
+  badge.textContent = widgetUnread > 99 ? "99+" : String(widgetUnread);
+  badge.classList.toggle("show", widgetUnread > 0);
+}
+
+window.toggleWidget = (force) => {
+  widgetOpen = typeof force === "boolean" ? force : !widgetOpen;
+  $("messengerPanel")?.classList.toggle("open", widgetOpen);
+  if(widgetOpen) resetWidgetUnread();
+  renderWidget();
+};
+
+window.setWidgetTab = (id) => {
+  widgetTab = id;
+  document.querySelectorAll("[data-widget-tab]").forEach(b => b.classList.toggle("active", b.dataset.widgetTab === id));
+  document.querySelectorAll(".messengerBody").forEach(b => b.classList.toggle("active", b.id === id));
+  renderWidget();
+};
+
+function renderMiniAccount(a){
+  if(!a) return "";
+  return `<div class="miniAccount"><strong>${esc(a.name)}</strong><br>${esc(a.plateforme)} · ${Number(a.listings||0)} annonce(s)<br>Email : ${esc(a.email||'')}<br><button class="secondary small" onclick="copySharedAccount('${esc(a.id)}')" style="margin-top:8px">Copier accès</button></div>`;
+}
+
+function renderWidget(){
+  updateWidgetBadge();
+
+  if($("miniSenderName")) $("miniSenderName").value = localStorage.getItem("duoSender") || $("senderName")?.value || "";
+
+  const miniChat = $("miniChat");
+  if(miniChat){
+    const localSender = (localStorage.getItem("duoSender") || "").toLowerCase();
+    miniChat.innerHTML = messages.slice(0, 18).reverse().map(m => {
+      const mine = String(m.sender || '').toLowerCase() === localSender;
+      const acc = m.accountId ? accounts.find(a => a.id === m.accountId) : null;
+      return `<div class="miniMsg ${mine ? 'me' : ''}">
+        <div class="miniMeta"><strong>${esc(m.sender || 'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
+        <div class="miniText">${esc(m.text || (acc ? 'Compte partagé' : ''))}</div>
+        ${acc ? renderMiniAccount(acc) : ''}
+      </div>`;
+    }).join("") || '<p class="muted">Aucun message.</p>';
+    miniChat.scrollTop = miniChat.scrollHeight;
+  }
+
+  const miniNotifs = $("miniNotifs");
+  if(miniNotifs){
+    const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt}));
+    const items = [...widgetNotifs, ...activityItems].slice(0, 30);
+    miniNotifs.innerHTML = items.map(n => `<div class="miniNotif" onclick="setWidgetTab('miniChat')">
+      <strong>${esc(n.title)}</strong>
+      <p>${esc(n.body)}</p>
+      <span class="miniMeta">${esc(stamp(n.at))}</span>
+    </div>`).join("") || '<p class="muted">Aucune notification.</p>';
+  }
+
+  const miniTasks = $("miniTasks");
+  if(miniTasks){
+    miniTasks.innerHTML = tasks.map(t => `<label class="miniTask ${t.done ? 'done' : ''}">
+      <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${esc(t.id)}', this.checked)">
+      <span>${esc(t.text)}</span>
+    </label>`).join("") || '<p class="muted">Aucune tâche.</p>';
+  }
+}
+
+document.addEventListener("click", e => {
+  if(e.target.closest(".floatingChatBtn") || e.target.closest(".messengerPanel") || e.target.closest(".toast")) return;
+});
+
+
 function filteredOrders(){
   const q = $("search")?.value?.trim().toLowerCase() || "";
   const st = $("filterStatus")?.value || "";
@@ -384,16 +718,19 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks();
+  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks(); renderWidget();
 }
 
 function renderDashboard(){
-  const confirmed=orders.filter(isConfirmed);
-  const total=confirmed.reduce((s,r)=>s+Number(r.prix||0),0);
-  $("mConfirmed").textContent=euro(total);
-  $("mRows").textContent=orders.length;
-  $("mConfirmedCount").textContent=confirmed.length;
-  $("mAvg").textContent=euro(confirmed.length?total/confirmed.length:0);
+  const aSendTotal = orders.filter(r=>String(r.statut||'')==='A Send').reduce((s,r)=>s+Number(r.prix||0),0);
+  const sendTotal = orders.filter(r=>String(r.statut||'')==='Send').reduce((s,r)=>s+Number(r.prix||0),0);
+  const confirmed = orders.filter(isConfirmed);
+  const confirmedTotal = confirmed.reduce((s,r)=>s+Number(r.prix||0),0);
+  const prejudice = aSendTotal + sendTotal + confirmedTotal;
+  $("mPrejudice").textContent=euro(prejudice);
+  $("mASend").textContent=euro(aSendTotal);
+  $("mSend").textContent=euro(sendTotal);
+  $("mConfirmed").textContent=euro(confirmedTotal);
   renderRanking();
 }
 
@@ -576,6 +913,18 @@ $("accountForm").addEventListener("submit", async e=>{
   clearAccount();
 });
 
+
+$("miniChatForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const text = $("miniChatText").value.trim();
+  const sender = $("miniSenderName").value.trim() || localStorage.getItem("duoSender") || "Anonyme";
+  if(!text) return;
+  localStorage.setItem("duoSender", sender);
+  if($("senderName")) $("senderName").value = sender;
+  await addDoc(chatRef,{text,sender,priority:"",createdAt:serverTimestamp()});
+  $("miniChatText").value = "";
+});
+
 $("chatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text=$("chatText").value.trim();
@@ -705,30 +1054,68 @@ async function start(){
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
       orders=snap.docs.map(d=>({id:d.id,...d.data()}));
-      if(!firstOrders && snap.docChanges().length) notify('Duo Update','Commande mise à jour');
+      if(!firstOrders){
+        snap.docChanges().forEach(c=>{
+          const d=c.doc.data();
+          const label = `${d.client || 'Client'} · ${d.statut || ''} · ${euro(d.prix || 0)}`;
+          if(c.type==='added'){ notify('Nouvelle commande', label); pushWidgetNotif('Nouvelle commande', label, 'order'); }
+          if(c.type==='modified'){ notify('Commande modifiée', label); pushWidgetNotif('Commande modifiée', label, 'order'); }
+          if(c.type==='removed'){ notify('Commande supprimée', d.client || 'Commande supprimée'); pushWidgetNotif('Commande supprimée', d.client || '', 'order'); }
+        });
+      }
       firstOrders=false; setSync('Connecté en temps réel','ok'); renderAll();
     }, err=>{console.error(err); setSync('Erreur Firebase','bad')});
 
+    let firstAccounts=true;
     onSnapshot(query(accountsRef,orderBy('createdAt','desc')), snap=>{
-      accounts=snap.docs.map(d=>({id:d.id,...d.data()})); renderAll();
+      accounts=snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(!firstAccounts){
+        snap.docChanges().forEach(c=>{
+          const d=c.doc.data();
+          if(c.type==='added') pushWidgetNotif('Nouveau compte', `${d.plateforme || ''} · ${d.name || ''}`, 'account');
+          if(c.type==='modified') pushWidgetNotif('Compte modifié', `${d.plateforme || ''} · ${d.name || ''}`, 'account');
+        });
+      }
+      firstAccounts=false;
+      renderAll();
     });
 
     onSnapshot(query(chatRef,orderBy('createdAt','desc'),limit(80)), snap=>{
+      const changes = snap.docChanges().map(c=>({type:c.type, data:{id:c.doc.id,...c.doc.data()}}));
       messages=snap.docs.map(d=>({id:d.id,...d.data()}));
-      if(!firstChat && snap.docChanges().some(c=>c.type==='added')) notify('Nouveau message','Ton associé a envoyé un message');
-      firstChat=false; renderChat();
+      if(!firstChat){
+        changes.filter(c=>c.type==='added').forEach(c=>{
+          const m=c.data;
+          const localSender=(localStorage.getItem('duoSender')||'').toLowerCase();
+          if(String(m.sender||'').toLowerCase() !== localSender){
+            const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : 'Nouveau message'), 90)}`;
+            notify('Nouveau message', body);
+            pushWidgetNotif('Nouveau message', body, 'chat');
+          }
+        });
+      }
+      firstChat=false; renderChat(); renderWidget();
     });
 
     onSnapshot(query(activityRef,orderBy('createdAt','desc'),limit(60)), snap=>{
-      activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity();
+      activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity(); renderWidget();
     });
 
     onSnapshot(query(notesRef,orderBy('createdAt','desc'),limit(40)), snap=>{
-      notes=snap.docs.map(d=>({id:d.id,...d.data()})); renderNotes();
+      notes=snap.docs.map(d=>({id:d.id,...d.data()})); renderNotes(); renderWidget();
     });
 
+    let firstTasks=true;
     onSnapshot(query(tasksRef,orderBy('createdAt','desc'),limit(80)), snap=>{
-      tasks=snap.docs.map(d=>({id:d.id,...d.data()})); renderTasks();
+      tasks=snap.docs.map(d=>({id:d.id,...d.data()}));
+      if(!firstTasks){
+        snap.docChanges().filter(c=>c.type==='added').forEach(c=>{
+          const d=c.doc.data();
+          pushWidgetNotif('Nouvelle tâche', d.text || 'Tâche ajoutée', 'task');
+        });
+      }
+      firstTasks=false;
+      renderTasks(); renderWidget();
     });
 
   }catch(e){ console.error(e); setSync('Firebase non disponible','bad'); }
