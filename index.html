@@ -352,13 +352,85 @@
     .statusBadge.pause{color:#6b7280;background:#f3f4f6;border-color:#d1d5db}
     .statusBadge.verif{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}
     .banHistory{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;max-height:260px;overflow:auto}
-    .reactionBar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-    .reactionBar button{border:1px solid var(--line);background:#fff;color:#111827;border-radius:999px;padding:5px 8px;font-weight:800;cursor:pointer;font-size:13px}
+    .reactionBar{
+      position:relative;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:10px;
+      max-width:100%;
+    }
+    .reactionBar button{
+      border:1px solid var(--line);
+      background:#fff;
+      color:#111827;
+      border-radius:999px;
+      padding:5px 8px;
+      font-weight:800;
+      cursor:pointer;
+      font-size:13px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .reactionBar button:hover{background:#f3f4f6}
+    .reactionBar button.mine{
+      border-color:#2563eb;
+      background:#eff6ff;
+      color:#1d4ed8;
+    }
     .msg.me .reactionBar button{background:#fff;color:#111827}
-    .attachmentPreview{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f9fafb}
-    .attachmentPreview img{display:block;max-width:100%;max-height:260px;object-fit:contain;background:#fff}
-    .attachmentPreview a{display:block;padding:10px 12px;color:#111827;font-weight:800;text-decoration:none}
-    .miniMsg .attachmentPreview img{max-height:170px}
+    .msg.me .reactionBar button.mine{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd}
+    .reactionPlus{
+      width:28px;
+      height:28px;
+      padding:0!important;
+      display:inline-grid;
+      place-items:center;
+      font-size:16px!important;
+      border-style:dashed!important;
+    }
+    .emojiPicker{
+      display:none;
+      position:absolute;
+      left:0;
+      bottom:36px;
+      z-index:40;
+      gap:6px;
+      flex-wrap:wrap;
+      width:220px;
+      padding:8px;
+      border:1px solid var(--line2);
+      border-radius:12px;
+      background:#fff;
+      box-shadow:0 16px 38px rgba(17,24,39,.18);
+    }
+    .emojiPicker.open{display:flex}
+    .emojiPicker button{
+      width:30px;
+      height:30px;
+      padding:0!important;
+      display:grid;
+      place-items:center;
+      font-size:16px!important;
+      background:#fff!important;
+      color:#111827!important;
+    }
+    .miniMsg{max-width:100%;overflow:visible}
+    .miniMsg .reactionBar{gap:5px;margin-top:8px}
+    .miniMsg .reactionBar button{font-size:12px;padding:5px 7px}
+    .miniMsg .reactionPlus{width:26px;height:26px}
+    .miniMsg .emojiPicker{
+      bottom:32px;
+      width:196px;
+      max-width:calc(100vw - 56px);
+      background:#fff;
+    }
+    .attachmentPreview{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f9fafb;max-width:100%}
+    .attachmentPreview img{display:block;width:100%;max-width:100%;max-height:260px;object-fit:contain;background:#fff}
+    .attachmentPreview a{display:block;padding:10px 12px;color:#111827;font-weight:800;text-decoration:none;word-break:break-word}
+    .miniMsg .attachmentPreview img{max-height:150px;object-fit:contain}
+    .miniMsg .attachmentPreview{border-color:rgba(255,255,255,.16)}
     .seasonControls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
     .leaderDiff{font-size:13px;color:var(--muted);margin-top:6px}
 
@@ -1091,17 +1163,92 @@ function renderAttachment(url){
   const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
   return `<div class="attachmentPreview">${isImg?`<img src="${esc(u)}" alt="Pièce jointe" loading="lazy">`:`<a href="${esc(u)}" target="_blank" rel="noopener">Ouvrir la pièce jointe</a>`}</div>`;
 }
-function renderReactions(m){
-  const reactions=m.reactions||{};
-  const emojis=['👍','🔥','✅','👀','😂'];
-  return `<div class="reactionBar">${emojis.map(e=>`<button type="button" onclick="reactMessage('${esc(m.id)}','${e}')">${e} ${Number(reactions[e]||0)||''}</button>`).join('')}</div>`;
+function getClientReactionId(){
+  let id = localStorage.getItem('duoReactionClientId');
+  if(!id){
+    id = (crypto?.randomUUID ? crypto.randomUUID() : `client-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+    localStorage.setItem('duoReactionClientId', id);
+  }
+  const name = (localStorage.getItem('duoSender') || $('senderName')?.value || $('miniSenderName')?.value || '').trim();
+  return name ? `name:${name.toLowerCase()}` : `device:${id}`;
 }
+
+function normalizeReactionBucket(bucket){
+  if(typeof bucket === 'number') return {legacy: bucket, users:{}};
+  if(Array.isArray(bucket)){
+    const users={};
+    bucket.forEach(u => users[String(u)] = true);
+    return {legacy:0, users};
+  }
+  if(bucket && typeof bucket === 'object'){
+    const users = bucket.users && typeof bucket.users === 'object' ? {...bucket.users} : {};
+    const legacy = Number(bucket.legacy ?? (bucket.count && !bucket.users ? bucket.count : 0)) || 0;
+    return {legacy, users};
+  }
+  return {legacy:0, users:{}};
+}
+
+function reactionCount(bucket){
+  const b = normalizeReactionBucket(bucket);
+  return b.legacy + Object.keys(b.users).length;
+}
+
+function hasMyReaction(bucket){
+  const me = getClientReactionId();
+  const b = normalizeReactionBucket(bucket);
+  return !!b.users[me];
+}
+
+function renderReactions(m){
+  const reactions = m.reactions || {};
+  const pickerEmojis = ['👍','🔥','✅','👀','😂','❤️','👏','😮','😅','🙏'];
+  const summary = Object.entries(reactions)
+    .map(([emoji,bucket]) => ({emoji, count: reactionCount(bucket), mine: hasMyReaction(bucket)}))
+    .filter(r => r.count > 0)
+    .sort((a,b) => b.count - a.count);
+
+  return `<div class="reactionBar" id="reactbar-${esc(m.id)}">
+    ${summary.map(r=>`<button type="button" class="${r.mine?'mine':''}" title="${r.mine?'Retirer ma réaction':'Réagir'}" onclick="reactMessage('${esc(m.id)}','${esc(r.emoji)}')">${esc(r.emoji)} ${r.count}</button>`).join('')}
+    <button type="button" class="reactionPlus" title="Ajouter une réaction" onclick="toggleReactionPicker('${esc(m.id)}', event)">+</button>
+    <div class="emojiPicker" id="picker-${esc(m.id)}">
+      ${pickerEmojis.map(e=>`<button type="button" onclick="reactMessage('${esc(m.id)}','${e}'); closeReactionPickers();">${e}</button>`).join('')}
+    </div>
+  </div>`;
+}
+
+window.closeReactionPickers = () => {
+  document.querySelectorAll('.emojiPicker.open').forEach(p => p.classList.remove('open'));
+};
+
+window.toggleReactionPicker = (id, event) => {
+  event?.stopPropagation();
+  const picker = document.getElementById(`picker-${id}`);
+  if(!picker) return;
+  const isOpen = picker.classList.contains('open');
+  closeReactionPickers();
+  picker.classList.toggle('open', !isOpen);
+};
+
 window.reactMessage = async (id, emoji) => {
-  const m=messages.find(x=>x.id===id); if(!m||!chatRef) return;
+  const m=messages.find(x=>x.id===id); 
+  if(!m||!chatRef) return;
+
   const reactions={...(m.reactions||{})};
-  reactions[emoji]=Number(reactions[emoji]||0)+1;
+  const bucket = normalizeReactionBucket(reactions[emoji]);
+  const me = getClientReactionId();
+
+  if(bucket.users[me]) delete bucket.users[me];
+  else bucket.users[me] = true;
+
+  if(bucket.legacy === 0 && Object.keys(bucket.users).length === 0) delete reactions[emoji];
+  else reactions[emoji] = bucket;
+
   await setDoc(doc(chatRef,id),{reactions,updatedAt:serverTimestamp()},{merge:true});
 };
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('.reactionBar')) closeReactionPickers();
+});
 function renderChat(){
   $("messages").innerHTML=messages.slice().reverse().map(m=>{
     const mine = (m.sender||'').toLowerCase() === (localStorage.getItem('duoSender')||'').toLowerCase();
