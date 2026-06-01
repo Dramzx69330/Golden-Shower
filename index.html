@@ -1421,6 +1421,112 @@ tbody tr:hover td{background:#1b1f29!important}
       .accountStatusSelect{width:100%!important}
     }
 
+
+
+    /* V25.7 — Bouton urgence prioritaire */
+    .emergencyQuickBtn{
+      width:100%;
+      border:1px solid rgba(239,68,68,.55)!important;
+      background:linear-gradient(180deg,rgba(239,68,68,.22),rgba(127,29,29,.20))!important;
+      color:#fecaca!important;
+      border-radius:10px!important;
+      padding:10px 12px!important;
+      font-weight:1000!important;
+      letter-spacing:.02em;
+      cursor:pointer;
+    }
+    .emergencyQuickBtn:hover{
+      background:linear-gradient(180deg,rgba(239,68,68,.32),rgba(127,29,29,.26))!important;
+      border-color:rgba(248,113,113,.75)!important;
+    }
+    .emergencyBackdrop{
+      position:fixed;
+      inset:0;
+      z-index:40000;
+      background:rgba(0,0,0,.76);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+    }
+    .emergencyBackdrop.open{display:flex}
+    .emergencyModal{
+      width:min(580px,100%);
+      background:#171a22;
+      color:#f9fafb;
+      border:1px solid rgba(248,113,113,.38);
+      border-radius:18px;
+      box-shadow:0 34px 120px rgba(0,0,0,.72), 0 0 0 1px rgba(239,68,68,.14) inset;
+      overflow:hidden;
+    }
+    .emergencyHead{
+      padding:22px 24px;
+      display:flex;
+      gap:14px;
+      align-items:center;
+      background:linear-gradient(135deg,#7f1d1d,#111827 62%);
+      border-bottom:1px solid rgba(248,113,113,.22);
+    }
+    .emergencyIcon{
+      width:46px;height:46px;border-radius:999px;
+      display:grid;place-items:center;
+      background:#ef4444;color:#fff;font-size:24px;
+      box-shadow:0 0 0 8px rgba(239,68,68,.18);
+      flex:0 0 auto;
+    }
+    .emergencyHead strong{display:block;font-size:22px;letter-spacing:-.04em}
+    .emergencyHead span{display:block;margin-top:3px;color:#fecaca;font-size:13px;font-weight:800}
+    .emergencyBody{padding:24px;display:grid;gap:14px}
+    .emergencyBody label{
+      display:grid;gap:8px;
+      font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#aeb6c5;
+    }
+    .emergencyBody select,.emergencyBody textarea,.emergencyBody input{
+      width:100%!important;
+      min-width:0!important;
+      background:#0f1218!important;
+      color:#fff!important;
+      border:1px solid #343b49!important;
+      border-radius:10px!important;
+    }
+    .emergencyBody textarea{min-height:96px;resize:vertical}
+    .emergencyActions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+    .emergencyPrimary{
+      background:#ef4444!important;
+      border:1px solid #ef4444!important;
+      color:#fff!important;
+      border-radius:10px!important;
+      padding:12px 14px!important;
+      font-weight:1000!important;
+      cursor:pointer;
+    }
+    .emergencySecondary{
+      background:#171a22!important;
+      border:1px solid #343b49!important;
+      color:#f3f4f6!important;
+      border-radius:10px!important;
+      padding:12px 14px!important;
+      font-weight:900!important;
+      cursor:pointer;
+    }
+    .emergencyMessageBox{
+      background:#0f1218;
+      border:1px solid #343b49;
+      border-radius:13px;
+      padding:15px 16px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      font-weight:800;
+      color:#f9fafb;
+    }
+    .miniNotif.emergencyItem{
+      border-color:rgba(239,68,68,.48)!important;
+      background:rgba(127,29,29,.26)!important;
+    }
+    .miniNotif.emergencyItem strong{color:#fecaca}
+
 </style>
 </head>
 <body>
@@ -1738,6 +1844,7 @@ tbody tr:hover td{background:#1b1f29!important}
   <form class="messengerComposer" id="miniChatForm">
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div id="miniAttachmentPreview" class="miniAttachmentPreview"></div>
+    <button type="button" class="emergencyQuickBtn" onclick="openEmergencyComposer()">🚨 Urgence</button>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
       <input id="miniAttachmentUrl" placeholder="GIF / image URL">
@@ -1791,6 +1898,59 @@ tbody tr:hover td{background:#1b1f29!important}
   </div>
 </div>
 
+
+<div id="emergencyComposerBackdrop" class="emergencyBackdrop" onclick="closeEmergencyComposer(event)">
+  <div class="emergencyModal" onclick="event.stopPropagation()">
+    <div class="emergencyHead">
+      <div class="emergencyIcon">🚨</div>
+      <div>
+        <strong>Nouvelle urgence</strong>
+        <span>Envoie une alerte prioritaire à ton associé.</span>
+      </div>
+    </div>
+    <form id="emergencyForm" class="emergencyBody">
+      <label>Type
+        <select id="emergencyType">
+          <option>Commande urgente</option>
+          <option>Client important</option>
+          <option>Compte banni</option>
+          <option>Photos à envoyer</option>
+          <option>Autre</option>
+        </select>
+      </label>
+      <label>Message
+        <textarea id="emergencyText" placeholder="Ex : Pablo veut les photos maintenant"></textarea>
+      </label>
+      <label>Envoyé par
+        <input id="emergencySender" placeholder="Dora / ZerleZZ">
+      </label>
+      <div class="emergencyActions">
+        <button type="button" class="emergencySecondary" onclick="closeEmergencyComposer()">Annuler</button>
+        <button type="submit" class="emergencyPrimary">Envoyer l'urgence</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="emergencyAlertBackdrop" class="emergencyBackdrop" role="dialog" aria-modal="true">
+  <div class="emergencyModal">
+    <div class="emergencyHead">
+      <div class="emergencyIcon">🚨</div>
+      <div>
+        <strong>URGENCE</strong>
+        <span id="emergencyAlertMeta">Message prioritaire</span>
+      </div>
+    </div>
+    <div class="emergencyBody">
+      <div class="emergencyMessageBox" id="emergencyAlertText"></div>
+      <div class="emergencyActions">
+        <button type="button" class="emergencySecondary" onclick="replyToEmergency()">Répondre</button>
+        <button type="button" class="emergencyPrimary" onclick="ackEmergency()">J'AI LU</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -1808,8 +1968,8 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
@@ -1829,7 +1989,7 @@ function shouldDisplayOnce(map, key, ttl=4500){
   map.set(key, now + ttl);
   return true;
 }
-let currentReplyTo=null, currentThreadRootId=null, typingTimer=null, presenceTimer=null, currentPageId="dashboard", currentLiveAction="";
+let currentReplyTo=null, currentThreadRootId=null, typingTimer=null, presenceTimer=null, currentPageId="dashboard", currentLiveAction="", activeEmergency=null;
 
 const $ = id => document.getElementById(id);
 const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
@@ -2009,6 +2169,87 @@ function notify(title, body){
     new Notification(title,{body});
   }
 }
+
+
+function emergencyKey(u){
+  return `urgency-read-${duoId}-${u.id}`;
+}
+
+function isEmergencyReadByMe(u){
+  const me = normalizeName(getCurrentSender());
+  if(!u || !u.id) return true;
+  if(localStorage.getItem(emergencyKey(u)) === "1") return true;
+  const readBy = Array.isArray(u.readBy) ? u.readBy.map(normalizeName) : [];
+  return Boolean(me && readBy.includes(me));
+}
+
+function shouldShowEmergency(u){
+  if(!u || !u.id || u.acknowledged) return false;
+  const sender = normalizeName(u.sender);
+  const me = normalizeName(getCurrentSender());
+  if(me && sender && me === sender) return false;
+  return !isEmergencyReadByMe(u);
+}
+
+function showEmergencyAlert(u){
+  if(!shouldShowEmergency(u)) return;
+  activeEmergency = u;
+  const meta = $("emergencyAlertMeta");
+  const body = $("emergencyAlertText");
+  if(meta) meta.textContent = `${u.type || "Urgence"} · ${u.sender || "Quelqu'un"} · ${stamp(u.createdAt)}`;
+  if(body) body.textContent = u.text || "Urgence sans message.";
+  $("emergencyAlertBackdrop")?.classList.add("open");
+  beep(); setTimeout(beep, 260); setTimeout(beep, 520);
+}
+
+window.openEmergencyComposer = () => {
+  const sender = getCurrentSender();
+  if($("emergencySender")) $("emergencySender").value = sender === "Anonyme" ? "" : sender;
+  if($("emergencyText")) $("emergencyText").value = "";
+  $("emergencyComposerBackdrop")?.classList.add("open");
+  setTimeout(()=>$("emergencyText")?.focus(), 50);
+};
+
+window.closeEmergencyComposer = (event) => {
+  if(event && event.target !== $("emergencyComposerBackdrop")) return;
+  $("emergencyComposerBackdrop")?.classList.remove("open");
+};
+
+window.ackEmergency = async () => {
+  if(!activeEmergency) return;
+  const me = getCurrentSender();
+  localStorage.setItem(emergencyKey(activeEmergency), "1");
+  const readBy = Array.isArray(activeEmergency.readBy) ? [...activeEmergency.readBy] : [];
+  if(me && !readBy.map(normalizeName).includes(normalizeName(me))) readBy.push(me);
+  await setDoc(doc(urgenciesRef, activeEmergency.id), {
+    readBy,
+    lastReadBy: me,
+    lastReadAt: serverTimestamp(),
+    acknowledged: true
+  }, {merge:true});
+  await addDoc(chatRef, messagePayload({
+    text:`✅ Urgence lue par ${me || "associé"} : ${activeEmergency.type || "Urgence"}`,
+    sender: me || "Système",
+    priority:"important"
+  }));
+  $("emergencyAlertBackdrop")?.classList.remove("open");
+  activeEmergency = null;
+};
+
+window.replyToEmergency = () => {
+  $("emergencyAlertBackdrop")?.classList.remove("open");
+  toggleWidget(true);
+  setWidgetTab("miniChat");
+  const txt = activeEmergency ? `Réponse urgence (${activeEmergency.type || "Urgence"}) : ` : "Réponse urgence : ";
+  const input = $("miniChatText");
+  if(input){ input.value = txt; input.focus(); }
+};
+
+window.openEmergencyFromList = (id) => {
+  const u = urgencies.find(x=>x.id===id);
+  if(!u) return;
+  showEmergencyAlert({...u, acknowledged:false});
+};
 
 function extractMentions(text=''){
   return [...String(text).matchAll(/@([A-Za-zÀ-ÿ0-9_.-]+)/g)].map(m=>m[1].toLowerCase());
@@ -2228,13 +2469,14 @@ function renderWidget(){
     const alertItems = getSmartAlerts().slice(0,8).map(a => ({title:a.high ? "⚠️ Commande bloquée" : "⏱️ Commande à surveiller", body:a.body, at:new Date().toISOString(), type:"alert"}));
     const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt, type:"activity"}));
     const pinnedItems = messages.filter(m=>m.pinned).slice(0,6).map(m=>({title:"📌 Message épinglé", body:`${m.sender || ''} : ${shortText(m.text || 'Pièce jointe',80)}`, at:m.pinnedAt || m.createdAt, type:"chat"}));
-    const items = [...pinnedItems, ...alertItems, ...widgetNotifs, ...activityItems].slice(0, 30);
-    miniNotifs.innerHTML = items.map(n => `<div class="miniNotif">
+    const emergencyItems = urgencies.slice(0, 8).map(u => ({title:"🚨 URGENCE", body:`${u.type || "Urgence"} · ${u.sender || ""} : ${shortText(u.text || "", 90)}`, at:u.createdAt, type:"emergency", id:u.id}));
+    const items = [...emergencyItems, ...pinnedItems, ...alertItems, ...widgetNotifs, ...activityItems].slice(0, 34);
+    miniNotifs.innerHTML = items.map(n => `<div class="miniNotif ${n.type === 'emergency' ? 'emergencyItem' : ''}">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.body)}</p>
       <span class="miniMeta">${esc(stamp(n.at))}</span>
       <div class="miniNotifActions">
-        <button class="secondary small" onclick="${n.type==='chat' ? "setWidgetTab('miniChat')" : n.type==='activity' ? "setWidgetTab('miniActivity')" : "goPage('dashboard');toggleWidget(false)"}">Voir</button>
+        <button class="secondary small" onclick="${n.type==='emergency' ? `openEmergencyFromList('${esc(n.id)}')` : n.type==='chat' ? "setWidgetTab('miniChat')" : n.type==='activity' ? "setWidgetTab('miniActivity')" : "goPage('dashboard');toggleWidget(false)"}">Voir</button>
         <button class="secondary small" onclick="this.closest('.miniNotif').remove()">Ignorer</button>
       </div>
     </div>`).join("") || '<p class="muted">Aucune notification.</p>';
@@ -3155,6 +3397,41 @@ $("accountForm").addEventListener("submit", async e=>{
 });
 
 
+
+$("emergencyForm")?.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const sender = $("emergencySender")?.value?.trim() || getCurrentSender();
+  const type = $("emergencyType")?.value || "Urgence";
+  const body = $("emergencyText")?.value?.trim();
+  if(!body) return alert("Message d'urgence obligatoire.");
+  localStorage.setItem("duoSender", sender);
+  if($("senderName")) $("senderName").value = sender;
+  if($("miniSenderName")) $("miniSenderName").value = sender;
+  const recent = Number(localStorage.getItem("duoEmergencyRecentAt") || 0);
+  const count = Number(localStorage.getItem("duoEmergencyRecentCount") || 0);
+  const now = Date.now();
+  const nextCount = now - recent < 5*60*1000 ? count + 1 : 1;
+  if(nextCount > 3) return alert("Anti-spam : maximum 3 urgences en 5 minutes.");
+  localStorage.setItem("duoEmergencyRecentAt", String(now));
+  localStorage.setItem("duoEmergencyRecentCount", String(nextCount));
+  await addDoc(urgenciesRef, {
+    type,
+    text: body,
+    sender,
+    readBy: [],
+    acknowledged: false,
+    createdAt: serverTimestamp()
+  });
+  await addDoc(chatRef, messagePayload({
+    text:`🚨 URGENCE — ${type}\n${body}`,
+    sender,
+    priority:"important"
+  }));
+  await logActivity(`🚨 Urgence envoyée par ${sender} : ${type}`);
+  pushWidgetNotif("🚨 Urgence envoyée", `${type} · ${body}`, "emergency-local");
+  $("emergencyComposerBackdrop")?.classList.remove("open");
+});
+
 $("miniChatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text = $("miniChatText").value.trim();
@@ -3485,6 +3762,20 @@ async function start(){
     banHistoryRef=collection(db,'duos',duoId,'banHistory');
     typingRef=collection(db,'duos',duoId,'typing');
     presenceRef=collection(db,'duos',duoId,'presence');
+    urgenciesRef=collection(db,'duos',duoId,'urgencies');
+
+    onSnapshot(query(urgenciesRef,orderBy('createdAt','desc'),limit(30)), snap=>{
+      const changes=snap.docChanges().map(c=>({type:c.type,data:{id:c.doc.id,...c.doc.data()}}));
+      urgencies=snap.docs.map(d=>({id:d.id,...d.data()}));
+      changes.filter(c=>c.type==='added').forEach(c=>{
+        const u=c.data;
+        if(shouldShowEmergency(u)){
+          pushWidgetNotif('🚨 URGENCE', `${u.type || 'Urgence'} · ${u.sender || ''} : ${shortText(u.text || '', 90)}`, 'emergency');
+          showEmergencyAlert(u);
+        }
+      });
+      renderWidget();
+    });
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
       orders=snap.docs.map(d=>({id:d.id,...d.data()}));
