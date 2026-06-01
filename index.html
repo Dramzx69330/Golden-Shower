@@ -344,6 +344,24 @@
     .miniNotifActions button{padding:7px 9px!important;font-size:12px!important}
     @media(max-width:700px){.clientMetrics{grid-template-columns:1fr 1fr}.timelineItem{grid-template-columns:54px 1fr}}
 
+
+    /* V14 — saisons, réactions, pièces jointes/GIF, comptes bannis */
+    .statusBadge{display:inline-flex;align-items:center;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;border:1px solid var(--line2);background:#fff;margin-left:8px}
+    .statusBadge.actif{color:var(--green);background:#f0fdf4;border-color:#bbf7d0}
+    .statusBadge.banni{color:var(--red);background:#fef2f2;border-color:#fecaca}
+    .statusBadge.pause{color:#6b7280;background:#f3f4f6;border-color:#d1d5db}
+    .statusBadge.verif{color:#1d4ed8;background:#eff6ff;border-color:#bfdbfe}
+    .banHistory{margin-top:16px;border-top:1px solid var(--line);padding-top:14px;max-height:260px;overflow:auto}
+    .reactionBar{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+    .reactionBar button{border:1px solid var(--line);background:#fff;color:#111827;border-radius:999px;padding:5px 8px;font-weight:800;cursor:pointer;font-size:13px}
+    .msg.me .reactionBar button{background:#fff;color:#111827}
+    .attachmentPreview{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f9fafb}
+    .attachmentPreview img{display:block;max-width:100%;max-height:260px;object-fit:contain;background:#fff}
+    .attachmentPreview a{display:block;padding:10px 12px;color:#111827;font-weight:800;text-decoration:none}
+    .miniMsg .attachmentPreview img{max-height:170px}
+    .seasonControls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+    .leaderDiff{font-size:13px;color:var(--muted);margin-top:6px}
+
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -464,6 +482,8 @@
             <label>Mot de passe<input id="accPassword" type="password" placeholder="Mot de passe"></label>
             <label>Annonces en cours<input id="accListings" type="number" min="0" step="1" placeholder="0"></label>
             <label>Favori<select id="accFavorite"><option value="non">Non</option><option value="oui">Oui</option></select></label>
+            <label>Statut<select id="accStatus"><option>ACTIF</option><option>BANNI</option><option>EN PAUSE</option><option>VÉRIFICATION</option></select></label>
+            <label class="full">Raison statut / bannissement<input id="accStatusReason" placeholder="Ex : vérification identité, shadowban, compte à tester..."></label>
             <label class="full">Note<input id="accNote" placeholder="Infos utiles"></label>
             <div class="full" style="display:flex;gap:10px">
               <button class="primary" type="submit">Enregistrer compte</button>
@@ -473,7 +493,21 @@
         </div>
         <div class="card pad">
           <h2>Comptes enregistrés</h2>
+          <div class="toolbar">
+            <select id="accountStatusFilter" onchange="renderAccounts()">
+              <option value="">Tous statuts</option>
+              <option value="ACTIF">Actifs</option>
+              <option value="BANNI">Bannis</option>
+              <option value="EN PAUSE">En pause</option>
+              <option value="VÉRIFICATION">Vérification</option>
+            </select>
+          </div>
+          <div id="accountStatusSummary" class="muted" style="margin-bottom:12px"></div>
           <div id="accountsList" class="list"></div>
+          <div class="banHistory">
+            <h3>Historique comptes bannis</h3>
+            <div id="banHistoryList" class="list"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -488,6 +522,7 @@
               <input id="senderName" placeholder="Ton nom" style="max-width:170px">
               <select id="chatPriority"><option value="">Normal</option><option value="important">Important</option></select>
               <select id="shareAccountSelect"><option value="">Joindre un compte...</option></select>
+              <input id="attachmentUrl" placeholder="Image / GIF / lien" style="min-width:210px">
               <button class="primary" type="submit">Envoyer</button>
             </div>
           </form>
@@ -536,6 +571,22 @@
     </section>
 
     <section id="stats" class="page">
+      <div class="card pad" style="margin-bottom:20px">
+        <h2>Saison / classement</h2>
+        <div class="seasonControls">
+          <select id="seasonRange" onchange="renderSeasonRanking()">
+            <option value="month">Mois en cours</option>
+            <option value="quarter">Trimestre</option>
+            <option value="year">Année</option>
+            <option value="all">Depuis le début</option>
+          </select>
+          <select id="seasonMetric" onchange="renderSeasonRanking()">
+            <option value="sum">Par montant confirmé</option>
+            <option value="count">Par nombre de ventes</option>
+          </select>
+        </div>
+        <div id="seasonRanking" class="list"></div>
+      </div>
       <div class="grid three">
         <div class="card pad"><h2>Stats par vendeur</h2><div id="sellerStats" class="list"></div></div>
         <div class="card pad"><h2>Stats par plateforme</h2><div id="platformStats" class="list"></div></div>
@@ -593,6 +644,7 @@
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
+      <input id="miniAttachmentUrl" placeholder="GIF / image URL">
       <button type="submit">Envoyer</button>
     </div>
   </form>
@@ -616,8 +668,8 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
 
@@ -711,7 +763,7 @@ window.setWidgetTab = (id) => {
 
 function renderMiniAccount(a){
   if(!a) return "";
-  return `<div class="miniAccount"><strong>${esc(a.name)}</strong><br>${esc(a.plateforme)} · ${Number(a.listings||0)} annonce(s)<br>Email : ${esc(a.email||'')}<br><button class="secondary small" onclick="copySharedAccount('${esc(a.id)}')" style="margin-top:8px">Copier accès</button></div>`;
+  return `<div class="miniAccount"><strong>${esc(a.name)}</strong> ${accountStatusLabel(a)}<br>${esc(a.plateforme)} · ${Number(a.listings||0)} annonce(s)<br>Email : ${esc(a.email||'')}<br><button class="secondary small" onclick="copySharedAccount('${esc(a.id)}')" style="margin-top:8px">Copier accès</button></div>`;
 }
 
 function renderWidget(){
@@ -729,6 +781,8 @@ function renderWidget(){
         <div class="miniMeta"><strong>${esc(m.sender || 'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
         <div class="miniText">${esc(m.text || (acc ? 'Compte partagé' : ''))}</div>
         ${acc ? renderMiniAccount(acc) : ''}
+        ${renderAttachment(m.attachmentUrl)}
+        ${renderReactions(m)}
       </div>`;
     }).join("") || '<p class="muted">Aucun message.</p>';
     miniChat.scrollTop = miniChat.scrollHeight;
@@ -842,7 +896,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderActivity(); renderNotes(); renderTasks(); renderGlobalSearch(); renderWidget();
+  renderDashboard(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget();
 }
 
 function renderDashboard(){
@@ -963,19 +1017,50 @@ function accountRevenue(id){
   return {sum:confirmed.reduce((s,r)=>s+Number(r.prix||0),0), count:confirmed.length};
 }
 
+
+function accountStatusClass(status){
+  const s=String(status||'ACTIF').toUpperCase();
+  if(s==='BANNI') return 'banni';
+  if(s==='EN PAUSE') return 'pause';
+  if(s.includes('VÉR') || s.includes('VER')) return 'verif';
+  return 'actif';
+}
+function accountStatusLabel(a){
+  const s=String(a.status||'ACTIF').toUpperCase();
+  return `<span class="statusBadge ${accountStatusClass(s)}">${esc(s)}</span>`;
+}
+function renderBanHistory(){
+  if(!$("banHistoryList")) return;
+  $("banHistoryList").innerHTML = banHistory.slice(0,30).map(h=>`
+    <div class="row">
+      <div><strong>${esc(h.accountName||'Compte')}</strong><div class="muted">${esc(h.from||'')} → ${esc(h.to||'')} · ${esc(h.reason||'Aucune raison')}</div></div>
+      <span class="muted">${esc(stamp(h.createdAt))}</span>
+    </div>
+  `).join('') || '<p class="muted">Aucun historique de bannissement.</p>';
+}
 function renderAccounts(){
-  $("accountsList").innerHTML=accounts.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>{
+  const filter = $("accountStatusFilter")?.value || "";
+  const summary = {ACTIF:0, BANNI:0, "EN PAUSE":0, "VÉRIFICATION":0};
+  accounts.forEach(a=>{ const s=String(a.status||'ACTIF').toUpperCase(); summary[s]=(summary[s]||0)+1; });
+  if($("accountStatusSummary")){
+    $("accountStatusSummary").innerHTML = `Actifs: <strong>${summary.ACTIF||0}</strong> · Bannis: <strong>${summary.BANNI||0}</strong> · En pause: <strong>${summary["EN PAUSE"]||0}</strong> · Vérification: <strong>${summary["VÉRIFICATION"]||0}</strong>`;
+  }
+  const visible = accounts.filter(a=>!filter || String(a.status||'ACTIF').toUpperCase()===filter);
+  $("accountsList").innerHTML=visible.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.status||'ACTIF').localeCompare(String(b.status||'ACTIF')) || String(a.name).localeCompare(String(b.name))).map(a=>{
     const perf=accountRevenue(a.id);
+    const status=String(a.status||'ACTIF').toUpperCase();
     return `<div class="row">
       <div>
-        <strong>${a.favorite==='oui'?'<span class="star">★</span> ':''}${esc(a.name)}</strong>
+        <strong>${a.favorite==='oui'?'<span class="star">★</span> ':''}${esc(a.name)} ${accountStatusLabel(a)}</strong>
         <div class="muted">${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · <span class="${Number(a.listings||0)===0?'alertZero':''}">${Number(a.listings||0)} annonce(s)</span></div>
+        ${a.statusReason?`<div class="muted" style="margin-top:5px">Raison : ${esc(a.statusReason)}</div>`:''}
         <div class="muted" style="margin-top:5px">${perf.count} vente(s) confirmée(s) · ${euro(perf.sum)}</div>
         <div style="margin-top:8px">Email: <span class="secret">${esc(a.email||'')}</span></div>
         <div style="margin-top:6px">Mot de passe: <span class="secret" id="pw-${esc(a.id)}">••••••••</span></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
         <button class="secondary small" onclick="toggleFavorite('${esc(a.id)}')">${a.favorite==='oui'?'Retirer ★':'Favori ★'}</button>
+        <button class="${status==='BANNI'?'secondary':'danger'} small" onclick="quickToggleBan('${esc(a.id)}')">${status==='BANNI'?'Réactiver':'Bannir'}</button>
         <button class="secondary small" onclick="editAccount('${esc(a.id)}')">Modifier</button>
         <button class="secondary small" onclick="togglePassword('${esc(a.id)}')">Afficher</button>
         <button class="secondary small" onclick="copyAccount('${esc(a.id)}')">Copier</button>
@@ -984,7 +1069,7 @@ function renderAccounts(){
       </div>
     </div>`;
   }).join('') || '<p class="muted">Aucun compte enregistré.</p>';
-  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>`<option value="${esc(a.id)}">${a.favorite==='oui'?'★ ':''}${esc(a.name)} · ${esc(a.plateforme)}</option>`).join('');
+  $("shareAccountSelect").innerHTML='<option value="">Joindre un compte...</option>'+accounts.slice().filter(a=>String(a.status||'ACTIF').toUpperCase()!=='BANNI').sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.name).localeCompare(String(b.name))).map(a=>`<option value="${esc(a.id)}">${a.favorite==='oui'?'★ ':''}${esc(a.name)} · ${esc(a.plateforme)}</option>`).join('');
 }
 
 function renderAccountCard(a, reveal=false){
@@ -999,6 +1084,24 @@ function renderAccountCard(a, reveal=false){
   </div>`;
 }
 
+
+function renderAttachment(url){
+  const u=String(url||'').trim();
+  if(!u) return '';
+  const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
+  return `<div class="attachmentPreview">${isImg?`<img src="${esc(u)}" alt="Pièce jointe" loading="lazy">`:`<a href="${esc(u)}" target="_blank" rel="noopener">Ouvrir la pièce jointe</a>`}</div>`;
+}
+function renderReactions(m){
+  const reactions=m.reactions||{};
+  const emojis=['👍','🔥','✅','👀','😂'];
+  return `<div class="reactionBar">${emojis.map(e=>`<button type="button" onclick="reactMessage('${esc(m.id)}','${e}')">${e} ${Number(reactions[e]||0)||''}</button>`).join('')}</div>`;
+}
+window.reactMessage = async (id, emoji) => {
+  const m=messages.find(x=>x.id===id); if(!m||!chatRef) return;
+  const reactions={...(m.reactions||{})};
+  reactions[emoji]=Number(reactions[emoji]||0)+1;
+  await setDoc(doc(chatRef,id),{reactions,updatedAt:serverTimestamp()},{merge:true});
+};
 function renderChat(){
   $("messages").innerHTML=messages.slice().reverse().map(m=>{
     const mine = (m.sender||'').toLowerCase() === (localStorage.getItem('duoSender')||'').toLowerCase();
@@ -1007,6 +1110,8 @@ function renderChat(){
       <div class="msgMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span>${m.priority==='important'?'<span class="pill warn">Important</span>':''}</div>
       <div class="msgText">${esc(m.text||'')}</div>
       ${acc?renderAccountCard(acc,false):''}
+      ${renderAttachment(m.attachmentUrl)}
+      ${renderReactions(m)}
     </div>`;
   }).join('') || '<p class="muted">Aucun message.</p>';
   const box=$("messages"); box.scrollTop=box.scrollHeight;
@@ -1025,6 +1130,41 @@ function statBlock(groupKey, targetId){
   `).join('') || '<p class="muted">Aucune donnée confirmée.</p>';
 }
 
+
+function inSeason(dateStr, range){
+  if(range==='all') return true;
+  const d=new Date(dateStr || Date.now());
+  const now=new Date();
+  if(range==='year') return d.getFullYear()===now.getFullYear();
+  if(range==='month') return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+  if(range==='quarter'){
+    const q=Math.floor(now.getMonth()/3);
+    return d.getFullYear()===now.getFullYear() && Math.floor(d.getMonth()/3)===q;
+  }
+  return true;
+}
+function renderSeasonRanking(){
+  if(!$("seasonRanking")) return;
+  const range=$("seasonRange")?.value || 'month';
+  const metric=$("seasonMetric")?.value || 'sum';
+  const map={};
+  orders.filter(r=>isConfirmed(r) && inSeason(r.date, range)).forEach(r=>{
+    const k=r.vendeur||'Sans vendeur';
+    if(!map[k]) map[k]={sum:0,count:0};
+    map[k].sum+=Number(r.prix||0); map[k].count++;
+  });
+  const rows=Object.entries(map).sort((a,b)=> metric==='count' ? b[1].count-a[1].count : b[1].sum-a[1].sum);
+  const leader=rows[0], second=rows[1];
+  const diff = leader && second ? (metric==='count' ? `${leader[1].count-second[1].count} vente(s) d'avance` : `${euro(leader[1].sum-second[1].sum)} d'avance`) : '';
+  const max=Math.max(1,...rows.map(([_,v])=> metric==='count'?v.count:v.sum));
+  $("seasonRanking").innerHTML = rows.map(([name,v],i)=>{
+    const value=metric==='count'?v.count:v.sum;
+    return `<div class="row">
+      <div style="width:100%"><strong>${i+1}. ${esc(name)}</strong><div class="muted">${v.count} vente(s) · ${euro(v.sum)}</div><div class="bar"><span style="width:${Math.round(value/max*100)}%"></span></div>${i===0&&diff?`<div class="leaderDiff">${esc(diff)}</div>`:''}</div>
+      <strong>${metric==='count'?v.count:euro(v.sum)}</strong>
+    </div>`;
+  }).join('') || '<p class="muted">Aucune vente confirmée sur cette période.</p>';
+}
 function renderStats(){ 
   statBlock('vendeur','sellerStats'); 
   statBlock('plateforme','platformStats'); 
@@ -1094,9 +1234,18 @@ $("orderForm").addEventListener("submit", async e=>{
 $("accountForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const id=$("accountId").value;
-  const data={plateforme:$("accPlateforme").value,name:$("accName").value.trim(),owner:$("accOwner").value.trim(),email:$("accEmail").value.trim(),password:$("accPassword").value, listings:Number($("accListings").value||0),favorite:$("accFavorite").value,note:$("accNote").value.trim(),updatedAt:serverTimestamp()};
+  const data={plateforme:$("accPlateforme").value,name:$("accName").value.trim(),owner:$("accOwner").value.trim(),email:$("accEmail").value.trim(),password:$("accPassword").value, listings:Number($("accListings").value||0),favorite:$("accFavorite").value,status:$("accStatus").value,statusReason:$("accStatusReason").value.trim(),note:$("accNote").value.trim(),updatedAt:serverTimestamp()};
   if(!data.name) return alert("Nom du compte obligatoire.");
-  if(id){ await setDoc(doc(accountsRef,id),data,{merge:true}); await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`); }
+  if(id){
+    const oldAcc=accounts.find(x=>x.id===id);
+    await setDoc(doc(accountsRef,id),data,{merge:true});
+    if(oldAcc && String(oldAcc.status||'ACTIF') !== String(data.status)){
+      await addDoc(banHistoryRef,{accountId:id,accountName:data.name,from:String(oldAcc.status||'ACTIF'),to:data.status,reason:data.statusReason||'',createdAt:serverTimestamp()});
+      await logActivity(`Statut compte changé : ${data.name} (${oldAcc.status||'ACTIF'} → ${data.status})`);
+    } else {
+      await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`);
+    }
+  }
   else{ await addDoc(accountsRef,{...data,createdAt:serverTimestamp()}); await logActivity(`Nouveau compte ajouté : ${data.plateforme} · ${data.name}`); }
   clearAccount();
 });
@@ -1105,23 +1254,26 @@ $("accountForm").addEventListener("submit", async e=>{
 $("miniChatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text = $("miniChatText").value.trim();
+  const attachmentUrl = $("miniAttachmentUrl")?.value.trim() || "";
   const sender = $("miniSenderName").value.trim() || localStorage.getItem("duoSender") || "Anonyme";
-  if(!text) return;
+  if(!text && !attachmentUrl) return;
   localStorage.setItem("duoSender", sender);
   if($("senderName")) $("senderName").value = sender;
-  await addDoc(chatRef,{text,sender,priority:"",createdAt:serverTimestamp()});
+  await addDoc(chatRef,{text,attachmentUrl,sender,priority:"",createdAt:serverTimestamp()});
   $("miniChatText").value = "";
+  if($("miniAttachmentUrl")) $("miniAttachmentUrl").value = "";
 });
 
 $("chatForm").addEventListener("submit", async e=>{
   e.preventDefault();
   const text=$("chatText").value.trim();
   const accountId=$("shareAccountSelect").value;
+  const attachmentUrl=$("attachmentUrl")?.value.trim() || "";
   const sender=$("senderName").value.trim() || 'Anonyme';
   localStorage.setItem('duoSender',sender);
-  if(!text && !accountId) return;
-  await addDoc(chatRef,{text,accountId,sender,priority:$("chatPriority").value,createdAt:serverTimestamp()});
-  $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value='';
+  if(!text && !accountId && !attachmentUrl) return;
+  await addDoc(chatRef,{text,accountId,attachmentUrl,sender,priority:$("chatPriority").value,createdAt:serverTimestamp()});
+  $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value=''; if($("attachmentUrl")) $("attachmentUrl").value='';
 });
 
 window.editOrder=id=>{
@@ -1135,12 +1287,28 @@ window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date")
 window.clearAccount=()=>{ $("accountForm").reset(); $("accountId").value=''; };
 window.editAccount=id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
-  $("accountId").value=id; $("accPlateforme").value=a.plateforme||'Vinted'; $("accName").value=a.name||''; $("accOwner").value=a.owner||''; $("accEmail").value=a.email||''; $("accPassword").value=a.password||''; $("accListings").value=a.listings||0; $("accFavorite").value=a.favorite||'non'; $("accNote").value=a.note||'';
+  $("accountId").value=id; $("accPlateforme").value=a.plateforme||'Vinted'; $("accName").value=a.name||''; $("accOwner").value=a.owner||''; $("accEmail").value=a.email||''; $("accPassword").value=a.password||''; $("accListings").value=a.listings||0; $("accFavorite").value=a.favorite||'non'; $("accStatus").value=a.status||'ACTIF'; $("accStatusReason").value=a.statusReason||''; $("accNote").value=a.note||'';
   goPage('comptes');
 };
 window.toggleFavorite=async id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
   await setDoc(doc(accountsRef,id),{favorite:a.favorite==='oui'?'non':'oui',updatedAt:serverTimestamp()},{merge:true});
+};
+
+window.quickToggleBan=async id=>{
+  const a=accounts.find(x=>x.id===id); if(!a) return;
+  const current=String(a.status||'ACTIF').toUpperCase();
+  if(current==='BANNI'){
+    const reason=prompt('Raison de la réactivation ?', 'Compte réactivé') || 'Compte réactivé';
+    await setDoc(doc(accountsRef,id),{status:'ACTIF',statusReason:reason,updatedAt:serverTimestamp()},{merge:true});
+    await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:'BANNI',to:'ACTIF',reason,createdAt:serverTimestamp()});
+    await logActivity(`Compte réactivé : ${a.plateforme} · ${a.name}`);
+  }else{
+    const reason=prompt('Pourquoi ce compte est banni ?', a.statusReason || '') || '';
+    await setDoc(doc(accountsRef,id),{status:'BANNI',statusReason:reason,bannedAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
+    await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:current,to:'BANNI',reason,createdAt:serverTimestamp()});
+    await logActivity(`Compte banni : ${a.plateforme} · ${a.name}`);
+  }
 };
 window.removeAccount=async id=>{ if(confirm('Supprimer ce compte ?')){ await deleteDoc(doc(accountsRef,id)); await logActivity('Un compte a été supprimé'); } };
 window.togglePassword=id=>{
@@ -1149,7 +1317,7 @@ window.togglePassword=id=>{
 };
 window.copyAccount=async id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
-  await navigator.clipboard.writeText(`Plateforme: ${a.plateforme}\nCompte: ${a.name}\nEmail: ${a.email||''}\nMot de passe: ${a.password||''}\nAnnonces: ${a.listings||0}`);
+  await navigator.clipboard.writeText(`Plateforme: ${a.plateforme}\nCompte: ${a.name}\nEmail: ${a.email||''}\nMot de passe: ${a.password||''}\nAnnonces: ${a.listings||0}\nStatut: ${a.status||'ACTIF'}\nRaison: ${a.statusReason||''}`);
   alert('Compte copié.');
 };
 window.shareAccountToChat=id=>{ goPage('chat'); $("shareAccountSelect").value=id; $("chatText").value = "Je t’envoie ce compte."; };
@@ -1239,6 +1407,7 @@ async function start(){
     activityRef=collection(db,'duos',duoId,'activity');
     notesRef=collection(db,'duos',duoId,'notes');
     tasksRef=collection(db,'duos',duoId,'tasks');
+    banHistoryRef=collection(db,'duos',duoId,'banHistory');
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
       orders=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -1304,6 +1473,11 @@ async function start(){
       }
       firstTasks=false;
       renderTasks(); renderWidget();
+    });
+
+    onSnapshot(query(banHistoryRef,orderBy('createdAt','desc'),limit(80)), snap=>{
+      banHistory=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderBanHistory();
     });
 
   }catch(e){ console.error(e); setSync('Firebase non disponible','bad'); }
