@@ -575,6 +575,93 @@
       #miniAttachmentUrl{grid-column:1 / -1}
     }
 
+
+    /* V21 — mentions @ avec suggestions + alerte obligatoire */
+    .mentionSuggest{
+      position:fixed;
+      z-index:25000;
+      width:min(260px,calc(100vw - 28px));
+      max-height:220px;
+      overflow:auto;
+      display:none;
+      background:#ffffff;
+      color:#111827;
+      border:1px solid var(--line2);
+      border-radius:12px;
+      box-shadow:0 22px 70px rgba(15,23,42,.28);
+      padding:6px;
+    }
+    .mentionSuggest.open{display:block}
+    .mentionOption{
+      width:100%;
+      border:0;
+      background:#fff;
+      color:#111827;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      text-align:left;
+      padding:10px 11px;
+      border-radius:9px;
+      cursor:pointer;
+      font-weight:900;
+    }
+    .mentionOption:hover,.mentionOption.active{background:#eff6ff;color:#1d4ed8}
+    .mentionAvatar{
+      width:28px;height:28px;border-radius:999px;background:#111827;color:#fff;
+      display:grid;place-items:center;font-size:12px;font-weight:900;
+    }
+    .mentionAlertBackdrop{
+      position:fixed;
+      inset:0;
+      z-index:30000;
+      background:rgba(15,23,42,.58);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+    }
+    .mentionAlertBackdrop.open{display:flex}
+    .mentionAlert{
+      width:min(560px,100%);
+      background:#ffffff;
+      color:#111827;
+      border:1px solid rgba(255,255,255,.32);
+      border-radius:18px;
+      box-shadow:0 34px 110px rgba(0,0,0,.38);
+      overflow:hidden;
+      animation:mentionPop .16s ease-out;
+    }
+    .mentionAlertHead{
+      padding:22px 24px;
+      background:#111827;
+      color:#fff;
+      display:flex;
+      gap:14px;
+      align-items:center;
+    }
+    .mentionAlertIcon{
+      width:42px;height:42px;border-radius:999px;background:#2563eb;
+      display:grid;place-items:center;font-size:22px;flex:0 0 auto;
+    }
+    .mentionAlertHead strong{display:block;font-size:20px;letter-spacing:-.035em}
+    .mentionAlertHead span{display:block;color:#cbd5e1;font-size:13px;margin-top:3px}
+    .mentionAlertBody{padding:24px}
+    .mentionAlertMsg{
+      background:#f8fafc;
+      border:1px solid #e5e7eb;
+      border-radius:13px;
+      padding:15px 16px;
+      margin:14px 0 18px;
+      white-space:pre-wrap;
+      line-height:1.5;
+      font-weight:700;
+    }
+    .mentionAlertActions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    @keyframes mentionPop{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
   </style>
 </head>
 <body>
@@ -874,6 +961,29 @@
 </div>
 
 
+<div id="mentionSuggest" class="mentionSuggest"></div>
+
+<div id="mentionAlertBackdrop" class="mentionAlertBackdrop" role="dialog" aria-modal="true">
+  <div class="mentionAlert">
+    <div class="mentionAlertHead">
+      <div class="mentionAlertIcon">📣</div>
+      <div>
+        <strong>Tu as été mentionné</strong>
+        <span>Message prioritaire à lire avant de continuer</span>
+      </div>
+    </div>
+    <div class="mentionAlertBody">
+      <div class="muted" id="mentionAlertMeta"></div>
+      <div class="mentionAlertMsg" id="mentionAlertText"></div>
+      <div class="mentionAlertActions">
+        <button class="secondary" type="button" onclick="openMentionInWidget()">Répondre</button>
+        <button class="primary" type="button" onclick="closeMentionAlert()">J’ai lu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -901,6 +1011,148 @@ const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'
 const esc = v => String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const today = () => new Date().toISOString().slice(0,10);
 const isConfirmed = r => String(r.statut||'').toLowerCase().includes('confirm');
+
+const MENTION_MEMBERS = ["Zerlezz", "Dora"];
+let mentionTargetInput = null;
+let mentionActiveIndex = 0;
+let lastMentionMessage = null;
+
+function mentionInitial(name){
+  return String(name || "?").trim().slice(0,1).toUpperCase();
+}
+
+function getMentionMatch(input){
+  if(!input) return null;
+  const pos = input.selectionStart ?? input.value.length;
+  const before = input.value.slice(0, pos);
+  const match = before.match(/(^|\s)@([A-Za-zÀ-ÿ0-9_.-]*)$/);
+  if(!match) return null;
+  return { start: pos - match[2].length - 1, end: pos, query: match[2] || "" };
+}
+
+function positionMentionSuggest(input){
+  const box = $("mentionSuggest");
+  const rect = input.getBoundingClientRect();
+  const width = Math.min(260, window.innerWidth - 28);
+  let left = Math.max(14, Math.min(rect.left, window.innerWidth - width - 14));
+  let top = rect.bottom + 8;
+  if(top + 220 > window.innerHeight) top = Math.max(14, rect.top - 230);
+  box.style.left = `${left}px`;
+  box.style.top = `${top}px`;
+  box.style.width = `${width}px`;
+}
+
+function showMentionSuggest(input){
+  const box = $("mentionSuggest");
+  const m = getMentionMatch(input);
+  if(!m){ hideMentionSuggest(); return; }
+
+  const q = m.query.toLowerCase();
+  const list = MENTION_MEMBERS.filter(name => name.toLowerCase().startsWith(q));
+  if(!list.length){ hideMentionSuggest(); return; }
+
+  mentionTargetInput = input;
+  mentionActiveIndex = Math.min(mentionActiveIndex, list.length - 1);
+  box.innerHTML = list.map((name, index) => `
+    <button type="button" class="mentionOption ${index === mentionActiveIndex ? 'active' : ''}" data-mention="${esc(name)}">
+      <span class="mentionAvatar">${esc(mentionInitial(name))}</span>
+      <span>@${esc(name)}</span>
+    </button>
+  `).join("");
+  positionMentionSuggest(input);
+  box.classList.add("open");
+}
+
+function hideMentionSuggest(){
+  const box = $("mentionSuggest");
+  if(box) box.classList.remove("open");
+  mentionTargetInput = null;
+}
+
+function selectMention(name){
+  const input = mentionTargetInput;
+  const m = getMentionMatch(input);
+  if(!input || !m) return hideMentionSuggest();
+
+  const before = input.value.slice(0, m.start);
+  const after = input.value.slice(m.end);
+  input.value = `${before}@${name} ${after}`;
+  const nextPos = before.length + name.length + 2;
+  input.focus();
+  input.setSelectionRange(nextPos, nextPos);
+  hideMentionSuggest();
+}
+
+function bindMentionInput(id){
+  const input = $(id);
+  if(!input) return;
+
+  input.addEventListener("input", () => showMentionSuggest(input));
+  input.addEventListener("click", () => showMentionSuggest(input));
+  input.addEventListener("blur", () => setTimeout(hideMentionSuggest, 160));
+
+  input.addEventListener("keydown", e => {
+    const box = $("mentionSuggest");
+    const open = box?.classList.contains("open") && mentionTargetInput === input;
+    if(!open) return;
+
+    const options = [...box.querySelectorAll(".mentionOption")];
+    if(!options.length) return;
+
+    if(e.key === "ArrowDown"){
+      e.preventDefault();
+      mentionActiveIndex = (mentionActiveIndex + 1) % options.length;
+      showMentionSuggest(input);
+    } else if(e.key === "ArrowUp"){
+      e.preventDefault();
+      mentionActiveIndex = (mentionActiveIndex - 1 + options.length) % options.length;
+      showMentionSuggest(input);
+    } else if(e.key === "Enter" || e.key === "Tab"){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      selectMention(options[mentionActiveIndex]?.dataset.mention || options[0].dataset.mention);
+    } else if(e.key === "Escape"){
+      e.preventDefault();
+      hideMentionSuggest();
+    }
+  }, true);
+}
+
+function showMentionAlert(message){
+  lastMentionMessage = message;
+  const meta = `${message.sender || "Anonyme"} · ${stamp(message.createdAt)}`;
+  $("mentionAlertMeta").textContent = meta;
+  $("mentionAlertText").textContent = message.text || "Tu as été mentionné dans le chat.";
+  $("mentionAlertBackdrop").classList.add("open");
+  beep();
+}
+
+window.closeMentionAlert = () => {
+  $("mentionAlertBackdrop").classList.remove("open");
+};
+
+window.openMentionInWidget = () => {
+  closeMentionAlert();
+  toggleWidget(true);
+  setWidgetTab("miniChat");
+  setTimeout(() => $("miniChatText")?.focus(), 80);
+};
+
+document.addEventListener("click", e => {
+  const box = $("mentionSuggest");
+  if(!box?.classList.contains("open")) return;
+  if(box.contains(e.target)) return;
+  if(mentionTargetInput && e.target === mentionTargetInput) return;
+  hideMentionSuggest();
+});
+
+$("mentionSuggest")?.addEventListener("mousedown", e => {
+  const btn = e.target.closest(".mentionOption");
+  if(!btn) return;
+  e.preventDefault();
+  selectMention(btn.dataset.mention);
+});
+
 
 function setSync(text,type=''){ $("syncState").innerHTML = `<span class="dot ${type}"></span>${esc(text)}`; }
 function stamp(ts){ try{ return ts?.toDate ? ts.toDate().toLocaleString('fr-FR') : new Date(ts||Date.now()).toLocaleString('fr-FR') }catch{return ''} }
@@ -1709,6 +1961,9 @@ $("chatText").addEventListener("keydown", e => {
   }
 });
 
+bindMentionInput("chatText");
+bindMentionInput("miniChatText");
+
 function updateMiniAttachmentPreview(){
   const preview = $("miniAttachmentPreview");
   if(!preview) return;
@@ -1907,6 +2162,7 @@ async function start(){
             const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : m.attachmentUrl ? 'Image envoyée' : 'Nouveau message'), 90)}`;
             notify(mentioned ? 'Mention dans le chat' : 'Nouveau message', body);
             pushWidgetNotif(mentioned ? 'Mention dans le chat' : 'Nouveau message', body, mentioned ? 'mention' : 'chat');
+            if(mentioned) showMentionAlert(m);
           }
         });
       }
