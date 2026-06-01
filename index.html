@@ -497,6 +497,146 @@
     .uploadHint{font-size:12px;color:var(--muted)}
     @media(max-width:900px){.chartGrid{grid-template-columns:1fr}.chartRow{grid-template-columns:70px 1fr 76px}}
 
+
+    /* V23 — Discord chat */
+    .pinnedStrip{
+      border-bottom:1px solid var(--line);
+      background:rgba(15,23,42,.04);
+      padding:10px 14px;
+      display:none;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pinnedStrip.show{display:flex}
+    .pinnedChip{
+      border:1px solid var(--line2);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;
+      font-weight:800;
+      cursor:pointer;
+      max-width:260px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .replyPreview,.replyBanner{
+      border-left:3px solid #2563eb;
+      background:rgba(37,99,235,.10);
+      padding:8px 10px;
+      border-radius:8px;
+      margin:6px 0 10px;
+      font-size:13px;
+      color:var(--text);
+    }
+    .replyBanner{display:none;align-items:flex-start;justify-content:space-between;gap:10px}
+    .replyBanner.show{display:flex}
+    .replyPreview strong,.replyBanner strong{display:block;margin-bottom:3px}
+    .msgActions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:9px;
+      opacity:.0;
+      transform:translateY(2px);
+      transition:.14s ease;
+    }
+    .msg:hover .msgActions,.miniMsg:hover .msgActions{opacity:1;transform:none}
+    .msgActions button{
+      border:1px solid var(--line2);
+      background:var(--panel);
+      color:var(--text);
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .msgActions button:hover{background:rgba(148,163,184,.14)}
+    .readReceipt{
+      margin-top:7px;
+      font-size:11px;
+      color:var(--muted);
+      font-weight:700;
+    }
+    .typingState{
+      min-height:20px;
+      padding:0 18px 10px;
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .tagCard{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border:1px solid rgba(37,99,235,.35);
+      background:rgba(37,99,235,.10);
+      color:#93c5fd;
+      border-radius:999px;
+      padding:3px 8px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .threadBackdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.55);
+      backdrop-filter:blur(8px);
+      z-index:10020;
+      display:none;
+      align-items:center;
+      justify-content:flex-end;
+      padding:20px;
+    }
+    .threadBackdrop.open{display:flex}
+    .threadPanel{
+      width:min(520px,100%);
+      height:min(760px,calc(100vh - 40px));
+      background:#0f1115;
+      color:#f9fafb;
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px;
+      box-shadow:0 30px 90px rgba(0,0,0,.45);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    .threadHead{
+      padding:16px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      background:#111827;
+    }
+    .threadBody{flex:1;overflow:auto;padding:14px;display:grid;gap:10px;align-content:start}
+    .threadComposer{border-top:1px solid rgba(255,255,255,.10);padding:12px;display:grid;gap:8px;background:#10141c}
+    .threadComposer textarea{min-height:54px;max-height:120px;resize:none;background:#0b0f16;color:#fff;border-color:rgba(255,255,255,.16)}
+    .threadComposer .line{display:flex;gap:8px}
+    .threadComposer input{min-width:0;flex:1;background:#0b0f16;color:#fff;border-color:rgba(255,255,255,.16)}
+    .threadComposer button{background:#2563eb;color:#fff;border:1px solid #2563eb;border-radius:10px;padding:10px 12px;font-weight:900;cursor:pointer}
+    .miniPinned{
+      display:none;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:#111827;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .miniPinned.show{display:flex}
+    .miniPinned .pinnedChip{background:#171b24;color:#fff;border-color:rgba(255,255,255,.12);max-width:100%}
+    .miniTyping{font-size:12px;color:#9ca3af;font-weight:800;padding:0 14px 8px;min-height:18px}
+    @media(max-width:700px){
+      .threadBackdrop{padding:8px;align-items:stretch}
+      .threadPanel{height:calc(100vh - 16px)}
+      .msgActions{opacity:1;transform:none}
+    }
+
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -1120,7 +1260,10 @@ tbody tr:hover td{background:#1b1f29!important}
     <section id="chat" class="page">
       <div class="chatWrap">
         <div class="card chatPanel">
+          <div id="pinnedMessages" class="pinnedStrip"></div>
           <div id="messages" class="messages"></div>
+          <div id="typingState" class="typingState"></div>
+          <div id="replyBanner" class="replyBanner"></div>
           <form id="chatForm" class="chatInput">
             <textarea id="chatText" placeholder="Écris un message..."></textarea>
             <div class="chatControls">
@@ -1253,7 +1396,9 @@ tbody tr:hover td{background:#1b1f29!important}
     <button data-widget-tab="miniTasks" onclick="setWidgetTab('miniTasks')">Tâches</button>
     <button data-widget-tab="miniActivity" onclick="setWidgetTab('miniActivity')">Activité</button>
   </div>
+  <div id="miniPinned" class="miniPinned"></div>
   <div id="miniChat" class="messengerBody active"></div>
+  <div id="miniTyping" class="miniTyping"></div>
   <div id="miniNotifs" class="messengerBody"></div>
   <div id="miniTasks" class="messengerBody"></div>
   <div id="miniActivity" class="messengerBody"></div>
@@ -1293,6 +1438,26 @@ tbody tr:hover td{background:#1b1f29!important}
 </div>
 
 
+<div class="threadBackdrop" id="threadBackdrop" onclick="closeThread(event)">
+  <div class="threadPanel" onclick="event.stopPropagation()">
+    <div class="threadHead">
+      <div>
+        <h2 style="margin:0;font-size:20px">Thread</h2>
+        <p class="muted" id="threadSub" style="margin:6px 0 0">Discussion liée au message.</p>
+      </div>
+      <button class="messengerClose" onclick="closeThread()">×</button>
+    </div>
+    <div id="threadBody" class="threadBody"></div>
+    <form id="threadForm" class="threadComposer">
+      <textarea id="threadText" placeholder="Répondre dans le thread..."></textarea>
+      <div class="line">
+        <input id="threadSenderName" placeholder="Ton nom">
+        <button type="submit">Envoyer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
@@ -1310,10 +1475,11 @@ const firebaseConfig = {
 };
 
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
+let currentReplyTo=null, currentThreadRootId=null, typingTimer=null;
 
 const $ = id => document.getElementById(id);
 const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
@@ -1505,7 +1671,12 @@ function textHasMentionForMe(text=''){
 }
 
 function renderTextWithMentions(text=''){
-  return esc(text).replace(/@([A-Za-zÀ-ÿ0-9_.-]+)/g, '<span class="mention">@$1</span>');
+  let out = esc(text)
+    .replace(/@([A-Za-zÀ-ÿ0-9_.-]+)/g, '<span class="mention">@$1</span>')
+    .replace(/\/client\s+([^\\n]+)/gi, (_, name) => `<span class="tagCard">👤 Client · ${esc(String(name).trim())}</span>`)
+    .replace(/\/compte\s+([^\\n]+)/gi, (_, name) => `<span class="tagCard">🏷️ Compte · ${esc(String(name).trim())}</span>`)
+    .replace(/\/commande\s+([^\\n]+)/gi, (_, name) => `<span class="tagCard">📦 Commande · ${esc(String(name).trim())}</span>`);
+  return out;
 }
 
 function fileToDataURL(file){
@@ -1662,28 +1833,38 @@ function renderWidget(){
 
   if($("miniSenderName")) $("miniSenderName").value = localStorage.getItem("duoSender") || $("senderName")?.value || "";
 
+  renderPinnedMessages('miniPinned');
+
   const miniChat = $("miniChat");
   if(miniChat){
-    const localSender = (localStorage.getItem("duoSender") || "").toLowerCase();
-    miniChat.innerHTML = messages.slice(0, 18).reverse().map(m => {
-      const mine = String(m.sender || '').toLowerCase() === localSender;
+    const mainMessages = messages.filter(m=>!m.threadParentId).slice(0, 18);
+    const localSender = normalizeName(getCurrentSender());
+    miniChat.innerHTML = mainMessages.reverse().map(m => {
+      const mine = normalizeName(m.sender) === localSender;
       const acc = m.accountId ? accounts.find(a => a.id === m.accountId) : null;
-      return `<div class="miniMsg ${mine ? 'me' : ''}">
+      return `<div class="miniMsg ${mine ? 'me' : ''}" data-message-id="${esc(m.id)}">
         <div class="miniMeta"><strong>${esc(m.sender || 'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
+        ${renderReplyPreview(m)}
         <div class="miniText">${renderTextWithMentions(m.text || (acc ? 'Compte partagé' : ''))}</div>
         ${acc ? renderMiniAccount(acc) : ''}
         ${renderAttachment(m.attachmentUrl)}
+        ${renderMessageActions(m,true)}
         ${renderReactions(m)}
+        ${renderReadReceipt(m)}
       </div>`;
     }).join("") || '<p class="muted">Aucun message.</p>';
     miniChat.scrollTop = miniChat.scrollHeight;
+    setTimeout(()=>markMessagesRead(mainMessages.slice(0,10)), 250);
   }
+
+  renderTyping();
 
   const miniNotifs = $("miniNotifs");
   if(miniNotifs){
     const alertItems = getSmartAlerts().slice(0,8).map(a => ({title:a.high ? "⚠️ Commande bloquée" : "⏱️ Commande à surveiller", body:a.body, at:new Date().toISOString(), type:"alert"}));
     const activityItems = activities.slice(0, 12).map(a => ({title:"Activité", body:a.text || "", at:a.createdAt, type:"activity"}));
-    const items = [...alertItems, ...widgetNotifs, ...activityItems].slice(0, 30);
+    const pinnedItems = messages.filter(m=>m.pinned).slice(0,6).map(m=>({title:"📌 Message épinglé", body:`${m.sender || ''} : ${shortText(m.text || 'Pièce jointe',80)}`, at:m.pinnedAt || m.createdAt, type:"chat"}));
+    const items = [...pinnedItems, ...alertItems, ...widgetNotifs, ...activityItems].slice(0, 30);
     miniNotifs.innerHTML = items.map(n => `<div class="miniNotif">
       <strong>${esc(n.title)}</strong>
       <p>${esc(n.body)}</p>
@@ -1712,6 +1893,7 @@ function renderWidget(){
     </div>`).join("") || '<p class="muted">Aucune activité.</p>';
   }
 }
+
 
 document.addEventListener("click", e => {
   if(e.target.closest(".floatingChatBtn") || e.target.closest(".messengerPanel") || e.target.closest(".toast")) return;
@@ -2090,19 +2272,205 @@ window.reactMessage = async (id, emoji) => {
 document.addEventListener('click', e => {
   if(!e.target.closest('.reactionBar')) closeReactionPickers();
 });
+
+function getCurrentSender(){
+  return ($("senderName")?.value || $("miniSenderName")?.value || $("threadSenderName")?.value || localStorage.getItem("duoSender") || "Anonyme").trim() || "Anonyme";
+}
+
+function normalizeName(v){
+  return String(v||'').trim().toLowerCase();
+}
+
+function messageById(id){
+  return messages.find(m => m.id === id);
+}
+
+function readByNames(m){
+  const rb = m.readBy || {};
+  return Object.keys(rb).filter(Boolean).map(n => n.charAt(0).toUpperCase()+n.slice(1));
+}
+
+function renderReadReceipt(m){
+  const names = readByNames(m).filter(n => normalizeName(n) !== normalizeName(m.sender));
+  return names.length ? `<div class="readReceipt">Vu par ${esc(names.join(" · "))}</div>` : '';
+}
+
+function renderReplyPreview(m){
+  if(!m?.replyTo) return '';
+  const parent = messageById(m.replyTo);
+  if(!parent) return `<div class="replyPreview"><strong>Réponse</strong>Message original indisponible</div>`;
+  return `<div class="replyPreview"><strong>${esc(parent.sender || 'Message')}</strong>${esc(shortText(parent.text || 'Pièce jointe / compte partagé', 90))}</div>`;
+}
+
+function threadCount(id){
+  return messages.filter(m => m.threadRootId === id && m.threadParentId).length;
+}
+
+function renderMessageActions(m, compact=false){
+  const pinned = !!m.pinned;
+  const count = threadCount(m.id);
+  return `<div class="msgActions">
+    <button type="button" onclick="setReplyTo('${esc(m.id)}')">Répondre</button>
+    <button type="button" onclick="togglePinMessage('${esc(m.id)}')">${pinned ? 'Désépingler' : '📌 Épingler'}</button>
+    <button type="button" onclick="openThread('${esc(m.id)}')">Thread${count ? ` (${count})` : ''}</button>
+  </div>`;
+}
+
+function renderPinnedMessages(targetId='pinnedMessages'){
+  const box=$(targetId);
+  if(!box) return;
+  const pinned = messages.filter(m => m.pinned && !m.threadParentId).slice(0, 6);
+  box.classList.toggle('show', pinned.length>0);
+  box.innerHTML = pinned.map(m=>`<button class="pinnedChip" onclick="scrollToMessage('${esc(m.id)}')">📌 ${esc(m.sender||'')} · ${esc(shortText(m.text || 'Message épinglé', 60))}</button>`).join('');
+}
+
+window.scrollToMessage = id => {
+  toggleWidget(false);
+  goPage('chat');
+  setTimeout(()=>{
+    const el=document.querySelector(`[data-message-id="${CSS.escape(id)}"]`);
+    el?.scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+};
+
+window.setReplyTo = id => {
+  currentReplyTo = id;
+  const m=messageById(id);
+  const text = m ? `${m.sender || 'Message'} : ${shortText(m.text || 'Pièce jointe', 80)}` : 'Message sélectionné';
+  if($("replyBanner")){
+    $("replyBanner").classList.add('show');
+    $("replyBanner").innerHTML = `<div><strong>Réponse à</strong>${esc(text)}</div><button class="secondary small" type="button" onclick="cancelReply()">Annuler</button>`;
+  }
+  toggleWidget(true);
+  setWidgetTab('miniChat');
+  setTimeout(() => $("miniChatText")?.focus(), 80);
+};
+
+window.cancelReply = () => {
+  currentReplyTo = null;
+  $("replyBanner")?.classList.remove('show');
+};
+
+window.togglePinMessage = async id => {
+  const m=messageById(id); if(!m || !chatRef) return;
+  await setDoc(doc(chatRef,id),{pinned:!m.pinned,pinnedAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
+  await logActivity(`${getCurrentSender()} a ${m.pinned?'désépinglé':'épinglé'} un message`);
+};
+
+function visibleTypingText(){
+  const me=normalizeName(getCurrentSender());
+  const now=Date.now();
+  const active = typingUsers.filter(t=>{
+    const name=normalizeName(t.sender);
+    const updated=t.updatedAt?.toDate ? t.updatedAt.toDate().getTime() : new Date(t.updatedAt || 0).getTime();
+    return t.active && name && name!==me && now-updated<15000;
+  }).map(t=>t.sender);
+  if(!active.length) return '';
+  return active.length===1 ? `${active[0]} est en train d'écrire...` : `${active.join(', ')} écrivent...`;
+}
+
+function renderTyping(){
+  const txt=visibleTypingText();
+  if($("typingState")) $("typingState").textContent = txt;
+  if($("miniTyping")) $("miniTyping").textContent = txt;
+}
+
+function typingDocId(name){
+  return normalizeName(name).replace(/[^a-z0-9_-]/g,'_') || 'anonyme';
+}
+
+async function setTyping(active){
+  if(!typingRef) return;
+  const sender=getCurrentSender();
+  localStorage.setItem('duoSender', sender);
+  await setDoc(doc(typingRef, typingDocId(sender)), {sender, active, updatedAt:serverTimestamp()}, {merge:true});
+}
+
+function handleTypingInput(){
+  setTyping(true);
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>setTyping(false), 1800);
+}
+
+async function markMessagesRead(list){
+  const me=normalizeName(getCurrentSender());
+  if(!me || !chatRef) return;
+  const toMark=list.filter(m => normalizeName(m.sender)!==me && !(m.readBy||{})[me]).slice(0,15);
+  for(const m of toMark){
+    await setDoc(doc(chatRef,m.id),{readBy:{...(m.readBy||{}),[me]:serverTimestamp()},updatedAt:serverTimestamp()},{merge:true});
+  }
+}
+
+window.openThread = id => {
+  currentThreadRootId=id;
+  renderThread();
+  $("threadBackdrop")?.classList.add('open');
+  if($("threadSenderName")) $("threadSenderName").value = localStorage.getItem('duoSender') || getCurrentSender();
+  setTimeout(()=>$("threadText")?.focus(),80);
+};
+
+window.closeThread = (event) => {
+  if(event && event.target !== $("threadBackdrop")) return;
+  $("threadBackdrop")?.classList.remove('open');
+  currentThreadRootId=null;
+};
+
+function renderThread(){
+  const root=messageById(currentThreadRootId);
+  const body=$("threadBody");
+  if(!body || !root) return;
+  $("threadSub").textContent = `${root.sender || 'Message'} · ${shortText(root.text || 'Pièce jointe', 80)}`;
+  const replies=messages.filter(m=>m.threadRootId===currentThreadRootId && m.threadParentId).slice().reverse();
+  body.innerHTML = `
+    <div class="miniMsg">
+      <div class="miniMeta"><strong>${esc(root.sender||'Anonyme')}</strong><span>${stamp(root.createdAt)}</span></div>
+      <div class="miniText">${renderTextWithMentions(root.text||'')}</div>
+      ${renderAttachment(root.attachmentUrl)}
+      ${renderReactions(root)}
+    </div>
+    ${replies.map(m=>`<div class="miniMsg ${normalizeName(m.sender)===normalizeName(getCurrentSender())?'me':''}" data-message-id="${esc(m.id)}">
+      <div class="miniMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
+      <div class="miniText">${renderTextWithMentions(m.text||'')}</div>
+      ${renderAttachment(m.attachmentUrl)}
+      ${renderReactions(m)}
+      ${renderReadReceipt(m)}
+    </div>`).join('') || '<p class="muted">Aucune réponse dans ce thread.</p>'}`;
+  body.scrollTop=body.scrollHeight;
+}
+
+function messagePayload({text, sender, attachmentUrl='', accountId='', priority='', replyTo='', threadRootId='', threadParentId=''}){
+  return {
+    text, sender, attachmentUrl, accountId, priority,
+    mentions:extractMentions(text),
+    replyTo: replyTo || null,
+    threadRootId: threadRootId || null,
+    threadParentId: threadParentId || null,
+    readBy:{[normalizeName(sender)]:serverTimestamp()},
+    createdAt:serverTimestamp()
+  };
+}
+
 function renderChat(){
-  $("messages").innerHTML=messages.slice().reverse().map(m=>{
-    const mine = (m.sender||'').toLowerCase() === (localStorage.getItem('duoSender')||'').toLowerCase();
+  renderPinnedMessages('pinnedMessages');
+  const mainMessages = messages.filter(m=>!m.threadParentId);
+  $("messages").innerHTML=mainMessages.slice().reverse().map(m=>{
+    const mine = normalizeName(m.sender) === normalizeName(getCurrentSender());
     const acc = m.accountId ? accounts.find(a=>a.id===m.accountId) : null;
-    return `<div class="msg ${mine?'me':''} ${m.priority==='important'?'important':''}">
-      <div class="msgMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span>${m.priority==='important'?'<span class="pill warn">Important</span>':''}</div>
+    return `<div class="msg ${mine?'me':''} ${m.priority==='important'?'important':''}" data-message-id="${esc(m.id)}">
+      <div class="msgMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span>${m.priority==='important'?'<span class="pill warn">Important</span>':''}${m.pinned?'<span class="pill warn">📌 Épinglé</span>':''}</div>
+      ${renderReplyPreview(m)}
       <div class="msgText">${renderTextWithMentions(m.text||'')}</div>
       ${acc?renderAccountCard(acc,false):''}
       ${renderAttachment(m.attachmentUrl)}
+      ${renderMessageActions(m)}
       ${renderReactions(m)}
+      ${renderReadReceipt(m)}
     </div>`;
   }).join('') || '<p class="muted">Aucun message.</p>';
   const box=$("messages"); box.scrollTop=box.scrollHeight;
+  renderTyping();
+  setTimeout(()=>markMessagesRead(mainMessages.slice(0,12)), 250);
+  if(currentThreadRootId) renderThread();
 }
 
 function statBlock(groupKey, targetId){
@@ -2247,7 +2615,9 @@ $("miniChatForm").addEventListener("submit", async e=>{
   if(!text && !attachmentUrl) return;
   localStorage.setItem("duoSender", sender);
   if($("senderName")) $("senderName").value = sender;
-  await addDoc(chatRef,{text,attachmentUrl,sender,priority:textHasMentionForMe(text) ? "important" : "",mentions:extractMentions(text),createdAt:serverTimestamp()});
+  await addDoc(chatRef,messagePayload({text,attachmentUrl,sender,priority:textHasMentionForMe(text) ? "important" : "",replyTo:currentReplyTo}));
+  await setTyping(false);
+  currentReplyTo=null; $("replyBanner")?.classList.remove('show');
   $("miniChatText").value = "";
   if($("miniAttachmentUrl")) $("miniAttachmentUrl").value = "";
   if($("miniAttachmentFile")) $("miniAttachmentFile").value = "";
@@ -2270,8 +2640,31 @@ $("chatText").addEventListener("keydown", e => {
   }
 });
 
+
+$("threadForm")?.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const text=$("threadText").value.trim();
+  const sender=$("threadSenderName").value.trim() || getCurrentSender();
+  if(!text || !currentThreadRootId) return;
+  localStorage.setItem("duoSender", sender);
+  await addDoc(chatRef,messagePayload({text,sender,priority:textHasMentionForMe(text) ? "important" : "",threadRootId:currentThreadRootId,threadParentId:currentThreadRootId}));
+  await setTyping(false);
+  $("threadText").value='';
+  setTimeout(renderThread,120);
+});
+
+$("threadText")?.addEventListener("keydown", e=>{
+  if(e.key==="Enter" && !e.shiftKey){
+    e.preventDefault();
+    $("threadForm").requestSubmit();
+  }
+});
+
 bindMentionInput("chatText");
 bindMentionInput("miniChatText");
+$("chatText")?.addEventListener("input", handleTypingInput);
+$("miniChatText")?.addEventListener("input", handleTypingInput);
+$("threadText")?.addEventListener("input", handleTypingInput);
 
 function updateMiniAttachmentPreview(){
   const preview = $("miniAttachmentPreview");
@@ -2294,7 +2687,9 @@ $("chatForm").addEventListener("submit", async e=>{
   localStorage.setItem('duoSender',sender);
   if(!text && !accountId && !attachmentUrl) return;
   const priority = $("chatPriority").value || (textHasMentionForMe(text) ? "important" : "");
-  await addDoc(chatRef,{text,accountId,attachmentUrl,sender,priority,mentions:extractMentions(text),createdAt:serverTimestamp()});
+  await addDoc(chatRef,messagePayload({text,accountId,attachmentUrl,sender,priority,replyTo:currentReplyTo}));
+  await setTyping(false);
+  currentReplyTo=null; $("replyBanner")?.classList.remove('show');
   $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value=''; if($("attachmentUrl")) $("attachmentUrl").value=''; if($("attachmentFile")) $("attachmentFile").value='';
 });
 
@@ -2430,6 +2825,7 @@ async function start(){
     notesRef=collection(db,'duos',duoId,'notes');
     tasksRef=collection(db,'duos',duoId,'tasks');
     banHistoryRef=collection(db,'duos',duoId,'banHistory');
+    typingRef=collection(db,'duos',duoId,'typing');
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
       orders=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -2502,6 +2898,12 @@ async function start(){
     onSnapshot(query(banHistoryRef,orderBy('createdAt','desc'),limit(80)), snap=>{
       banHistory=snap.docs.map(d=>({id:d.id,...d.data()}));
       renderBanHistory();
+    });
+
+
+    onSnapshot(query(typingRef,orderBy('updatedAt','desc'),limit(10)), snap=>{
+      typingUsers=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderTyping();
     });
 
   }catch(e){ console.error(e); setSync('Firebase non disponible','bad'); }
