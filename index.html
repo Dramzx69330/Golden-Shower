@@ -434,47 +434,6 @@
     .seasonControls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
     .leaderDiff{font-size:13px;color:var(--muted);margin-top:6px}
 
-
-    .globalEmojiPicker{
-      position:fixed;
-      z-index:10060;
-      display:none;
-      width:min(360px,calc(100vw - 28px));
-      max-height:320px;
-      overflow:auto;
-      padding:10px;
-      grid-template-columns:repeat(8,1fr);
-      gap:6px;
-      background:#fff;
-      border:1px solid var(--line2);
-      border-radius:14px;
-      box-shadow:0 24px 70px rgba(17,24,39,.24);
-    }
-    .globalEmojiPicker.open{display:grid}
-    .globalEmojiPicker button{
-      width:36px;
-      height:36px;
-      padding:0!important;
-      display:grid;
-      place-items:center;
-      border:0;
-      border-radius:9px;
-      background:#fff;
-      color:#111827;
-      font-size:21px!important;
-      cursor:pointer;
-      line-height:1;
-    }
-    .globalEmojiPicker button:hover{background:#f3f4f6}
-    .miniMsg .reactionBar{
-      overflow:visible;
-      max-width:100%;
-      flex-wrap:wrap;
-    }
-    .miniMsg .reactionBar button{
-      min-width:auto;
-      flex:0 0 auto;
-    }
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
       aside{height:auto;position:relative}
@@ -1210,18 +1169,39 @@ function getClientReactionId(){
     id = (crypto?.randomUUID ? crypto.randomUUID() : `client-${Date.now()}-${Math.random().toString(16).slice(2)}`);
     localStorage.setItem('duoReactionClientId', id);
   }
-  const name = (locconst IPHONE_EMOJIS = [
-  '👍','👎','🔥','✅','☑️','✔️','❌','👀','😂','🤣','😅','😊','😎','😮','😱','😡',
-  '❤️','🩵','💙','💚','💛','🧡','💜','🤍','🖤','💯','🙏','👏','🤝','💪','👌','✌️',
-  '🥇','🏆','⭐','⚡','🚀','💎','💰','💸','📦','📬','📸','🖼️','🔔','📌','📝','⏰',
-  '⚠️','🚫','🔴','🟢','🟠','🔵','🟣','⚫','⚪','🟡','🛒','📊','📈','📉','🔍','🔒',
-  '🔓','👤','👥','💬','📲','📞','✉️','📩','🧾','🧠','🎯','🧨','🧊','🍀','🐐','👑',
-  '😈','🤨','😬','😭','😍','🥳','😴','🤯','🙄','😤','🤔','🤫','🫡','🫠','🥶','😇',
-  '🐱','🐶','🦁','🐍','🦅','🍕','🍔','☕','🍻','🎁','🎉','🎊','🧿','🪙','🏅','📍'
-];
+  const name = (localStorage.getItem('duoSender') || $('senderName')?.value || $('miniSenderName')?.value || '').trim();
+  return name ? `name:${name.toLowerCase()}` : `device:${id}`;
+}
+
+function normalizeReactionBucket(bucket){
+  if(typeof bucket === 'number') return {legacy: bucket, users:{}};
+  if(Array.isArray(bucket)){
+    const users={};
+    bucket.forEach(u => users[String(u)] = true);
+    return {legacy:0, users};
+  }
+  if(bucket && typeof bucket === 'object'){
+    const users = bucket.users && typeof bucket.users === 'object' ? {...bucket.users} : {};
+    const legacy = Number(bucket.legacy ?? (bucket.count && !bucket.users ? bucket.count : 0)) || 0;
+    return {legacy, users};
+  }
+  return {legacy:0, users:{}};
+}
+
+function reactionCount(bucket){
+  const b = normalizeReactionBucket(bucket);
+  return b.legacy + Object.keys(b.users).length;
+}
+
+function hasMyReaction(bucket){
+  const me = getClientReactionId();
+  const b = normalizeReactionBucket(bucket);
+  return !!b.users[me];
+}
 
 function renderReactions(m){
   const reactions = m.reactions || {};
+  const pickerEmojis = ['👍','🔥','✅','👀','😂','❤️','👏','😮','😅','🙏'];
   const summary = Object.entries(reactions)
     .map(([emoji,bucket]) => ({emoji, count: reactionCount(bucket), mine: hasMyReaction(bucket)}))
     .filter(r => r.count > 0)
@@ -1229,60 +1209,6 @@ function renderReactions(m){
 
   return `<div class="reactionBar" id="reactbar-${esc(m.id)}">
     ${summary.map(r=>`<button type="button" class="${r.mine?'mine':''}" title="${r.mine?'Retirer ma réaction':'Réagir'}" onclick="reactMessage('${esc(m.id)}','${esc(r.emoji)}')">${esc(r.emoji)} ${r.count}</button>`).join('')}
-    <button type="button" class="reactionPlus" title="Ajouter une réaction" onclick="toggleReactionPicker('${esc(m.id)}', event)">+</button>
-  </div>`;
-}
-
-function ensureGlobalEmojiPicker(){
-  let picker = document.getElementById('globalEmojiPicker');
-  if(picker) return picker;
-  picker = document.createElement('div');
-  picker.id = 'globalEmojiPicker';
-  picker.className = 'globalEmojiPicker';
-  document.body.appendChild(picker);
-  return picker;
-}
-
-window.closeReactionPickers = () => {
-  document.querySelectorAll('.emojiPicker.open').forEach(p => p.classList.remove('open'));
-  const global = document.getElementById('globalEmojiPicker');
-  if(global){
-    global.classList.remove('open');
-    global.dataset.messageId = '';
-  }
-};
-
-window.toggleReactionPicker = (id, event) => {
-  event?.stopPropagation();
-  const picker = ensureGlobalEmojiPicker();
-  const isSameOpen = picker.classList.contains('open') && picker.dataset.messageId === id;
-  closeReactionPickers();
-  if(isSameOpen) return;
-
-  picker.dataset.messageId = id;
-  picker.innerHTML = IPHONE_EMOJIS.map(e =>
-    `<button type="button" title="${esc(e)}" onclick="reactMessage('${esc(id)}','${esc(e)}'); closeReactionPickers();">${esc(e)}</button>`
-  ).join('');
-
-  const btn = event?.currentTarget || event?.target;
-  const rect = btn?.getBoundingClientRect ? btn.getBoundingClientRect() : {left: window.innerWidth - 380, top: window.innerHeight - 380, bottom: window.innerHeight - 80};
-  const width = Math.min(360, window.innerWidth - 28);
-  const estimatedHeight = 320;
-  let left = Math.min(Math.max(14, rect.left), window.innerWidth - width - 14);
-  let top = rect.bottom + 8;
-
-  if(top + estimatedHeight > window.innerHeight - 14){
-    top = rect.top - estimatedHeight - 8;
-  }
-  if(top < 14) top = 14;
-
-  picker.style.left = `${left}px`;
-  picker.style.top = `${top}px`;
-  picker.style.width = `${width}px`;
-  picker.classList.add('open');
-};
-
-tton type="button" class="${r.mine?'mine':''}" title="${r.mine?'Retirer ma réaction':'Réagir'}" onclick="reactMessage('${esc(m.id)}','${esc(r.emoji)}')">${esc(r.emoji)} ${r.count}</button>`).join('')}
     <button type="button" class="reactionPlus" title="Ajouter une réaction" onclick="toggleReactionPicker('${esc(m.id)}', event)">+</button>
     <div class="emojiPicker" id="picker-${esc(m.id)}">
       ${pickerEmojis.map(e=>`<button type="button" onclick="reactMessage('${esc(m.id)}','${e}'); closeReactionPickers();">${e}</button>`).join('')}
@@ -1321,7 +1247,7 @@ window.reactMessage = async (id, emoji) => {
 };
 
 document.addEventListener('click', e => {
-  if(!e.target.closest('.reactionBar') && !e.target.closest('.globalEmojiPicker')) closeReactionPickers();
+  if(!e.target.closest('.reactionBar')) closeReactionPickers();
 });
 function renderChat(){
   $("messages").innerHTML=messages.slice().reverse().map(m=>{
