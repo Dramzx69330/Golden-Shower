@@ -1157,6 +1157,85 @@ tbody tr:hover td{background:#1b1f29!important}
       white-space:nowrap;
     }
 
+
+    /* V25.1 — Statut compte avancé + dashboard comptes + notifications statut */
+    .accountStatusDashboard{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:12px;
+    }
+    .accountStatusTile{
+      border:1px solid var(--line);
+      background:var(--panel2);
+      border-radius:12px;
+      padding:15px 16px;
+      display:grid;
+      gap:7px;
+    }
+    .accountStatusTile span{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:var(--muted);
+      font-weight:900;
+    }
+    .accountStatusTile strong{
+      font-size:27px;
+      line-height:1;
+      color:var(--text);
+    }
+    .accountStatusTile.actif{border-color:rgba(34,197,94,.38)}
+    .accountStatusTile.chauffe{border-color:rgba(234,179,8,.42)}
+    .accountStatusTile.risque{border-color:rgba(249,115,22,.48)}
+    .accountStatusTile.banni{border-color:rgba(239,68,68,.48)}
+    .accountStatusTile.verif{border-color:rgba(96,165,250,.48)}
+    .accountRow{
+      border:1px solid var(--line)!important;
+      border-radius:12px;
+      padding:16px!important;
+      background:var(--panel2);
+      align-items:flex-start!important;
+    }
+    .accountRow.status-actif{border-left:4px solid #22c55e!important}
+    .accountRow.status-chauffe{border-left:4px solid #eab308!important}
+    .accountRow.status-risque{border-left:4px solid #f97316!important}
+    .accountRow.status-banni{border-left:4px solid #ef4444!important;opacity:.92}
+    .accountRow.status-verif{border-left:4px solid #60a5fa!important}
+    .statusBadge.chauffe{color:#a16207!important;background:#fef9c3!important;border-color:#fde047!important}
+    .statusBadge.risque{color:#c2410c!important;background:#fff7ed!important;border-color:#fdba74!important}
+    .statusQuickActions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      margin-top:8px;
+    }
+    .statusQuickActions button{
+      padding:6px 8px!important;
+      font-size:11px!important;
+      border-radius:999px!important;
+    }
+    .accountStatusAlert{
+      border:1px solid rgba(249,115,22,.45);
+      background:rgba(249,115,22,.10);
+      color:var(--text);
+      border-radius:12px;
+      padding:12px 14px;
+      margin-top:12px;
+      font-size:13px;
+      line-height:1.4;
+    }
+    body .statusBadge.chauffe{background:#3a300d!important;color:#fde68a!important;border-color:#854d0e!important}
+    body .statusBadge.risque{background:#3b1d0d!important;color:#fed7aa!important;border-color:#9a3412!important}
+    body .accountStatusTile{background:#141821!important}
+    @media(max-width:1050px){
+      .accountStatusDashboard{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){
+      .accountStatusDashboard{grid-template-columns:1fr}
+    }
+
 </style>
 </head>
 <body>
@@ -1198,6 +1277,13 @@ tbody tr:hover td{background:#1b1f29!important}
         <div class="card pad metric"><span>A Send</span><strong id="mASend">0 €</strong></div>
         <div class="card pad metric"><span>Send</span><strong id="mSend">0 €</strong></div>
         <div class="card pad metric"><span>Confirmé</span><strong id="mConfirmed">0 €</strong></div>
+      </div>
+
+      <div class="card pad" style="margin-top:20px">
+        <h2>État des comptes</h2>
+        <p class="muted">Vue rapide des comptes actifs, en chauffe, à risque et bannis.</p>
+        <div id="accountStatusDashboard" class="accountStatusDashboard"></div>
+        <div id="accountStatusWarning" class="accountStatusAlert" style="display:none"></div>
       </div>
 
       <div class="card pad smartAlerts">
@@ -1273,7 +1359,7 @@ tbody tr:hover td{background:#1b1f29!important}
             <label>Mot de passe<input id="accPassword" type="password" placeholder="Mot de passe"></label>
             <label>Annonces en cours<input id="accListings" type="number" min="0" step="1" placeholder="0"></label>
             <label>Favori<select id="accFavorite"><option value="non">Non</option><option value="oui">Oui</option></select></label>
-            <label>Statut<select id="accStatus"><option>ACTIF</option><option>BANNI</option><option>EN PAUSE</option><option>VÉRIFICATION</option></select></label>
+            <label>Statut<select id="accStatus"><option>ACTIF</option><option>CHAUFFE</option><option>RISQUE</option><option>BANNI</option><option>EN PAUSE</option><option>VÉRIFICATION</option></select></label>
             <label class="full">Raison statut / bannissement<input id="accStatusReason" placeholder="Ex : vérification identité, shadowban, compte à tester..."></label>
             <label class="full">Note<input id="accNote" placeholder="Infos utiles"></label>
             <div class="full" style="display:flex;gap:10px">
@@ -1288,6 +1374,8 @@ tbody tr:hover td{background:#1b1f29!important}
             <select id="accountStatusFilter" onchange="renderAccounts()">
               <option value="">Tous statuts</option>
               <option value="ACTIF">Actifs</option>
+              <option value="CHAUFFE">Chauffe</option>
+              <option value="RISQUE">Risque</option>
               <option value="BANNI">Bannis</option>
               <option value="EN PAUSE">En pause</option>
               <option value="VÉRIFICATION">Vérification</option>
@@ -1524,6 +1612,7 @@ const duoId = "duo-principal";
 let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef;
 let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[];
 let firstOrders=true, firstChat=true, soundOn=false;
+let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
 let currentReplyTo=null, currentThreadRootId=null, typingTimer=null;
 
@@ -2016,7 +2105,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget();
+  renderDashboard(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget();
 }
 
 function renderDashboard(){
@@ -2138,16 +2227,62 @@ function accountRevenue(id){
 }
 
 
+function normalizeAccountStatus(status){
+  const s=String(status||'ACTIF').trim().toUpperCase();
+  if(s === 'CHAUFFE') return 'CHAUFFE';
+  if(s === 'RISQUE') return 'RISQUE';
+  if(s === 'BANNI') return 'BANNI';
+  if(s === 'EN PAUSE') return 'EN PAUSE';
+  if(s.includes('VÉR') || s.includes('VER')) return 'VÉRIFICATION';
+  return 'ACTIF';
+}
 function accountStatusClass(status){
-  const s=String(status||'ACTIF').toUpperCase();
+  const s=normalizeAccountStatus(status);
   if(s==='BANNI') return 'banni';
+  if(s==='CHAUFFE') return 'chauffe';
+  if(s==='RISQUE') return 'risque';
   if(s==='EN PAUSE') return 'pause';
-  if(s.includes('VÉR') || s.includes('VER')) return 'verif';
+  if(s==='VÉRIFICATION') return 'verif';
   return 'actif';
 }
+function accountStatusIcon(status){
+  const s=normalizeAccountStatus(status);
+  return ({ACTIF:'🟢', CHAUFFE:'🟡', RISQUE:'🟠', BANNI:'🔴', 'EN PAUSE':'⚪', 'VÉRIFICATION':'🔵'}[s] || '🟢');
+}
 function accountStatusLabel(a){
-  const s=String(a.status||'ACTIF').toUpperCase();
-  return `<span class="statusBadge ${accountStatusClass(s)}">${esc(s)}</span>`;
+  const s=normalizeAccountStatus(a.status);
+  return `<span class="statusBadge ${accountStatusClass(s)}">${accountStatusIcon(s)} ${esc(s)}</span>`;
+}
+function accountStatusCounts(){
+  const summary = {ACTIF:0, CHAUFFE:0, RISQUE:0, BANNI:0, "EN PAUSE":0, "VÉRIFICATION":0};
+  accounts.forEach(a=>{ const s=normalizeAccountStatus(a.status); summary[s]=(summary[s]||0)+1; });
+  return summary;
+}
+function renderAccountStatusDashboard(){
+  if(!$("accountStatusDashboard")) return;
+  const c=accountStatusCounts();
+  const items=[
+    ['ACTIF','actif','🟢'],
+    ['CHAUFFE','chauffe','🟡'],
+    ['RISQUE','risque','🟠'],
+    ['BANNI','banni','🔴'],
+    ['VÉRIFICATION','verif','🔵']
+  ];
+  $("accountStatusDashboard").innerHTML = items.map(([label,cls,icon])=>`
+    <div class="accountStatusTile ${cls}">
+      <span>${icon} ${esc(label)}</span>
+      <strong>${c[label]||0}</strong>
+    </div>
+  `).join('');
+  const warning=[];
+  if((c.RISQUE||0)>0) warning.push(`${c.RISQUE} compte(s) à risque`);
+  if((c.CHAUFFE||0)>0) warning.push(`${c.CHAUFFE} compte(s) en chauffe`);
+  if((c.BANNI||0)>0) warning.push(`${c.BANNI} compte(s) banni(s)`);
+  const box=$("accountStatusWarning");
+  if(box){
+    box.style.display = warning.length ? 'block' : 'none';
+    box.innerHTML = warning.length ? `⚠️ Surveillance comptes : <strong>${warning.join(' · ')}</strong>` : '';
+  }
 }
 function renderBanHistory(){
   if(!$("banHistoryList")) return;
@@ -2160,16 +2295,15 @@ function renderBanHistory(){
 }
 function renderAccounts(){
   const filter = $("accountStatusFilter")?.value || "";
-  const summary = {ACTIF:0, BANNI:0, "EN PAUSE":0, "VÉRIFICATION":0};
-  accounts.forEach(a=>{ const s=String(a.status||'ACTIF').toUpperCase(); summary[s]=(summary[s]||0)+1; });
+  const summary = accountStatusCounts();
   if($("accountStatusSummary")){
-    $("accountStatusSummary").innerHTML = `Actifs: <strong>${summary.ACTIF||0}</strong> · Bannis: <strong>${summary.BANNI||0}</strong> · En pause: <strong>${summary["EN PAUSE"]||0}</strong> · Vérification: <strong>${summary["VÉRIFICATION"]||0}</strong>`;
+    $("accountStatusSummary").innerHTML = `Actifs: <strong>${summary.ACTIF||0}</strong> · Chauffe: <strong>${summary.CHAUFFE||0}</strong> · Risque: <strong>${summary.RISQUE||0}</strong> · Bannis: <strong>${summary.BANNI||0}</strong> · En pause: <strong>${summary["EN PAUSE"]||0}</strong> · Vérification: <strong>${summary["VÉRIFICATION"]||0}</strong>`;
   }
-  const visible = accounts.filter(a=>!filter || String(a.status||'ACTIF').toUpperCase()===filter);
+  const visible = accounts.filter(a=>!filter || normalizeAccountStatus(a.status)===filter);
   $("accountsList").innerHTML=visible.slice().sort((a,b)=>(b.favorite==='oui')-(a.favorite==='oui') || String(a.status||'ACTIF').localeCompare(String(b.status||'ACTIF')) || String(a.name).localeCompare(String(b.name))).map(a=>{
     const perf=accountRevenue(a.id);
-    const status=String(a.status||'ACTIF').toUpperCase();
-    return `<div class="row">
+    const status=normalizeAccountStatus(a.status);
+    return `<div class="row accountRow status-${accountStatusClass(status)}">
       <div>
         <strong>${a.favorite==='oui'?'<span class="star">★</span> ':''}${esc(a.name)} ${accountStatusLabel(a)}</strong>
         <div class="muted">${esc(a.plateforme)} · ${esc(a.owner||'Non attribué')} · <span class="${Number(a.listings||0)===0?'alertZero':''}">${Number(a.listings||0)} annonce(s)</span></div>
@@ -2179,6 +2313,9 @@ function renderAccounts(){
         <div style="margin-top:6px">Mot de passe: <span class="secret" id="pw-${esc(a.id)}">••••••••</span></div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <div class="statusQuickActions" style="width:100%">
+          ${['ACTIF','CHAUFFE','RISQUE','BANNI','VÉRIFICATION'].filter(s=>s!==status).map(s=>`<button class="secondary small" onclick="setAccountStatusQuick('${esc(a.id)}','${s}')">${accountStatusIcon(s)} ${s}</button>`).join('')}
+        </div>
         <button class="secondary small" onclick="toggleFavorite('${esc(a.id)}')">${a.favorite==='oui'?'Retirer ★':'Favori ★'}</button>
         <button class="${status==='BANNI'?'secondary':'danger'} small" onclick="quickToggleBan('${esc(a.id)}')">${status==='BANNI'?'Réactiver':'Bannir'}</button>
         <button class="secondary small" onclick="editAccount('${esc(a.id)}')">Modifier</button>
@@ -2641,9 +2778,13 @@ $("accountForm").addEventListener("submit", async e=>{
   if(id){
     const oldAcc=accounts.find(x=>x.id===id);
     await setDoc(doc(accountsRef,id),data,{merge:true});
-    if(oldAcc && String(oldAcc.status||'ACTIF') !== String(data.status)){
-      await addDoc(banHistoryRef,{accountId:id,accountName:data.name,from:String(oldAcc.status||'ACTIF'),to:data.status,reason:data.statusReason||'',createdAt:serverTimestamp()});
-      await logActivity(`Statut compte changé : ${data.name} (${oldAcc.status||'ACTIF'} → ${data.status})`);
+    if(oldAcc && normalizeAccountStatus(oldAcc.status) !== normalizeAccountStatus(data.status)){
+      const fromStatus=normalizeAccountStatus(oldAcc.status);
+      const toStatus=normalizeAccountStatus(data.status);
+      await addDoc(banHistoryRef,{accountId:id,accountName:data.name,from:fromStatus,to:toStatus,reason:data.statusReason||'',createdAt:serverTimestamp()});
+      await logActivity(`Statut compte changé : ${data.name} (${fromStatus} → ${toStatus})`);
+      pushWidgetNotif('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`, 'account-status');
+      toast('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`);
     } else {
       await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`);
     }
@@ -2750,7 +2891,7 @@ window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date")
 window.clearAccount=()=>{ $("accountForm").reset(); $("accountId").value=''; };
 window.editAccount=id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
-  $("accountId").value=id; $("accPlateforme").value=a.plateforme||'Vinted'; $("accName").value=a.name||''; $("accOwner").value=a.owner||''; $("accEmail").value=a.email||''; $("accPassword").value=a.password||''; $("accListings").value=a.listings||0; $("accFavorite").value=a.favorite||'non'; $("accStatus").value=a.status||'ACTIF'; $("accStatusReason").value=a.statusReason||''; $("accNote").value=a.note||'';
+  $("accountId").value=id; $("accPlateforme").value=a.plateforme||'Vinted'; $("accName").value=a.name||''; $("accOwner").value=a.owner||''; $("accEmail").value=a.email||''; $("accPassword").value=a.password||''; $("accListings").value=a.listings||0; $("accFavorite").value=a.favorite||'non'; $("accStatus").value=normalizeAccountStatus(a.status); $("accStatusReason").value=a.statusReason||''; $("accNote").value=a.note||'';
   goPage('comptes');
 };
 window.toggleFavorite=async id=>{
@@ -2758,9 +2899,25 @@ window.toggleFavorite=async id=>{
   await setDoc(doc(accountsRef,id),{favorite:a.favorite==='oui'?'non':'oui',updatedAt:serverTimestamp()},{merge:true});
 };
 
+window.setAccountStatusQuick=async(id,status)=>{
+  const a=accounts.find(x=>x.id===id); if(!a) return;
+  const from=normalizeAccountStatus(a.status);
+  const to=normalizeAccountStatus(status);
+  if(from===to) return;
+  const needsReason = ['CHAUFFE','RISQUE','BANNI'].includes(to);
+  const defaultReason = a.statusReason || (to==='CHAUFFE' ? 'Compte à surveiller' : to==='RISQUE' ? 'Risque détecté' : to==='BANNI' ? 'Compte banni' : '');
+  const reason = needsReason ? (prompt(`Raison du statut ${to} ?`, defaultReason) || defaultReason) : (to==='ACTIF' ? 'Compte remis actif' : '');
+  const payload={status:to,statusReason:reason,updatedAt:serverTimestamp()};
+  if(to==='BANNI') payload.bannedAt=serverTimestamp();
+  await setDoc(doc(accountsRef,id),payload,{merge:true});
+  await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from,to,reason,createdAt:serverTimestamp()});
+  await logActivity(`Statut compte changé : ${a.plateforme} · ${a.name} (${from} → ${to})`);
+  pushWidgetNotif('Statut compte changé', `${a.name} : ${from} → ${to}`, 'account-status');
+  toast('Statut compte changé', `${a.name} : ${from} → ${to}`);
+};
 window.quickToggleBan=async id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
-  const current=String(a.status||'ACTIF').toUpperCase();
+  const current=normalizeAccountStatus(a.status);
   if(current==='BANNI'){
     const reason=prompt('Raison de la réactivation ?', 'Compte réactivé') || 'Compte réactivé';
     await setDoc(doc(accountsRef,id),{status:'ACTIF',statusReason:reason,updatedAt:serverTimestamp()},{merge:true});
@@ -2889,14 +3046,23 @@ async function start(){
 
     let firstAccounts=true;
     onSnapshot(query(accountsRef,orderBy('createdAt','desc')), snap=>{
-      accounts=snap.docs.map(d=>({id:d.id,...d.data()}));
+      const nextAccounts=snap.docs.map(d=>({id:d.id,...d.data()}));
       if(!firstAccounts){
         snap.docChanges().forEach(c=>{
-          const d=c.doc.data();
+          const d={id:c.doc.id,...c.doc.data()};
+          const newStatus=normalizeAccountStatus(d.status);
+          const oldStatus=previousAccountStatuses[d.id];
           if(c.type==='added') pushWidgetNotif('Nouveau compte', `${d.plateforme || ''} · ${d.name || ''}`, 'account');
-          if(c.type==='modified') pushWidgetNotif('Compte modifié', `${d.plateforme || ''} · ${d.name || ''}`, 'account');
+          if(c.type==='modified' && oldStatus && oldStatus !== newStatus){
+            pushWidgetNotif('Statut compte changé', `${d.name || 'Compte'} : ${oldStatus} → ${newStatus}`, 'account-status');
+            toast('Statut compte changé', `${d.name || 'Compte'} : ${oldStatus} → ${newStatus}`);
+          } else if(c.type==='modified') {
+            pushWidgetNotif('Compte modifié', `${d.plateforme || ''} · ${d.name || ''}`, 'account');
+          }
         });
       }
+      accounts=nextAccounts;
+      previousAccountStatuses = Object.fromEntries(accounts.map(a=>[a.id, normalizeAccountStatus(a.status)]));
       firstAccounts=false;
       renderAll();
     });
