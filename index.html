@@ -3814,24 +3814,79 @@ async function start(){
       renderAll();
     });
 
-    onSnapshot(query(chatRef,orderBy('createdAt','desc'),limit(80)), snap=>{
-      const changes = snap.docChanges().map(c=>({type:c.type, data:{id:c.doc.id,...c.doc.data()}}));
-      messages=snap.docs.map(d=>({id:d.id,...d.data()}));
-      if(!firstChat){
+    function handleChatSnapshot(snap, fromFallback=false){
+      const changes = fromFallback ? [] : snap.docChanges().map(c=>({type:c.type, data:{id:c.doc.id,...c.doc.data()}}));
+
+      // On met d'abord l'interface à jour. Comme ça, même si une notif bug,
+      // le chat reste instantané et ne bloque plus le rendu.
+      messages = snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderChat();
+      renderWidget();
+
+      if(!fromFallback){
+        window.__lastChatSnapshotKey = messages.map(m=>m.id).join("|");
+      }
+
+      if(!firstChat && !fromFallback){
         changes.filter(c=>c.type==='added').forEach(c=>{
-          const m=c.data;
-          const localSender=(localStorage.getItem('duoSender')||'').toLowerCase();
-          if(String(m.sender||'').toLowerCase() !== localSender){
-            const mentioned = textHasMentionForMe(m.text || "") || (m.mentions || []).includes((localStorage.getItem('duoSender')||'').toLowerCase());
-            const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : m.attachmentUrl ? 'Image envoyée' : 'Nouveau message'), 90)}`;
-            notify(mentioned ? 'Mention dans le chat' : 'Nouveau message', body);
-            pushWidgetNotif(mentioned ? 'Mention dans le chat' : 'Nouveau message', body, mentioned ? 'mention' : 'chat');
-            if(mentioned) showMentionAlert(m);
+          try{
+            const m=c.data;
+            const localSender=(localStorage.getItem('duoSender')||'').toLowerCase();
+            if(String(m.sender||'').toLowerCase() !== localSender){
+              const mentioned = textHasMentionForMe(m.text || "") || (m.mentions || []).includes((localStorage.getItem('duoSender')||'').toLowerCase());
+              const body = `${m.sender || 'Anonyme'} : ${shortText(m.text || (m.accountId ? 'Compte partagé' : m.attachmentUrl ? 'Image envoyée' : 'Nouveau message'), 90)}`;
+              notify(mentioned ? 'Mention dans le chat' : 'Nouveau message', body);
+              pushWidgetNotif(mentioned ? 'Mention dans le chat' : 'Nouveau message', body, mentioned ? 'mention' : 'chat');
+              if(mentioned) showMentionAlert(m);
+            }
+          }catch(notifErr){
+            console.warn('Notification chat ignorée pour ne pas bloquer le temps réel', notifErr);
           }
         });
       }
-      firstChat=false; renderChat(); renderWidget();
-    });
+
+      firstChat=false;
+    }
+
+    onSnapshot(
+      query(chatRef,orderBy('createdAt','desc'),limit(80)),
+      snap=>{
+        try{
+          handleChatSnapshot(snap,false);
+          setSync('Connecté en temps réel','ok');
+        }catch(chatErr){
+          console.error('Erreur rendu chat temps réel', chatErr);
+          try{
+            messages=snap.docs.map(d=>({id:d.id,...d.data()}));
+            renderChat();
+            renderWidget();
+            firstChat=false;
+          }catch(fallbackErr){ console.error(fallbackErr); }
+        }
+      },
+      err=>{
+        console.error('Listener chat Firestore coupé', err);
+        setSync('Chat temps réel dégradé','bad');
+      }
+    );
+
+    // Sécurité : si le listener Firestore est coupé par le navigateur/réseau,
+    // ce fallback resynchronise le chat toutes les 2 secondes.
+    window.__lastChatSnapshotKey = "";
+    if(window.__chatFallbackTimer) clearInterval(window.__chatFallbackTimer);
+    window.__chatFallbackTimer = setInterval(async ()=>{
+      if(!chatRef) return;
+      try{
+        const snap = await getDocs(query(chatRef,orderBy('createdAt','desc'),limit(80)));
+        const key = snap.docs.map(d=>d.id).join("|");
+        if(key && key !== window.__lastChatSnapshotKey){
+          window.__lastChatSnapshotKey = key;
+          handleChatSnapshot(snap,true);
+        }
+      }catch(e){
+        console.warn('Fallback chat impossible', e);
+      }
+    }, 2000);
 
     onSnapshot(query(activityRef,orderBy('createdAt','desc'),limit(60)), snap=>{
       activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity(); renderWidget();
