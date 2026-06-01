@@ -392,39 +392,40 @@
     }
     .emojiPicker{
       display:none;
-      position:fixed;
-      z-index:10050;
-      grid-template-columns:repeat(8,1fr);
+      position:absolute;
+      left:0;
+      bottom:36px;
+      z-index:40;
       gap:6px;
-      width:min(336px,calc(100vw - 28px));
-      max-height:min(320px,calc(100vh - 120px));
-      overflow:auto;
-      padding:10px;
-      border:1px solid rgba(17,24,39,.12);
-      border-radius:14px;
+      flex-wrap:wrap;
+      width:220px;
+      padding:8px;
+      border:1px solid var(--line2);
+      border-radius:12px;
       background:#fff;
-      box-shadow:0 24px 70px rgba(17,24,39,.24);
+      box-shadow:0 16px 38px rgba(17,24,39,.18);
     }
-    .emojiPicker.open{display:grid}
+    .emojiPicker.open{display:flex}
     .emojiPicker button{
-      width:34px;
-      height:34px;
+      width:30px;
+      height:30px;
       padding:0!important;
       display:grid;
       place-items:center;
-      font-size:20px!important;
+      font-size:16px!important;
       background:#fff!important;
       color:#111827!important;
-      border:1px solid transparent!important;
-      border-radius:9px!important;
-      cursor:pointer;
-      line-height:1!important;
     }
-    .emojiPicker button:hover{background:#f3f4f6!important;border-color:#e5e7eb!important}
     .miniMsg{max-width:100%;overflow:visible}
     .miniMsg .reactionBar{gap:5px;margin-top:8px}
     .miniMsg .reactionBar button{font-size:12px;padding:5px 7px}
     .miniMsg .reactionPlus{width:26px;height:26px}
+    .miniMsg .emojiPicker{
+      bottom:32px;
+      width:196px;
+      max-width:calc(100vw - 56px);
+      background:#fff;
+    }
     .attachmentPreview{margin-top:10px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#f9fafb;max-width:100%}
     .attachmentPreview img{display:block;width:100%;max-width:100%;max-height:260px;object-fit:contain;background:#fff}
     .attachmentPreview a{display:block;padding:10px 12px;color:#111827;font-weight:800;text-decoration:none;word-break:break-word}
@@ -432,6 +433,34 @@
     .miniMsg .attachmentPreview{border-color:rgba(255,255,255,.16)}
     .seasonControls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
     .leaderDiff{font-size:13px;color:var(--muted);margin-top:6px}
+
+
+    /* Fix réactions widget : picker scrollable, pas de fermeture au scroll, pas de doublon d'ID */
+    .emojiPicker{
+      max-height:240px!important;
+      overflow-y:auto!important;
+      overflow-x:hidden!important;
+      overscroll-behavior:contain!important;
+      touch-action:pan-y!important;
+      scrollbar-gutter:stable;
+    }
+    .emojiPicker.open{display:flex!important}
+    .emojiPicker button{
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    .miniMsg .emojiPicker{
+      left:auto!important;
+      right:0!important;
+      bottom:34px!important;
+      width:246px!important;
+      max-height:230px!important;
+      z-index:10050!important;
+    }
+    .messengerBody{
+      overflow-y:auto;
+      overflow-x:hidden;
+    }
 
     @media(max-width:1050px){
       .app{grid-template-columns:1fr}
@@ -1198,82 +1227,56 @@ function hasMyReaction(bucket){
   return !!b.users[me];
 }
 
-const REACTION_EMOJIS = [
-  '👍','👎','❤️','🖤','💙','💚','💛','🧡','💜','🔥','✅','❌','👀','😂','🤣','😭',
-  '😅','😎','😮','😱','😡','🤯','🤝','👏','🙏','💪','👌','✌️','🤌','🤙','🙌','💯',
-  '⭐','⚡','🚀','🎯','🏆','💎','📦','💬','🔔','📌','⚠️','⏳','💰','🧾','📸','📍',
-  '🟢','🟠','🔴','🔵','⚫','⚪','🥇','🥈','🥉','🍀','🧠','🫡','🤔','😴','😤','😈',
-  '🥶','🤩','😇','🙃','😉','😍','😘','😬','😐','🫠','🤮','🤬','💥','✨','🎉','🫶'
-];
-
-function getEmojiPicker(){
-  let picker = document.getElementById('globalEmojiPicker');
-  if(!picker){
-    picker = document.createElement('div');
-    picker.id = 'globalEmojiPicker';
-    picker.className = 'emojiPicker';
-    document.body.appendChild(picker);
-  }
-  return picker;
-}
-
 function renderReactions(m){
   const reactions = m.reactions || {};
+  const pickerEmojis = [
+    '👍','👎','❤️','🖤','💙','💚','💛','🧡','💜','🔥','✅','❌','👀','😅','🤣','😭',
+    '😎','😮','😱','😡','🤯','👏','🤝','🙏','💪','👌','🖐️','🤌','👍🏻','🙌','💯','⭐',
+    '⚡','🚀','🎯','🏆','💎','📦','💬','🔔','📌','⚠️','⏳','💰','🧾','📸','📍','🟢',
+    '🟠','🔴','🔵','⚫','⚪','🥇','🥈','🥉','👑','🫡','😈','🤡','🥶','😤','😇','🤔'
+  ];
   const summary = Object.entries(reactions)
     .map(([emoji,bucket]) => ({emoji, count: reactionCount(bucket), mine: hasMyReaction(bucket)}))
     .filter(r => r.count > 0)
     .sort((a,b) => b.count - a.count);
 
-  return `<div class="reactionBar" id="reactbar-${esc(m.id)}">
+  return `<div class="reactionBar">
     ${summary.map(r=>`<button type="button" class="${r.mine?'mine':''}" title="${r.mine?'Retirer ma réaction':'Réagir'}" onclick="reactMessage('${esc(m.id)}','${esc(r.emoji)}')">${esc(r.emoji)} ${r.count}</button>`).join('')}
-    <button type="button" class="reactionPlus" title="Ajouter une réaction" onclick="openEmojiPicker('${esc(m.id)}', event)">+</button>
+    <button type="button" class="reactionPlus" title="Ajouter une réaction" onclick="toggleReactionPicker(event)">+</button>
+    <div class="emojiPicker" data-message-id="${esc(m.id)}">
+      ${pickerEmojis.map(e=>`<button type="button" onclick="reactMessage('${esc(m.id)}','${e}')">${e}</button>`).join('')}
+    </div>
   </div>`;
 }
 
 window.closeReactionPickers = () => {
-  const picker = document.getElementById('globalEmojiPicker');
-  if(picker){
-    picker.classList.remove('open');
-    picker.dataset.messageId = '';
-  }
+  document.querySelectorAll('.emojiPicker.open').forEach(p => p.classList.remove('open'));
 };
 
-window.openEmojiPicker = (id, event) => {
+window.toggleReactionPicker = (event) => {
   event?.preventDefault();
   event?.stopPropagation();
 
-  const button = event?.currentTarget || event?.target;
-  const picker = getEmojiPicker();
-  const isSameOpen = picker.classList.contains('open') && picker.dataset.messageId === id;
+  const bar = event?.currentTarget?.closest('.reactionBar');
+  const picker = bar?.querySelector('.emojiPicker');
+  if(!picker) return;
 
+  const isOpen = picker.classList.contains('open');
   closeReactionPickers();
-  if(isSameOpen) return;
-
-  picker.dataset.messageId = id;
-  picker.innerHTML = REACTION_EMOJIS.map(e => 
-    `<button type="button" onclick="reactMessage('${esc(id)}','${esc(e)}'); closeReactionPickers();" title="${esc(e)}">${esc(e)}</button>`
-  ).join('');
-
-  picker.classList.add('open');
-
-  const rect = button.getBoundingClientRect();
-  const gap = 10;
-  const pickerWidth = Math.min(336, window.innerWidth - 28);
-  const approxHeight = Math.min(320, window.innerHeight - 120);
-
-  let left = rect.left;
-  if(left + pickerWidth > window.innerWidth - 14) left = window.innerWidth - pickerWidth - 14;
-  if(left < 14) left = 14;
-
-  let top = rect.top - approxHeight - gap;
-  if(top < 14) top = Math.min(rect.bottom + gap, window.innerHeight - approxHeight - 14);
-
-  picker.style.left = `${left}px`;
-  picker.style.top = `${top}px`;
-  picker.style.width = `${pickerWidth}px`;
+  picker.classList.toggle('open', !isOpen);
 };
 
-window.toggleReactionPicker = window.openEmojiPicker;
+document.addEventListener('pointerdown', e => {
+  if(e.target.closest('.emojiPicker') || e.target.closest('.reactionPlus')) e.stopPropagation();
+}, true);
+
+document.addEventListener('touchstart', e => {
+  if(e.target.closest('.emojiPicker') || e.target.closest('.reactionPlus')) e.stopPropagation();
+}, true);
+
+document.addEventListener('wheel', e => {
+  if(e.target.closest('.emojiPicker')) e.stopPropagation();
+}, {capture:true, passive:true});
 
 window.reactMessage = async (id, emoji) => {
   const m=messages.find(x=>x.id===id); 
@@ -1293,11 +1296,8 @@ window.reactMessage = async (id, emoji) => {
 };
 
 document.addEventListener('click', e => {
-  if(!e.target.closest('.reactionBar') && !e.target.closest('#globalEmojiPicker')) closeReactionPickers();
+  if(!e.target.closest('.reactionBar')) closeReactionPickers();
 });
-window.addEventListener('resize', closeReactionPickers);
-window.addEventListener('scroll', closeReactionPickers, true);
-
 function renderChat(){
   $("messages").innerHTML=messages.slice().reverse().map(m=>{
     const mine = (m.sender||'').toLowerCase() === (localStorage.getItem('duoSender')||'').toLowerCase();
