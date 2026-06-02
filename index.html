@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duo Update — Gestion commandes</title>
+  <title>Duo Update V35 — Gestion commandes</title>
   <style>
     :root{
       --bg:#f6f7f9;
@@ -474,188 +474,6 @@
     }
     .smartAlert.high{border-color:#fecaca;background:#fef2f2;color:#7f1d1d}
     .smartAlert strong{display:block;margin-bottom:3px}
-    .dailyActions{margin-top:20px}
-    .actionBoard{
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-      margin-top:14px;
-    }
-    .actionCard{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:10px;
-      padding:14px;
-      display:grid;
-      gap:10px;
-      min-height:142px;
-    }
-    .actionCard.danger{border-color:#fecaca;background:#fef2f2;color:#7f1d1d}
-    .actionCard.warn{border-color:#fed7aa;background:#fff7ed;color:#7c2d12}
-    .actionCard.ok{border-color:#bbf7d0;background:#f0fdf4;color:#14532d}
-    .actionTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .actionTop strong{font-size:15px}
-    .actionCount{font-size:28px;font-weight:900;line-height:1}
-    .actionList{display:grid;gap:7px;font-size:13px}
-    .actionItem{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      border-top:1px solid rgba(17,24,39,.08);
-      padding-top:7px;
-    }
-    .actionItem span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    @media(max-width:900px){.actionBoard{grid-template-columns:1fr}}
-    .dailyReplay{margin-top:20px}
-    .replayGrid{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-      margin-top:14px;
-    }
-    .replayMetric{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:10px;
-      padding:13px;
-      min-height:86px;
-    }
-    .replayMetric span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-    }
-    .replayMetric strong{display:block;margin-top:8px;font-size:24px;line-height:1}
-    .replayBody{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:14px;
-    }
-    .replayPanel{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:10px;
-      padding:14px;
-      min-height:160px;
-    }
-    .replayPanel h3{font-size:15px;margin:0 0 10px}
-    .replayList{display:grid;gap:9px}
-    .replayLine{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-      padding-bottom:9px;
-      border-bottom:1px solid var(--line);
-      font-size:14px;
-    }
-    .replayLine:last-child{border-bottom:0;padding-bottom:0}
-    .replayLine span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis}
-    .replayFooter{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-    @media(max-width:900px){.replayGrid,.replayBody{grid-template-columns:1fr}}
-    .sellerModeShell{
-      max-width:760px;
-      margin:0 auto;
-      display:grid;
-      gap:14px;
-    }
-    .sellerHero{
-      background:#111827;
-      color:#fff;
-      border-radius:12px;
-      padding:20px;
-      display:flex;
-      justify-content:space-between;
-      gap:14px;
-      align-items:flex-start;
-      flex-wrap:wrap;
-    }
-    .sellerHero h2{margin:0 0 8px;color:#fff}
-    .sellerHero .muted{color:#d1d5db}
-    .sellerQuickGrid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-    }
-    .sellerActionBtn{
-      min-height:96px;
-      border:1px solid var(--line2);
-      background:#fff;
-      color:#111827;
-      border-radius:12px;
-      padding:16px;
-      text-align:left;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      gap:10px;
-      cursor:pointer;
-      box-shadow:0 12px 28px rgba(17,24,39,.06);
-    }
-    .sellerActionBtn strong{font-size:18px}
-    .sellerActionBtn span{color:var(--muted);font-size:13px;line-height:1.35}
-    .sellerActionBtn.active{
-      background:#111827;
-      color:#fff;
-      border-color:#111827;
-    }
-    .sellerActionBtn.active span{color:#d1d5db}
-    .sellerPanel{display:none}
-    .sellerPanel.active{display:block}
-    .sellerForm{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px;
-    }
-    .sellerForm label{
-      display:grid;
-      gap:7px;
-      font-size:12px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      color:#4b5563;
-    }
-    .sellerForm input,.sellerForm select,.sellerForm textarea{width:100%;min-width:0}
-    .sellerFull{grid-column:1/-1}
-    .sellerSubmit{
-      min-height:54px;
-      font-size:16px;
-      width:100%;
-    }
-    .sellerQueue{
-      display:grid;
-      gap:10px;
-      max-height:420px;
-      overflow:auto;
-    }
-    .sellerOrderItem{
-      border:1px solid var(--line);
-      background:#fff;
-      border-radius:10px;
-      padding:12px;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-    }
-    .sellerOrderItem strong{display:block;margin-bottom:4px}
-    @media(max-width:700px){
-      .sellerQuickGrid,.sellerForm{grid-template-columns:1fr}
-      .sellerActionBtn{min-height:88px}
-    }
     .chartGrid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px}
     .chartBox{display:grid;gap:12px}
     .chartRow{display:grid;grid-template-columns:86px 1fr 90px;gap:12px;align-items:center;font-size:14px}
@@ -1850,613 +1668,87 @@ tbody tr:hover td{background:#1b1f29!important}
     }
 
 
-    /* V35 — Historique vocal + notes vocales */
-    .voiceNoteBtn{
-      border:1px solid rgba(96,165,250,.45)!important;
-      background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(37,99,235,.10))!important;
-      color:#dbeafe!important;
-      border-radius:10px!important;
-      padding:10px 12px!important;
-      font-weight:900!important;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .voiceNoteBtn.recording{
-      border-color:rgba(239,68,68,.65)!important;
-      background:linear-gradient(180deg,rgba(239,68,68,.26),rgba(127,29,29,.18))!important;
-      color:#fecaca!important;
-      animation:voicePulse 1s infinite;
-    }
-    @keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.28)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
-    .voiceAttachment{
-      display:grid;
-      gap:8px;
-      min-width:min(280px,100%);
-    }
-    .voiceAttachmentHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      color:#dbeafe;
-      font-size:12px;
-      font-weight:900;
-    }
-    .voiceAttachment audio{
-      width:100%;
-      min-width:220px;
-      max-width:100%;
-    }
-    .voiceHistoryBox{
-      margin-top:14px;
-      display:grid;
-      gap:9px;
-      max-height:230px;
-      overflow:auto;
-    }
-    .voiceHistoryItem{
-      border:1px solid var(--line);
-      background:var(--panel2);
-      border-radius:10px;
-      padding:10px 11px;
-      display:grid;
-      gap:4px;
-      font-size:13px;
-    }
-    .voiceHistoryItem strong{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      color:var(--text);
-    }
-    .voiceHistoryItem span{color:var(--muted)}
-    .voiceHistoryStatus{
-      display:inline-flex;
-      border-radius:999px;
-      padding:3px 7px;
-      border:1px solid rgba(148,163,184,.22);
-      font-size:11px;
-      font-weight:900;
-      white-space:nowrap;
-    }
-    .voiceHistoryStatus.ok{color:#86efac;background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28)}
-    .voiceHistoryStatus.missed{color:#fcd34d;background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28)}
-    .voiceHistoryStatus.ended{color:#cbd5e1;background:rgba(148,163,184,.10)}
-
-  
-/* V36 — Partage écran, E2E, salons vocaux, statut personnalisé, PWA */
-.v36Controls{display:grid;gap:8px;margin-top:10px}
-.v36ControlRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.v36ControlRow select,.v36ControlRow input{min-width:0!important;flex:1;padding:9px 10px!important;border-radius:9px!important;font-size:12px!important}
-.v36ControlRow button{padding:9px 10px!important;border-radius:9px!important;font-size:12px!important;font-weight:900!important}
-.v36Chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900;color:var(--text)}
-.v36ScreenBox{display:none;border:1px solid #343b49;background:#0b0e14;border-radius:12px;overflow:hidden;margin-top:10px}
-.v36ScreenBox.show{display:block}
-.v36ScreenBox video{display:block;width:100%;max-height:260px;background:#000}
-.v36ScreenLabel{padding:8px 10px;font-size:12px;color:#cbd5e1;font-weight:900;border-bottom:1px solid #343b49}
-.v36InstallBtn{display:none}
-.v36InstallBtn.show{display:inline-flex}
-.v36E2EOn{border-color:rgba(34,197,94,.45)!important;color:#bbf7d0!important;background:rgba(34,197,94,.10)!important}
-
-
-/* V38 — Mobile First responsive app shell */
-@media (max-width: 900px){
-  html, body{
-    width:100%!important;
-    max-width:100%!important;
-    overflow-x:hidden!important;
-    -webkit-text-size-adjust:100%;
-  }
-
-  .app{
-    display:block!important;
-    min-height:100dvh!important;
-    width:100%!important;
-  }
-
-  aside{
-    position:sticky!important;
-    top:0!important;
-    z-index:9000!important;
-    height:auto!important;
-    width:100%!important;
-    padding:12px 14px 10px!important;
-    border-right:0!important;
-    border-bottom:1px solid var(--line)!important;
-    background:rgba(18,19,24,.96)!important;
-    backdrop-filter:blur(14px)!important;
-    -webkit-backdrop-filter:blur(14px)!important;
-  }
-
-  aside .brand{
-    font-size:16px!important;
-    margin:0!important;
-    line-height:1.15!important;
-  }
-
-  aside .sub{
-    display:block!important;
-    font-size:10px!important;
-    line-height:1.25!important;
-    margin:3px 0 0!important;
-    max-width:250px!important;
-    opacity:.82!important;
-  }
-
-  aside .nav{
-    position:fixed!important;
-    left:0!important;
-    right:0!important;
-    bottom:0!important;
-    z-index:12000!important;
-    display:grid!important;
-    grid-template-columns:repeat(5, minmax(0,1fr))!important;
-    gap:5px!important;
-    padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
-    background:rgba(10,12,16,.96)!important;
-    border-top:1px solid var(--line)!important;
-    box-shadow:0 -16px 40px rgba(0,0,0,.35)!important;
-    backdrop-filter:blur(16px)!important;
-    -webkit-backdrop-filter:blur(16px)!important;
-  }
-
-  aside .nav button{
-    width:100%!important;
-    min-width:0!important;
-    height:50px!important;
-    padding:6px 4px!important;
-    border-radius:14px!important;
-    font-size:10px!important;
-    line-height:1.1!important;
-    text-align:center!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    white-space:normal!important;
-    word-break:normal!important;
-  }
-
-  aside .nav button[data-page="dashboard"]::before{content:"🏠";display:block;font-size:16px;margin-bottom:2px}
-  aside .nav button[data-page="clients"]::before{content:"👤";display:block;font-size:16px;margin-bottom:2px}
-  aside .nav button[data-page="accounts"]::before,
-  aside .nav button[data-page="comptes"]::before{content:"💼";display:block;font-size:16px;margin-bottom:2px}
-  aside .nav button[data-page="chat"]::before{content:"💬";display:block;font-size:16px;margin-bottom:2px}
-  aside .nav button[data-page="stats"]::before{content:"📊";display:block;font-size:16px;margin-bottom:2px}
-
-  main{
-    width:100%!important;
-    max-width:none!important;
-    margin:0!important;
-    padding:18px 12px calc(88px + env(safe-area-inset-bottom))!important;
-    overflow-x:hidden!important;
-  }
-
-  .top{
-    display:block!important;
-    margin-bottom:16px!important;
-  }
-
-  h1{
-    font-size:28px!important;
-    line-height:1.05!important;
-    letter-spacing:-.045em!important;
-  }
-
-  h2{
-    font-size:20px!important;
-  }
-
-  h3{
-    font-size:16px!important;
-  }
-
-  .muted,
-  #pageDesc{
-    font-size:12px!important;
-    line-height:1.35!important;
-  }
-
-  .globalSearchWrap{
-    max-width:none!important;
-    width:100%!important;
-    margin-top:12px!important;
-  }
-
-  .globalSearch{
-    width:100%!important;
-    min-width:0!important;
-    height:44px!important;
-    font-size:13px!important;
-    padding:11px 12px!important;
-    border-radius:12px!important;
-  }
-
-  .globalResults{
-    top:50px!important;
-    max-height:60dvh!important;
-    overflow:auto!important;
-  }
-
-  .grid,
-  .two,
-  .three,
-  .chartGrid,
-  .liveNowStrip,
-  .chatWrap{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:12px!important;
-  }
-
-  .cards{
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
-  }
-
-  .card{
-    border-radius:14px!important;
-    width:100%!important;
-    max-width:100%!important;
-    overflow:hidden!important;
-  }
-
-  .pad{
-    padding:14px!important;
-  }
-
-  .metric span{
-    font-size:10px!important;
-    letter-spacing:.08em!important;
-  }
-
-  .metric strong{
-    font-size:24px!important;
-    margin-top:8px!important;
-    line-height:1.05!important;
-  }
-
-  .toolbar{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:9px!important;
-  }
-
-  .toolbar input,
-  .toolbar select,
-  .toolbar button,
-  input,
-  select,
-  textarea{
-    width:100%!important;
-    min-width:0!important;
-    max-width:100%!important;
-  }
-
-  button.primary,
-  button.secondary,
-  button.danger{
-    min-height:42px!important;
-    border-radius:12px!important;
-  }
-
-  .form{
-    grid-template-columns:1fr!important;
-    gap:10px!important;
-  }
-
-  .row{
-    display:grid!important;
-    grid-template-columns:1fr!important;
-    gap:10px!important;
-    align-items:start!important;
-  }
-
-  table{
-    display:block!important;
-    width:100%!important;
-    overflow-x:auto!important;
-    -webkit-overflow-scrolling:touch!important;
-    white-space:nowrap!important;
-    border-radius:12px!important;
-  }
-
-  th,td{
-    padding:11px 12px!important;
-    font-size:12px!important;
-  }
-
-  .accountStatusDashboard{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
-  }
-
-  .accountStatusTile{
-    padding:12px!important;
-    border-radius:14px!important;
-  }
-
-  .accountStatusTile strong{
-    font-size:24px!important;
-  }
-
-  .cleanAccountRow,
-  .accountRow{
-    grid-template-columns:1fr!important;
-    display:grid!important;
-    padding:14px!important;
-    gap:12px!important;
-  }
-
-  .accountActionsCompact{
-    justify-items:stretch!important;
-  }
-
-  .accountButtons{
-    grid-template-columns:1fr 1fr!important;
-  }
-
-  .accountStatusSelect{
-    width:100%!important;
-    min-width:0!important;
-  }
-
-  .livePresenceBox{
-    width:100%!important;
-    min-width:0!important;
-    margin-top:12px!important;
-    max-height:260px!important;
-    overflow:auto!important;
-  }
-
-  .presenceUser{
-    padding:9px!important;
-  }
-
-  .presenceMeta,
-  .presenceName{
-    max-width:210px!important;
-  }
-
-  .chatWrap{
-    height:auto!important;
-    min-height:0!important;
-    max-height:none!important;
-  }
-
-  .chatPanel{
-    min-height:calc(100dvh - 190px)!important;
-    max-height:none!important;
-    border-radius:14px!important;
-  }
-
-  .messages{
-    min-height:calc(100dvh - 330px)!important;
-    max-height:calc(100dvh - 285px)!important;
-    padding:12px!important;
-    gap:10px!important;
-  }
-
-  .msg{
-    max-width:92%!important;
-    padding:11px 12px!important;
-    border-radius:14px!important;
-  }
-
-  .msgText{
-    font-size:14px!important;
-    line-height:1.42!important;
-    word-break:break-word!important;
-  }
-
-  .msgMeta{
-    font-size:11px!important;
-    flex-wrap:wrap!important;
-  }
-
-  .chatInput{
-    padding:12px!important;
-  }
-
-  .chatControls{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:8px!important;
-  }
-
-  .chatControls button,
-  .chatControls label{
-    width:100%!important;
-  }
-
-  .chatSide{
-    max-height:none!important;
-    overflow:visible!important;
-  }
-
-  .messengerPanel{
-    left:8px!important;
-    right:8px!important;
-    bottom:calc(72px + env(safe-area-inset-bottom))!important;
-    width:auto!important;
-    height:calc(100dvh - 96px)!important;
-    max-height:calc(100dvh - 96px)!important;
-    border-radius:18px!important;
-  }
-
-  .messengerBody{
-    padding:10px!important;
-  }
-
-  .messengerComposer{
-    padding:10px!important;
-  }
-
-  .messengerComposer .line{
-    grid-template-columns:1fr 42px 84px!important;
-  }
-
-  .messengerComposer .line input{
-    grid-column:1 / -1!important;
-  }
-
-  .messengerComposer button[type="submit"]{
-    width:84px!important;
-    min-width:84px!important;
-  }
-
-  .floatingChatBtn{
-    right:14px!important;
-    bottom:calc(76px + env(safe-area-inset-bottom))!important;
-    width:56px!important;
-    height:56px!important;
-    z-index:11999!important;
-  }
-
-  .toastStack{
-    left:10px!important;
-    right:10px!important;
-    bottom:calc(138px + env(safe-area-inset-bottom))!important;
-    width:auto!important;
-  }
-
-  .voiceBackdrop,
-  .emergencyBackdrop,
-  .mentionAlertBackdrop,
-  .modalBackdrop{
-    align-items:flex-end!important;
-    padding:0!important;
-  }
-
-  .voiceModal,
-  .emergencyModal,
-  .clientModal,
-  .mentionAlert{
-    width:100%!important;
-    max-width:100%!important;
-    border-radius:22px 22px 0 0!important;
-    max-height:92dvh!important;
-    overflow:auto!important;
-  }
-
-  .voiceHead,
-  .emergencyHead{
-    padding:18px!important;
-  }
-
-  .voiceBody,
-  .emergencyBody,
-  .clientModalBody{
-    padding:16px!important;
-  }
-
-  .voiceActions,
-  .emergencyActions,
-  .mentionAlertActions{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:8px!important;
-  }
-
-  .voiceActions button,
-  .emergencyActions button,
-  .mentionAlertActions button{
-    width:100%!important;
-  }
-
-  .threadBackdrop{
-    padding:0!important;
-    align-items:stretch!important;
-  }
-
-  .threadPanel{
-    width:100%!important;
-    height:100dvh!important;
-    border-radius:0!important;
-  }
-
-  .clientMetrics{
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:8px!important;
-  }
-
-  .timelineItem{
-    grid-template-columns:52px 1fr!important;
-    gap:10px!important;
-  }
-
-  .themeSwitcher{
-    justify-content:stretch!important;
-    margin-top:10px!important;
-  }
-
-  .themeSwitcher select{
-    width:100%!important;
-  }
-
-  .statusMini{
-    font-size:11px!important;
-    padding:5px 7px!important;
-  }
-
-  .miniMsg{
-    margin-bottom:8px!important;
-  }
-
-  .attachmentPreview img{
-    max-height:210px!important;
-  }
+/* V35 — Historique vocal + notes vocales */
+.voiceNotePlayer{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+  padding:10px 12px;
+  border:1px solid rgba(96,165,250,.30);
+  background:rgba(96,165,250,.10);
+  border-radius:12px;
 }
-
-@media (max-width: 430px){
-  .cards{
-    grid-template-columns:1fr!important;
-  }
-
-  .accountStatusDashboard{
-    grid-template-columns:1fr!important;
-  }
-
-  .clientMetrics{
-    grid-template-columns:1fr!important;
-  }
-
-  aside .nav button{
-    font-size:9px!important;
-  }
-
-  main{
-    padding-left:8px!important;
-    padding-right:8px!important;
-  }
-
-  .pad{
-    padding:12px!important;
-  }
-
-  .accountButtons,
-  .chatControls,
-  .voiceActions,
-  .emergencyActions{
-    grid-template-columns:1fr!important;
-  }
+.voiceNotePlayer audio{
+  width:100%;
+  min-width:160px;
+  height:34px;
 }
-
-/* V38 — Better touch targets */
-@media (pointer: coarse){
-  button,
-  .nav button,
-  select,
-  input,
-  textarea,
-  summary{
-    touch-action:manipulation;
-  }
-
-  button.small{
-    min-height:38px!important;
-  }
+.voiceNoteMeta{
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
 }
+.voiceRecordBtn{
+  border-radius:10px!important;
+  border:1px solid rgba(96,165,250,.45)!important;
+  background:rgba(96,165,250,.12)!important;
+  color:#dbeafe!important;
+  font-weight:900!important;
+}
+.voiceRecordBtn.recording{
+  border-color:rgba(239,68,68,.75)!important;
+  background:rgba(239,68,68,.20)!important;
+  color:#fecaca!important;
+}
+.callHistoryBackdrop{
+  position:fixed;
+  inset:0;
+  z-index:32000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(10px);
+}
+.callHistoryBackdrop.open{display:flex}
+.callHistoryModal{
+  width:min(620px,100%);
+  max-height:min(760px,calc(100vh - 44px));
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  background:#171a22;
+  color:#f3f4f6;
+  border:1px solid #343b49;
+  border-radius:18px;
+  box-shadow:0 34px 110px rgba(0,0,0,.55);
+}
+.callHistoryHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 20px;
+  border-bottom:1px solid #343b49;
+  background:#101218;
+}
+.callHistoryBody{
+  padding:14px;
+  overflow:auto;
+  display:grid;
+  gap:10px;
+}
+.callHistoryItem{
+  border:1px solid #343b49;
+  background:#101218;
+  border-radius:13px;
+  padding:12px 13px;
+}
+.callHistoryItem strong{display:block;margin-bottom:4px}
+.callHistoryItem .muted{font-size:12px}
 
 </style>
 </head>
@@ -2467,7 +1759,6 @@ tbody tr:hover td{background:#1b1f29!important}
     <div class="sub">Gestion propre des commandes Vinted / Leboncoin, comptes et chat direct.</div>
     <div class="nav">
       <button class="active" data-page="dashboard">Dashboard</button>
-      <button data-page="vendeur">Vendeur</button>
       <button data-page="clients">Clients</button>
       <button data-page="comptes">Comptes</button>
       <button data-page="chat">Chat</button>
@@ -2497,36 +1788,11 @@ tbody tr:hover td{background:#1b1f29!important}
         </div>
         <div id="livePresenceBox" class="livePresenceBox">
           <div class="livePresenceTitle"><span>Présence live</span><span id="presenceCount">0 en ligne</span></div>
-          <div class="v36Controls">
-            <div class="v36ControlRow">
-              <select id="customStatusSelect" onchange="setCustomStatus(this.value)" title="Statut personnalisé">
-                <option value="">🟢 Disponible</option>
-                <option value="🌙 Occupé">🌙 Occupé</option>
-                <option value="⚡ En mission">⚡ En mission</option>
-                <option value="🧠 Focus">🧠 Focus</option>
-                <option value="💤 AFK">💤 AFK</option>
-              </select>
-            </div>
-            <div class="v36ControlRow">
-              <input id="e2ePassphrase" type="password" placeholder="Phrase secrète E2E">
-              <button type="button" class="secondary small" id="e2eToggleBtn" onclick="toggleE2E()">🔐 E2E OFF</button>
-            </div>
-            <div class="v36ControlRow">
-              <select id="voiceRoomSelect" title="Salon vocal">
-                <option value="">🎧 Appel direct</option>
-                <option value="Général">🎤 Salon Général</option>
-                <option value="Staff">🎤 Salon Staff</option>
-                <option value="Urgence">🚨 Salon Urgence</option>
-              </select>
-              <button type="button" class="secondary small" onclick="joinVoiceRoom()">Rejoindre</button>
-            </div>
-          </div>
           <div id="livePresenceList" class="livePresenceList"></div>
         </div>
         <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
           <button class="secondary small" onclick="enableNotifications()">Activer son</button>
           <button class="secondary small" onclick="exportCSV()">Export CSV</button>
-          <button class="secondary small v36InstallBtn" id="installPwaBtn" onclick="installPWA()">Installer app</button>
         </div>
       </div>
     </div>
@@ -2550,29 +1816,6 @@ tbody tr:hover td{background:#1b1f29!important}
         <h2>Centre d'alertes intelligent</h2>
         <p class="muted">Commandes bloquées ou à surveiller automatiquement.</p>
         <div id="smartAlerts" class="alertList"></div>
-      </div>
-      <div class="card pad dailyActions">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div>
-            <h2>Plan d'action du jour</h2>
-            <p class="muted">Priorités calculées automatiquement depuis les commandes et les comptes.</p>
-          </div>
-          <button class="secondary small" type="button" onclick="goPage('chat');toggleWidget(true)">Ouvrir le suivi</button>
-        </div>
-        <div id="dailyActionBoard" class="actionBoard"></div>
-      </div>
-      <div class="card pad dailyReplay">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap">
-          <div>
-            <h2>Replay de journée</h2>
-            <p class="muted">Synthèse automatique des ventes, blocages et actions du jour.</p>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="secondary small" type="button" onclick="copyDailyReplay()">Copier</button>
-            <button class="primary small" type="button" onclick="sendDailyReplayToChat()">Envoyer au chat</button>
-          </div>
-        </div>
-        <div id="dailyReplayBox"></div>
       </div>
       <div class="liveNowStrip">
         <div class="liveNowCard">
@@ -2625,86 +1868,6 @@ tbody tr:hover td{background:#1b1f29!important}
           <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Suivi</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
           <tbody id="ordersTbody"></tbody>
         </table>
-      </div>
-    </section>
-
-    <section id="vendeur" class="page">
-      <div class="sellerModeShell">
-        <div class="sellerHero">
-          <div>
-            <h2>Mode téléphone vendeur</h2>
-            <p class="muted" style="margin:0">Quatre gestes rapides, sans tableau ni stats.</p>
-          </div>
-          <span class="pill send" id="sellerModeCount">0 action</span>
-        </div>
-
-        <div class="sellerQuickGrid">
-          <button class="sellerActionBtn active" type="button" data-seller-action="newOrder" onclick="setSellerAction('newOrder')">
-            <strong>Nouvelle commande</strong>
-            <span>Créer une commande en A Send.</span>
-          </button>
-          <button class="sellerActionBtn" type="button" data-seller-action="tracking" onclick="setSellerAction('tracking')">
-            <strong>Ajouter suivi</strong>
-            <span>Passer en Send avec numéro de suivi.</span>
-          </button>
-          <button class="sellerActionBtn" type="button" data-seller-action="confirm" onclick="setSellerAction('confirm')">
-            <strong>Confirmer</strong>
-            <span>Valider une commande terminée.</span>
-          </button>
-          <button class="sellerActionBtn" type="button" data-seller-action="share" onclick="setSellerAction('share')">
-            <strong>Partager compte</strong>
-            <span>Envoyer un accès au chat interne.</span>
-          </button>
-        </div>
-
-        <div class="card pad sellerPanel active" id="sellerPanelNewOrder">
-          <h2>Nouvelle commande</h2>
-          <form id="sellerQuickOrderForm" class="sellerForm">
-            <label>Vendeur<input id="sellerVendeur" required placeholder="Dora / ZerleZZ"></label>
-            <label>Client<input id="sellerClient" placeholder="Nom client"></label>
-            <label>Plateforme<select id="sellerPlateforme"><option>Vinted</option><option>Leboncoin</option></select></label>
-            <label>Produit<select id="sellerProduit"><option>Perth Mint</option><option>PAMP</option></select></label>
-            <label>Poids<select id="sellerPoids"><option>10g</option><option>5g</option></select></label>
-            <label>Prix<input id="sellerPrix" type="number" min="0" step="0.01" placeholder="0"></label>
-            <label>Série<input id="sellerSerie" placeholder="Référence"></label>
-            <label>Compte<select id="sellerOrderAccount"><option value="">Aucun compte lié</option></select></label>
-            <label class="sellerFull">Note<input id="sellerNote" placeholder="Note rapide"></label>
-            <div class="sellerFull"><button class="primary sellerSubmit" type="submit">Créer en A Send</button></div>
-          </form>
-        </div>
-
-        <div class="card pad sellerPanel" id="sellerPanelTracking">
-          <h2>Ajouter suivi</h2>
-          <form id="sellerTrackingForm" class="sellerForm">
-            <label class="sellerFull">Commande<select id="sellerTrackingOrder"></select></label>
-            <label>Numéro de suivi<input id="sellerTrackingCode" required placeholder="Tracking"></label>
-            <label>Date d'envoi<input id="sellerShippedAt" type="date"></label>
-            <div class="sellerFull"><button class="primary sellerSubmit" type="submit">Passer en Send</button></div>
-          </form>
-        </div>
-
-        <div class="card pad sellerPanel" id="sellerPanelConfirm">
-          <h2>Confirmer commande</h2>
-          <form id="sellerConfirmForm" class="sellerForm">
-            <label class="sellerFull">Commande<select id="sellerConfirmOrder"></select></label>
-            <div class="sellerFull"><button class="primary sellerSubmit" type="submit">Passer en Confirmé</button></div>
-          </form>
-        </div>
-
-        <div class="card pad sellerPanel" id="sellerPanelShare">
-          <h2>Partager compte</h2>
-          <form id="sellerShareAccountForm" class="sellerForm">
-            <label class="sellerFull">Compte<select id="sellerShareAccount"></select></label>
-            <label>De la part de<input id="sellerShareSender" placeholder="Dora / ZerleZZ"></label>
-            <label>Message<input id="sellerShareText" placeholder="Je t'envoie ce compte."></label>
-            <div class="sellerFull"><button class="primary sellerSubmit" type="submit">Envoyer au chat</button></div>
-          </form>
-        </div>
-
-        <div class="card pad">
-          <h2>File rapide</h2>
-          <div id="sellerQuickQueue" class="sellerQueue"></div>
-        </div>
       </div>
     </section>
 
@@ -2779,7 +1942,8 @@ tbody tr:hover td{background:#1b1f29!important}
               <select id="shareAccountSelect"><option value="">Joindre un compte...</option></select>
               <input id="attachmentUrl" placeholder="Image / GIF / lien" style="min-width:210px">
               <label class="fileLabel">📎 Image<input id="attachmentFile" type="file" accept="image/*,.gif"></label>
-              <button type="button" id="voiceNoteBtn" class="voiceNoteBtn" onclick="toggleVoiceNoteRecording(false)">🎙 Vocal</button>
+              <button class="secondary voiceRecordBtn" type="button" id="voiceNoteMainBtn" onclick="toggleVoiceNoteRecording('main')">🎙️ Vocal</button>
+              <button class="secondary" type="button" onclick="openCallHistory()">📞 Historique</button>
               <button class="primary" type="submit">Envoyer</button>
             </div>
           </form>
@@ -2792,7 +1956,6 @@ tbody tr:hover td{background:#1b1f29!important}
               <button class="danger" onclick="clearChatForBoth()">Effacer conversation</button>
             </div>
             <p class="muted" style="margin:0">Le clear supprime le chat chez vous deux.</p>
-            <div class="voiceHistoryBox" id="voiceHistoryBox"><p class="muted">Aucun appel récent.</p></div>
           </div>
           <div class="card pad">
             <h2>Notes épinglées</h2>
@@ -2915,7 +2078,8 @@ tbody tr:hover td{background:#1b1f29!important}
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div id="miniAttachmentPreview" class="miniAttachmentPreview"></div>
     <button type="button" id="voiceQuickBtn" class="voiceQuickBtn" onclick="toggleVoiceCall()">🎤 Appeler</button>
-    <button type="button" id="miniVoiceNoteBtn" class="voiceNoteBtn" onclick="toggleVoiceNoteRecording(true)">🎙 Note vocale</button>
+    <button type="button" id="voiceNoteMiniBtn" class="voiceQuickBtn voiceRecordBtn" onclick="toggleVoiceNoteRecording('mini')">🎙️ Note vocale</button>
+    <button type="button" class="voiceQuickBtn" onclick="openCallHistory()">📞 Historique appels</button>
     <button type="button" class="emergencyQuickBtn" onclick="openEmergencyComposer()">🚨 Urgence</button>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
@@ -3035,14 +2199,6 @@ tbody tr:hover td{background:#1b1f29!important}
     </div>
     <div class="voiceBody">
       <div id="voiceCallStatus" class="voiceStatus">Prêt.</div>
-      <div id="remoteScreenBox" class="v36ScreenBox">
-        <div class="v36ScreenLabel">Partage d'écran distant</div>
-        <video id="remoteScreenVideo" autoplay playsinline controls></video>
-      </div>
-      <div class="v36ControlRow">
-        <span id="activeVoiceRoomChip" class="v36Chip">🎧 Direct</span>
-        <button type="button" class="secondary" onclick="toggleScreenShare()">🖥️ Partager écran</button>
-      </div>
       <div class="voiceActions">
         <button type="button" class="secondary" id="voiceAcceptBtn" onclick="acceptVoiceCall()" style="display:none">Accepter</button>
         <button type="button" class="secondary" onclick="closeVoiceModal()">Fermer</button>
@@ -3052,6 +2208,22 @@ tbody tr:hover td{background:#1b1f29!important}
   </div>
 </div>
 <audio id="remoteVoiceAudio" autoplay playsinline></audio>
+
+<div id="callHistoryBackdrop" class="callHistoryBackdrop" onclick="closeCallHistory(event)">
+  <div class="callHistoryModal">
+    <div class="callHistoryHead">
+      <div>
+        <strong>📞 Historique vocal</strong>
+        <div class="muted">Appels terminés, manqués et refusés</div>
+      </div>
+      <button class="secondary small" type="button" onclick="closeCallHistory()">Fermer</button>
+    </div>
+    <div id="callHistoryBody" class="callHistoryBody">
+      <p class="muted">Chargement...</p>
+    </div>
+  </div>
+</div>
+
 
 <script type="module">
 import PocketBase, { LocalAuthStore } from "https://esm.sh/pocketbase@0.26.2";
@@ -3718,237 +2890,6 @@ function renderSmartAlerts(){
     </div>`).join('') || '<p class="muted">Aucune alerte pour le moment.</p>';
 }
 
-function orderLabel(r){
-  const client = r.client || 'Client inconnu';
-  const product = [r.produit, r.poids].filter(Boolean).join(' ');
-  return `${client}${product ? ' · ' + product : ''}`;
-}
-
-function actionOrderButton(r, label='Voir'){
-  return `<button class="secondary small" type="button" onclick="focusOrder('${esc(r.id)}')">${esc(label)}</button>`;
-}
-
-function getDailyActionGroups(){
-  const waitingToSend = orders
-    .filter(r => String(r.statut || '') === 'A Send')
-    .sort((a,b)=>daysBetween(b.date)-daysBetween(a.date));
-
-  const sentWithoutTracking = orders
-    .filter(r => String(r.statut || '') === 'Send' && !String(r.tracking || '').trim())
-    .sort((a,b)=>daysBetween(b.shippedAt || b.date)-daysBetween(a.shippedAt || a.date));
-
-  const riskyAccounts = accounts
-    .filter(a => ['CHAUFFE','RISQUE','BANNI','VÉRIFICATION'].includes(normalizeAccountStatus(a.status)))
-    .sort((a,b)=>String(normalizeAccountStatus(b.status)).localeCompare(String(normalizeAccountStatus(a.status))));
-
-  return [
-    {
-      key:'waiting',
-      cls: waitingToSend.length ? 'danger' : 'ok',
-      title:'À envoyer',
-      count:waitingToSend.length,
-      hint: waitingToSend.length ? 'Commandes encore en A Send.' : 'Rien à envoyer.',
-      items: waitingToSend.slice(0,3).map(r => ({
-        text:`${orderLabel(r)} · ${daysBetween(r.date)} j`,
-        action:actionOrderButton(r, 'Traiter')
-      }))
-    },
-    {
-      key:'tracking',
-      cls: sentWithoutTracking.length ? 'warn' : 'ok',
-      title:'Suivi manquant',
-      count:sentWithoutTracking.length,
-      hint: sentWithoutTracking.length ? 'Commandes Send sans numéro de suivi.' : 'Tous les suivis sont renseignés.',
-      items: sentWithoutTracking.slice(0,3).map(r => ({
-        text:`${orderLabel(r)} · ${r.vendeur || 'vendeur ?'}`,
-        action:actionOrderButton(r, 'Ajouter')
-      }))
-    },
-    {
-      key:'accounts',
-      cls: riskyAccounts.length ? 'warn' : 'ok',
-      title:'Comptes à surveiller',
-      count:riskyAccounts.length,
-      hint: riskyAccounts.length ? 'Statuts chauffe, risque, banni ou vérification.' : 'Aucun compte sensible.',
-      items: riskyAccounts.slice(0,3).map(a => ({
-        text:`${a.name || 'Compte'} · ${normalizeAccountStatus(a.status)}`,
-        action:`<button class="secondary small" type="button" onclick="goPage('comptes');editAccount('${esc(a.id)}')">Voir</button>`
-      }))
-    }
-  ];
-}
-
-function renderDailyActions(){
-  const box=$("dailyActionBoard");
-  if(!box) return;
-  const groups=getDailyActionGroups();
-  box.innerHTML = groups.map(g=>`
-    <div class="actionCard ${esc(g.cls)}">
-      <div class="actionTop">
-        <div>
-          <strong>${esc(g.title)}</strong>
-          <div class="muted">${esc(g.hint)}</div>
-        </div>
-        <div class="actionCount">${Number(g.count || 0)}</div>
-      </div>
-      <div class="actionList">
-        ${g.items.length ? g.items.map(item=>`
-          <div class="actionItem"><span title="${esc(item.text)}">${esc(item.text)}</span>${item.action}</div>
-        `).join('') : '<div class="muted">Aucune action nécessaire.</div>'}
-      </div>
-    </div>
-  `).join('');
-}
-
-function toDateValue(value){
-  if(!value) return null;
-  if(value?.toDate) return value.toDate();
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function isTodayValue(value){
-  const d = toDateValue(value);
-  return !!d && d.toISOString().slice(0,10) === today();
-}
-
-function todayOrCreatedToday(order){
-  return String(order.date || '') === today() || isTodayValue(order.createdAt);
-}
-
-function getDailyReplayData(){
-  const todayOrders = orders.filter(todayOrCreatedToday);
-  const confirmedToday = todayOrders.filter(isConfirmed);
-  const createdToday = orders.filter(r => isTodayValue(r.createdAt));
-  const updatedToday = orders.filter(r => isTodayValue(r.updatedAt));
-  const activitiesToday = activities.filter(a => isTodayValue(a.createdAt)).slice(0,8);
-  const openTasks = tasks.filter(t => !t.done);
-  const completedTasksToday = tasks.filter(t => t.done && isTodayValue(t.updatedAt));
-  const blockedOrders = getSmartAlerts().filter(a => a.high);
-  const watchedAccounts = accounts.filter(a => ['CHAUFFE','RISQUE','BANNI','VÉRIFICATION'].includes(normalizeAccountStatus(a.status)));
-  const pendingValue = orders
-    .filter(r => ['A Send','Send'].includes(String(r.statut || '')))
-    .reduce((sum,r)=>sum + Number(r.prix || 0), 0);
-  const confirmedTotal = confirmedToday.reduce((sum,r)=>sum + Number(r.prix || 0), 0);
-  const sellers = {};
-  confirmedToday.forEach(r=>{
-    const name = r.vendeur || 'Sans vendeur';
-    if(!sellers[name]) sellers[name] = {count:0,sum:0};
-    sellers[name].count++;
-    sellers[name].sum += Number(r.prix || 0);
-  });
-  const sellerRows = Object.entries(sellers).sort((a,b)=>b[1].sum-a[1].sum);
-  const highlights = [
-    confirmedToday.length ? `${confirmedToday.length} vente(s) confirmée(s) aujourd'hui pour ${euro(confirmedTotal)}.` : "Aucune vente confirmée aujourd'hui.",
-    createdToday.length ? `${createdToday.length} nouvelle(s) commande(s) créée(s).` : "Aucune nouvelle commande créée.",
-    blockedOrders.length ? `${blockedOrders.length} commande(s) bloquée(s) à traiter.` : "Aucune commande bloquée critique.",
-    watchedAccounts.length ? `${watchedAccounts.length} compte(s) à surveiller.` : "Aucun compte sensible détecté."
-  ];
-  return {
-    todayOrders,
-    confirmedToday,
-    createdToday,
-    updatedToday,
-    activitiesToday,
-    openTasks,
-    completedTasksToday,
-    blockedOrders,
-    watchedAccounts,
-    pendingValue,
-    confirmedTotal,
-    sellerRows,
-    highlights
-  };
-}
-
-function buildDailyReplayText(){
-  const d = getDailyReplayData();
-  const sellerLine = d.sellerRows.length
-    ? d.sellerRows.map(([name,v]) => `${name}: ${v.count} vente(s), ${euro(v.sum)}`).join(' | ')
-    : 'Aucune vente confirmée';
-  const blockedLine = d.blockedOrders.length
-    ? d.blockedOrders.slice(0,5).map(a => a.body).join(' | ')
-    : 'Aucun blocage critique';
-  const accountsLine = d.watchedAccounts.length
-    ? d.watchedAccounts.slice(0,5).map(a => `${a.name || 'Compte'} (${normalizeAccountStatus(a.status)})`).join(' | ')
-    : 'Aucun compte sensible';
-  const tasksLine = d.openTasks.length
-    ? d.openTasks.slice(0,6).map(t => t.text).join(' | ')
-    : 'Aucune tâche ouverte';
-  return [
-    `Replay du ${new Date().toLocaleDateString('fr-FR')}`,
-    `Confirmé: ${euro(d.confirmedTotal)} (${d.confirmedToday.length} vente(s))`,
-    `Commandes créées: ${d.createdToday.length}`,
-    `Commandes modifiées: ${d.updatedToday.length}`,
-    `Argent en attente: ${euro(d.pendingValue)}`,
-    `Tâches ouvertes: ${d.openTasks.length}`,
-    `Tâches terminées aujourd'hui: ${d.completedTasksToday.length}`,
-    `Vendeurs: ${sellerLine}`,
-    `Blocages: ${blockedLine}`,
-    `Comptes: ${accountsLine}`,
-    `À finir: ${tasksLine}`
-  ].join('\n');
-}
-
-function renderDailyReplay(){
-  const box=$("dailyReplayBox");
-  if(!box) return;
-  const d=getDailyReplayData();
-  const activityHtml = d.activitiesToday.map(a=>`
-    <div class="replayLine"><span>${activityIcon(a.text)} ${esc(a.text || 'Activité')}</span><strong>${esc(stamp(a.createdAt))}</strong></div>
-  `).join('') || '<p class="muted">Aucune activité enregistrée aujourd’hui.</p>';
-  const highlightsHtml = d.highlights.map(h=>`
-    <div class="replayLine"><span>${esc(h)}</span></div>
-  `).join('');
-  const sellerHtml = d.sellerRows.slice(0,4).map(([name,v])=>`
-    <div class="replayLine"><span>${esc(name)}</span><strong>${v.count} · ${euro(v.sum)}</strong></div>
-  `).join('') || '<p class="muted">Aucune vente confirmée aujourd’hui.</p>';
-  const nextHtml = [
-    ...d.blockedOrders.slice(0,2).map(a=>({text:a.body, badge:'Blocage'})),
-    ...d.openTasks.slice(0,3).map(t=>({text:t.text, badge:'Tâche'})),
-    ...d.watchedAccounts.slice(0,2).map(a=>({text:`${a.name || 'Compte'} · ${normalizeAccountStatus(a.status)}`, badge:'Compte'}))
-  ].slice(0,5).map(item=>`
-    <div class="replayLine"><span>${esc(item.text)}</span><strong>${esc(item.badge)}</strong></div>
-  `).join('') || '<p class="muted">Rien d’urgent à reprendre.</p>';
-
-  box.innerHTML = `
-    <div class="replayGrid">
-      <div class="replayMetric"><span>Confirmé jour</span><strong>${euro(d.confirmedTotal)}</strong></div>
-      <div class="replayMetric"><span>Nouvelles commandes</span><strong>${d.createdToday.length}</strong></div>
-      <div class="replayMetric"><span>Argent en attente</span><strong>${euro(d.pendingValue)}</strong></div>
-      <div class="replayMetric"><span>Tâches ouvertes</span><strong>${d.openTasks.length}</strong></div>
-    </div>
-    <div class="replayBody">
-      <div class="replayPanel"><h3>Faits marquants</h3><div class="replayList">${highlightsHtml}</div></div>
-      <div class="replayPanel"><h3>À reprendre</h3><div class="replayList">${nextHtml}</div></div>
-      <div class="replayPanel"><h3>Vendeurs du jour</h3><div class="replayList">${sellerHtml}</div></div>
-      <div class="replayPanel"><h3>Activité récente</h3><div class="replayList">${activityHtml}</div></div>
-    </div>
-    <div class="replayFooter">
-      <span class="muted">Mis à jour automatiquement avec les données chargées.</span>
-      <span class="pill">${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span>
-    </div>
-  `;
-}
-
-window.copyDailyReplay = async () => {
-  const text = buildDailyReplayText();
-  try{
-    await navigator.clipboard.writeText(text);
-    showToast('Replay copié', 'Le résumé de journée est dans le presse-papiers.', 'daily-replay-copy');
-  }catch(e){
-    alert(text);
-  }
-};
-
-window.sendDailyReplayToChat = async () => {
-  if(!chatRef) return alert("Chat pas encore connecté.");
-  const sender = getCurrentSender() || localStorage.getItem('duoSender') || 'Replay';
-  await addDoc(chatRef, messagePayload({text:buildDailyReplayText(), sender, priority:'important'}));
-  await logActivity(`${sender} a envoyé le replay de journée dans le chat`);
-  goPage('chat');
-};
-
 function renderBarChart(targetId, rows, empty='Aucune donnée.'){
   const box=$(targetId);
   if(!box) return;
@@ -4070,7 +3011,7 @@ function renderWidget(){
         ${renderReplyPreview(m)}
         <div class="miniText">${renderTextWithMentions(m.text || (acc ? 'Compte partagé' : ''))}</div>
         ${acc ? renderMiniAccount(acc) : ''}
-        ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
+        ${renderAttachment(m.attachmentUrl)}
         ${renderMessageActions(m,true)}
         ${renderReactions(m)}
         ${renderReadReceipt(m)}
@@ -4194,7 +3135,7 @@ function badge(s){
 }
 
 function renderAll(){
-  renderDashboard(); renderAccountStatusDashboard(); renderSmartAlerts(); renderDailyActions(); renderDailyReplay(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderSellerMode(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence();
+  renderDashboard(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence();
 }
 
 function renderDashboard(){
@@ -4242,84 +3183,7 @@ function renderAccountSelect(){
     $("orderAccount").innerHTML=opts;
     $("orderAccount").value=old;
   }
-  if($("sellerOrderAccount")){
-    const old=$("sellerOrderAccount").value;
-    $("sellerOrderAccount").innerHTML=opts;
-    $("sellerOrderAccount").value=old;
-  }
 }
-
-function sellerOrderOption(r){
-  const bits = [
-    r.client || 'Client inconnu',
-    r.produit || '',
-    r.poids || '',
-    r.vendeur || '',
-    euro(r.prix || 0)
-  ].filter(Boolean);
-  return `<option value="${esc(r.id)}">${esc(bits.join(' · '))}</option>`;
-}
-
-function renderSellerMode(){
-  const actionCount = orders.filter(r => ['A Send','Send'].includes(String(r.statut || ''))).length;
-  if($("sellerModeCount")) $("sellerModeCount").textContent = `${actionCount} action(s)`;
-
-  const toTrack = orders
-    .filter(r => String(r.statut || '') === 'A Send')
-    .sort((a,b)=>String(b.date || '').localeCompare(String(a.date || '')));
-  if($("sellerTrackingOrder")){
-    const old = $("sellerTrackingOrder").value;
-    $("sellerTrackingOrder").innerHTML = toTrack.map(sellerOrderOption).join('') || '<option value="">Aucune commande à envoyer</option>';
-    $("sellerTrackingOrder").value = toTrack.some(r=>r.id===old) ? old : ($("sellerTrackingOrder").options[0]?.value || '');
-  }
-
-  const toConfirm = orders
-    .filter(r => !isConfirmed(r) && String(r.statut || '') !== 'Annulé')
-    .sort((a,b)=>String(b.date || '').localeCompare(String(a.date || '')));
-  if($("sellerConfirmOrder")){
-    const old = $("sellerConfirmOrder").value;
-    $("sellerConfirmOrder").innerHTML = toConfirm.map(sellerOrderOption).join('') || '<option value="">Aucune commande à confirmer</option>';
-    $("sellerConfirmOrder").value = toConfirm.some(r=>r.id===old) ? old : ($("sellerConfirmOrder").options[0]?.value || '');
-  }
-
-  const shareableAccounts = accounts
-    .filter(a => normalizeAccountStatus(a.status) !== 'BANNI')
-    .sort((a,b)=>String(a.name || '').localeCompare(String(b.name || '')));
-  if($("sellerShareAccount")){
-    const old = $("sellerShareAccount").value;
-    $("sellerShareAccount").innerHTML = shareableAccounts
-      .map(a=>`<option value="${esc(a.id)}">${esc(a.name || 'Compte')} · ${esc(a.plateforme || '')} · ${esc(normalizeAccountStatus(a.status))}</option>`)
-      .join('') || '<option value="">Aucun compte partageable</option>';
-    $("sellerShareAccount").value = shareableAccounts.some(a=>a.id===old) ? old : ($("sellerShareAccount").options[0]?.value || '');
-  }
-
-  if($("sellerQuickQueue")){
-    const queue = orders
-      .filter(r => ['A Send','Send'].includes(String(r.statut || '')))
-      .sort((a,b)=>daysBetween(b.date)-daysBetween(a.date))
-      .slice(0,8);
-    $("sellerQuickQueue").innerHTML = queue.map(r=>`
-      <div class="sellerOrderItem">
-        <div>
-          <strong>${esc(orderLabel(r))}</strong>
-          <div class="muted">${esc(r.vendeur || 'Vendeur ?')} · ${badge(r.statut)} · ${euro(r.prix || 0)}</div>
-        </div>
-        <button class="secondary small" type="button" onclick="focusOrder('${esc(r.id)}')">Ouvrir</button>
-      </div>
-    `).join('') || '<p class="muted">Aucune action rapide en attente.</p>';
-  }
-}
-
-window.setSellerAction = id => {
-  document.querySelectorAll("[data-seller-action]").forEach(btn => btn.classList.toggle("active", btn.dataset.sellerAction === id));
-  const panelMap = {
-    newOrder:"sellerPanelNewOrder",
-    tracking:"sellerPanelTracking",
-    confirm:"sellerPanelConfirm",
-    share:"sellerPanelShare"
-  };
-  document.querySelectorAll(".sellerPanel").forEach(panel => panel.classList.toggle("active", panel.id === panelMap[id]));
-};
 
 function renderOrders(){
   const list=filteredOrders();
@@ -4547,18 +3411,10 @@ function renderAccountCard(a, reveal=false){
 }
 
 
-function renderAttachment(url, type='', durationMs=0){
+function renderAttachment(url){
   const u=String(url||'').trim();
   if(!u) return '';
-  const isAudio = type === "voice" || /^data:audio\//i.test(u) || /\.(webm|ogg|mp3|m4a|wav)(\?.*)?$/i.test(u);
-  if(isAudio){
-    const dur = durationMs ? formatDurationMs(durationMs) : "";
-    return `<div class="attachmentPreview voiceAttachment">
-      <div class="voiceAttachmentHeader"><span>🎙 Note vocale</span><span>${esc(dur)}</span></div>
-      <audio controls preload="metadata" src="${esc(u)}"></audio>
-    </div>`;
-  }
-  const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /^data:image\//i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
+  const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
   return `<div class="attachmentPreview">${isImg?`<img src="${esc(u)}" alt="Pièce jointe" loading="lazy">`:`<a href="${esc(u)}" target="_blank" rel="noopener">Ouvrir la pièce jointe</a>`}</div>`;
 }
 function getClientReactionId(){
@@ -4794,7 +3650,7 @@ function handleTypingInput(){
 
 
 function pageLabel(id){
-  const labels={dashboard:'Dashboard',vendeur:'Vendeur',clients:'Clients',comptes:'Comptes',chat:'Chat',stats:'Stats'};
+  const labels={dashboard:'Dashboard',clients:'Clients',comptes:'Comptes',chat:'Chat',stats:'Stats'};
   return labels[id] || id || 'Dashboard';
 }
 
@@ -4885,7 +3741,7 @@ function renderPresence(){
   const html=list.map(u=>{
     const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
     const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.online ? (u.customStatus ? `${esc(u.customStatus)} · ${u.typing ? '✍️ écrit' : '👀 '+esc(u.pageLabel||pageLabel(u.page))}` : (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`)) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
+    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
     const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
     return `<div class="presenceUser">
       <div class="presenceLeft">
@@ -4943,21 +3799,23 @@ function renderThread(){
       <div class="miniMeta"><strong>${esc(root.sender||'Anonyme')}</strong><span>${stamp(root.createdAt)}</span></div>
       <div class="miniText">${renderTextWithMentions(root.text||'')}</div>
       ${renderAttachment(root.attachmentUrl)}
+      ${renderVoiceNote(root)}
       ${renderReactions(root)}
     </div>
     ${replies.map(m=>`<div class="miniMsg ${normalizeName(m.sender)===normalizeName(getCurrentSender())?'me':''}" data-message-id="${esc(m.id)}">
       <div class="miniMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
       <div class="miniText">${renderTextWithMentions(m.text||'')}</div>
-      ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
+      ${renderAttachment(m.attachmentUrl)}
+      ${renderVoiceNote(m)}
       ${renderReactions(m)}
       ${renderReadReceipt(m)}
     </div>`).join('') || '<p class="muted">Aucune réponse dans ce thread.</p>'}`;
   body.scrollTop=body.scrollHeight;
 }
 
-function messagePayload({text, sender, attachmentUrl='', accountId='', priority='', replyTo='', threadRootId='', threadParentId='', type='', durationMs=0}){
+function messagePayload({text, sender, attachmentUrl='', accountId='', priority='', replyTo='', threadRootId='', threadParentId=''}){
   return {
-    text, sender, attachmentUrl, accountId, priority, type, durationMs,
+    text, sender, attachmentUrl, accountId, priority,
     mentions:extractMentions(text),
     replyTo: replyTo || null,
     threadRootId: threadRootId || null,
@@ -4978,7 +3836,8 @@ function renderChat(){
       ${renderReplyPreview(m)}
       <div class="msgText">${renderTextWithMentions(m.text||'')}</div>
       ${acc?renderAccountCard(acc,false):''}
-      ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
+      ${renderAttachment(m.attachmentUrl)}
+      ${renderVoiceNote(m)}
       ${renderMessageActions(m)}
       ${renderReactions(m)}
       ${renderReadReceipt(m)}
@@ -5102,70 +3961,6 @@ $("orderForm").addEventListener("submit", async e=>{
   if(id){ await setDoc(doc(ordersRef,id),data,{merge:true}); await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`); }
   else{ await addDoc(ordersRef,{...data,createdAt:serverTimestamp()}); await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`); }
   clearOrder();
-});
-
-$("sellerQuickOrderForm")?.addEventListener("submit", async e=>{
-  e.preventDefault();
-  const data={
-    date:today(),
-    vendeur:$("sellerVendeur").value.trim(),
-    client:$("sellerClient").value.trim(),
-    plateforme:$("sellerPlateforme").value,
-    produit:$("sellerProduit").value,
-    poids:$("sellerPoids").value,
-    serie:$("sellerSerie").value.trim(),
-    statut:"A Send",
-    prix:Number($("sellerPrix").value || 0),
-    accountId:$("sellerOrderAccount").value,
-    shippedAt:"",
-    tracking:"",
-    note:$("sellerNote").value.trim(),
-    updatedAt:serverTimestamp(),
-    createdAt:serverTimestamp()
-  };
-  if(!data.vendeur) return alert("Vendeur obligatoire.");
-  await addDoc(ordersRef,data);
-  await logActivity(`${data.vendeur} a créé une commande depuis le mode vendeur (${data.client || 'client inconnu'})`);
-  ["sellerClient","sellerSerie","sellerPrix","sellerNote"].forEach(id=>{ if($(id)) $(id).value=''; });
-  renderSellerMode();
-  showToast("Commande créée", `${data.client || 'Client'} · ${data.produit} ${data.poids}`, "seller-order-created");
-});
-
-$("sellerTrackingForm")?.addEventListener("submit", async e=>{
-  e.preventDefault();
-  const id=$("sellerTrackingOrder").value;
-  const tracking=$("sellerTrackingCode").value.trim();
-  if(!id) return alert("Aucune commande sélectionnée.");
-  if(!tracking) return alert("Numéro de suivi obligatoire.");
-  const order=orders.find(r=>r.id===id);
-  await setDoc(doc(ordersRef,id),{statut:"Send",tracking,shippedAt:$("sellerShippedAt").value || today(),updatedAt:serverTimestamp()},{merge:true});
-  await logActivity(`Suivi ajouté depuis le mode vendeur (${order?.client || 'client inconnu'})`);
-  $("sellerTrackingCode").value='';
-  $("sellerShippedAt").value=today();
-  showToast("Suivi ajouté", tracking, "seller-tracking-added");
-});
-
-$("sellerConfirmForm")?.addEventListener("submit", async e=>{
-  e.preventDefault();
-  const id=$("sellerConfirmOrder").value;
-  if(!id) return alert("Aucune commande sélectionnée.");
-  const order=orders.find(r=>r.id===id);
-  await setDoc(doc(ordersRef,id),{statut:"Confirmer",updatedAt:serverTimestamp()},{merge:true});
-  await logActivity(`Commande confirmée depuis le mode vendeur (${order?.client || 'client inconnu'})`);
-  showToast("Commande confirmée", orderLabel(order || {}), "seller-order-confirmed");
-});
-
-$("sellerShareAccountForm")?.addEventListener("submit", async e=>{
-  e.preventDefault();
-  const accountId=$("sellerShareAccount").value;
-  const account=accounts.find(a=>a.id===accountId);
-  if(!account) return alert("Aucun compte sélectionné.");
-  if(!chatRef) return alert("Chat pas encore connecté.");
-  const sender=$("sellerShareSender").value.trim() || getCurrentSender() || "Vendeur";
-  const text=$("sellerShareText").value.trim() || "Je t'envoie ce compte.";
-  await addDoc(chatRef,messagePayload({text,sender,accountId,priority:"important"}));
-  await logActivity(`${sender} a partagé un compte depuis le mode vendeur (${account.name || 'compte'})`);
-  showToast("Compte partagé", account.name || "Compte", "seller-account-shared");
 });
 
 $("accountForm").addEventListener("submit", async e=>{
@@ -5317,13 +4112,6 @@ window.editOrder=id=>{
   const r=orders.find(x=>x.id===id); if(!r) return;
   ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','orderAccount','shippedAt','tracking','note'].forEach(k=>$(k).value=k==='orderId'?id:(k==='orderAccount'?(r.accountId||''):(r[k]??'')));
   goPage('dashboard');
-};
-window.focusOrder=id=>{
-  const r=orders.find(x=>x.id===id); if(!r) return;
-  goPage('dashboard');
-  if($("search")) $("search").value = r.client || r.serie || r.vendeur || '';
-  renderOrders();
-  editOrder(id);
 };
 window.removeOrder=async id=>{ if(confirm('Supprimer cette commande ?')){ await deleteDoc(doc(ordersRef,id)); await logActivity('Une commande a été supprimée'); } };
 window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date").value=today(); };
@@ -5542,7 +4330,7 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   $(id).classList.add('active');
-  const titles={dashboard:['Dashboard','Vue globale de vos commandes confirmées et en cours.'],vendeur:['Mode vendeur','Interface mobile pour les gestes rapides.'],clients:['Clients','Nom, nombre de commandes et dépense totale.'],comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],stats:['Stats','Performance par vendeur, plateforme et produit.']};
+  const titles={dashboard:['Dashboard','Vue globale de vos commandes confirmées et en cours.'],clients:['Clients','Nom, nombre de commandes et dépense totale.'],comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],stats:['Stats','Performance par vendeur, plateforme et produit.']};
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
 }
@@ -6270,510 +5058,258 @@ function startDirectVoiceSubscription(){
 
 startDirectVoiceSubscription();
 
+console.info("Duo Update V34 TURN/OpenRelay ICE buffer fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
+
 
 /* V35 — Historique vocal + notes vocales */
-function formatDurationMs(ms){
-  const total = Math.max(0, Math.round(Number(ms || 0) / 1000));
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+const CALL_HISTORY_COLLECTION = "call_history";
+let v35VoiceRecorder = null;
+let v35VoiceChunks = [];
+let v35VoiceStartedAt = 0;
+let v35VoiceTarget = "mini";
+let v35ActiveCallStartedAt = 0;
+let v35ActiveCallHistoryId = "";
+
+function v35FormatDuration(seconds){
+  const s = Math.max(0, Math.round(Number(seconds || 0)));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${m}:${String(r).padStart(2,"0")}`;
 }
 
-function callMetaFromRecord(record){
-  const candidates = record?.candidates && typeof record.candidates === "object" ? record.candidates : {};
-  return candidates.meta && typeof candidates.meta === "object" ? candidates.meta : {};
-}
-
-async function updateCallMeta(id, patch){
-  if(!id) return null;
-  const record = await getDirectVoiceRecord(id);
-  if(!record) return null;
-  const candidates = record.candidates && typeof record.candidates === "object"
-    ? record.candidates
-    : { caller: [], callee: [] };
-  const meta = candidates.meta && typeof candidates.meta === "object" ? candidates.meta : {};
-  candidates.meta = { ...meta, ...patch };
-  return await updateDirectVoiceRecord(id, { candidates });
-}
-
-async function renderVoiceHistory(){
-  const box = $("voiceHistoryBox");
-  if(!box) return;
-  try{
-    await ensurePbAuth();
-    const list = await pb.collection("calls").getList(1, 12, { sort:"-created" });
-    const rows = (list.items || []).filter(r => {
-      const me = normalizeVoiceNameValue(voiceName());
-      return normalizeVoiceNameValue(r.from) === me || normalizeVoiceNameValue(r.to) === me;
-    });
-    box.innerHTML = rows.map(r => {
-      const meta = callMetaFromRecord(r);
-      const status = meta.finalStatus || r.status || "ended";
-      const cls = status === "accepted" || status === "completed" ? "ok" : (status === "missed" || status === "refused" ? "missed" : "ended");
-      const duration = meta.durationMs ? formatDurationMs(meta.durationMs) : "00:00";
-      const at = r.created ? stamp(r.created) : "";
-      const label = status === "missed" ? "Manqué" : status === "refused" ? "Refusé" : status === "ringing" ? "En cours" : "Terminé";
-      return `<div class="voiceHistoryItem">
-        <strong>${esc(r.from || "?")} → ${esc(r.to || "?")} <em class="voiceHistoryStatus ${cls}">${esc(label)}</em></strong>
-        <span>${esc(at)} · durée ${esc(duration)}</span>
-      </div>`;
-    }).join("") || '<p class="muted">Aucun appel récent.</p>';
-  }catch(e){
-    box.innerHTML = '<p class="muted">Historique vocal indisponible.</p>';
-  }
-}
-window.renderVoiceHistory = renderVoiceHistory;
-
-const __v35StartVoiceCallBase = startVoiceCall;
-startVoiceCall = async function(){
-  await __v35StartVoiceCallBase();
-  if(directVoiceRecordId){
-    try{
-      await updateCallMeta(directVoiceRecordId, {
-        startedAt: new Date().toISOString(),
-        acceptedAt: null,
-        endedAt: null,
-        durationMs: 0,
-        finalStatus: "ringing"
-      });
-      renderVoiceHistory();
-    }catch(e){ console.warn("Historique appel non initialisé", e); }
-  }
-};
-window.startVoiceCall = startVoiceCall;
-
-const __v35AcceptVoiceCallBase = acceptVoiceCall;
-acceptVoiceCall = async function(){
-  await __v35AcceptVoiceCallBase();
-  if(directVoiceRecordId){
-    try{
-      await updateCallMeta(directVoiceRecordId, {
-        acceptedAt: new Date().toISOString(),
-        finalStatus: "accepted"
-      });
-      renderVoiceHistory();
-    }catch(e){ console.warn("Historique acceptation non enregistré", e); }
-  }
-};
-window.acceptVoiceCall = acceptVoiceCall;
-
-const __v35HangupVoiceCallBase = hangupVoiceCall;
-hangupVoiceCall = async function(){
-  const id = directVoiceRecordId;
-  const record = id ? await getDirectVoiceRecord(id) : null;
-  const meta = callMetaFromRecord(record);
-  const nowIso = new Date().toISOString();
-  let durationMs = 0;
-  if(meta.acceptedAt){
-    durationMs = Date.now() - new Date(meta.acceptedAt).getTime();
-  }
-  const finalStatus = meta.acceptedAt ? "completed" : "missed";
-  try{
-    if(id){
-      await updateCallMeta(id, {
-        endedAt: nowIso,
-        durationMs,
-        finalStatus,
-        endedBy: voiceName()
-      });
-    }
-  }catch(e){ console.warn("Historique fin appel non enregistré", e); }
-  await __v35HangupVoiceCallBase();
-  renderVoiceHistory();
-};
-window.hangupVoiceCall = hangupVoiceCall;
-
-const __v35HandleDirectVoiceRecordBase = handleDirectVoiceRecord;
-handleDirectVoiceRecord = async function(record){
-  await __v35HandleDirectVoiceRecordBase(record);
-  if(record?.status === "ended" || record?.status === "accepted" || record?.status === "ringing"){
-    renderVoiceHistory();
-  }
-};
-
-let voiceNoteRecorder = null;
-let voiceNoteChunks = [];
-let voiceNoteStartedAt = 0;
-let voiceNoteTargetMini = false;
-
-function bestVoiceMimeType(){
-  const types = [
-    "audio/webm;codecs=opus",
-    "audio/webm",
-    "audio/ogg;codecs=opus",
-    "audio/mp4"
-  ];
-  return types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
-}
-
-function setVoiceNoteButtons(recording){
-  const label = recording ? "⏹ Stop" : "🎙 Vocal";
-  const miniLabel = recording ? "⏹ Stop vocal" : "🎙 Note vocale";
-  const btn = $("voiceNoteBtn");
-  const mini = $("miniVoiceNoteBtn");
-  if(btn){
-    btn.textContent = label;
-    btn.classList.toggle("recording", recording);
-  }
-  if(mini){
-    mini.textContent = miniLabel;
-    mini.classList.toggle("recording", recording);
-  }
-}
-
-async function blobToDataURL(blob){
-  return await new Promise((resolve, reject) => {
+function blobToDataUrl(blob){
+  return new Promise((resolve, reject)=>{
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(reader.error || new Error("Lecture audio impossible"));
+    reader.onerror = reject;
     reader.readAsDataURL(blob);
   });
 }
 
-async function sendVoiceNote(blob, durationMs, fromMini){
-  const senderEl = fromMini ? $("miniSenderName") : $("senderName");
-  const sender = senderEl?.value?.trim() || getCurrentSender() || voiceName() || "Anonyme";
-  localStorage.setItem("duoSender", sender);
-  const dataUrl = await blobToDataURL(blob);
-  await addDoc(chatRef, messagePayload({
-    text: "🎙 Note vocale",
-    sender,
-    attachmentUrl: dataUrl,
-    priority: "",
-    replyTo: currentReplyTo,
-    type: "voice",
-    durationMs
-  }));
-  if(currentReplyTo){
-    currentReplyTo = null;
-    $("replyBanner")?.classList.remove("show");
-  }
+function renderVoiceNote(m){
+  const src = m?.voiceDataUrl || m?.voiceUrl || "";
+  if(!src) return "";
+  const duration = m.voiceDurationSec ? ` · ${v35FormatDuration(m.voiceDurationSec)}` : "";
+  return `<div class="voiceNotePlayer">
+    <span>🎙️</span>
+    <audio controls preload="metadata" src="${esc(src)}"></audio>
+    <span class="voiceNoteMeta">${esc(duration.replace(/^ · /,''))}</span>
+  </div>`;
 }
+window.renderVoiceNote = renderVoiceNote;
 
-async function toggleVoiceNoteRecording(fromMini=false){
-  if(voiceNoteRecorder && voiceNoteRecorder.state === "recording"){
-    voiceNoteRecorder.stop();
+async function toggleVoiceNoteRecording(target="mini"){
+  if(v35VoiceRecorder && v35VoiceRecorder.state === "recording"){
+    v35VoiceRecorder.stop();
     return;
   }
+
   if(!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder){
     alert("Notes vocales non supportées sur ce navigateur.");
     return;
   }
+
   try{
-    await ensurePbAuth();
-    voiceNoteTargetMini = !!fromMini;
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-    voiceNoteChunks = [];
-    const mimeType = bestVoiceMimeType();
-    voiceNoteRecorder = new MediaRecorder(stream, mimeType ? {mimeType} : undefined);
-    voiceNoteStartedAt = Date.now();
-    voiceNoteRecorder.ondataavailable = e => {
-      if(e.data && e.data.size) voiceNoteChunks.push(e.data);
+    v35VoiceTarget = target;
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    v35VoiceChunks = [];
+    v35VoiceStartedAt = Date.now();
+
+    const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+      ? "audio/webm;codecs=opus"
+      : "audio/webm";
+
+    v35VoiceRecorder = new MediaRecorder(stream, {mimeType:mime});
+    v35VoiceRecorder.ondataavailable = e => {
+      if(e.data && e.data.size) v35VoiceChunks.push(e.data);
     };
-    voiceNoteRecorder.onstop = async () => {
-      setVoiceNoteButtons(false);
-      stream.getTracks().forEach(t => t.stop());
-      const durationMs = Date.now() - voiceNoteStartedAt;
-      const blob = new Blob(voiceNoteChunks, {type: voiceNoteRecorder.mimeType || "audio/webm"});
-      voiceNoteRecorder = null;
-      voiceNoteChunks = [];
-      if(blob.size < 800 || durationMs < 450){
-        alert("Note vocale trop courte.");
-        return;
-      }
+    v35VoiceRecorder.onstop = async () => {
       try{
-        await sendVoiceNote(blob, durationMs, voiceNoteTargetMini);
+        document.querySelectorAll(".voiceRecordBtn").forEach(b=>{
+          b.classList.remove("recording");
+          if(b.id === "voiceNoteMainBtn") b.textContent = "🎙️ Vocal";
+          if(b.id === "voiceNoteMiniBtn") b.textContent = "🎙️ Note vocale";
+        });
+
+        stream.getTracks().forEach(t=>t.stop());
+
+        const blob = new Blob(v35VoiceChunks, {type:mime});
+        const dataUrl = await blobToDataUrl(blob);
+        const duration = Math.max(1, Math.round((Date.now() - v35VoiceStartedAt) / 1000));
+        const sender = (v35VoiceTarget === "main"
+          ? $("senderName")?.value
+          : $("miniSenderName")?.value) || getCurrentSender() || "Anonyme";
+
+        localStorage.setItem("duoSender", sender);
+        if($("senderName")) $("senderName").value = sender;
+        if($("miniSenderName")) $("miniSenderName").value = sender;
+
+        await addDoc(chatRef, {
+          ...messagePayload({
+            text:`🎙️ Note vocale (${v35FormatDuration(duration)})`,
+            sender,
+            priority:"",
+            replyTo:currentReplyTo
+          }),
+          type:"voice",
+          voiceDataUrl:dataUrl,
+          voiceMime:mime,
+          voiceDurationSec:duration
+        });
+
+        currentReplyTo=null;
+        $("replyBanner")?.classList.remove("show");
+        pushWidgetNotif("🎙️ Note vocale", `${sender} a envoyé un vocal (${v35FormatDuration(duration)})`, "voice-note");
       }catch(e){
-        console.error("Envoi note vocale impossible", e);
+        console.error("Erreur note vocale", e);
         alert("Impossible d'envoyer la note vocale.");
+      }finally{
+        v35VoiceRecorder = null;
+        v35VoiceChunks = [];
       }
     };
-    voiceNoteRecorder.start();
-    setVoiceNoteButtons(true);
+
+    v35VoiceRecorder.start();
+    document.querySelectorAll(".voiceRecordBtn").forEach(b=>b.classList.add("recording"));
+    if($("voiceNoteMainBtn")) $("voiceNoteMainBtn").textContent = "⏹️ Stop";
+    if($("voiceNoteMiniBtn")) $("voiceNoteMiniBtn").textContent = "⏹️ Stop vocal";
   }catch(e){
     console.error(e);
-    setVoiceNoteButtons(false);
-    alert("Autorisation micro refusée ou indisponible.");
+    alert("Micro refusé ou indisponible.");
   }
 }
 window.toggleVoiceNoteRecording = toggleVoiceNoteRecording;
 
-setInterval(renderVoiceHistory, 15000);
-setTimeout(renderVoiceHistory, 1200);
-
-console.info("Duo Update V35 voice history + voice notes loaded", {pb: PB_URL, session: PB_SESSION_ID});
-
-
-/* V36 — Partage écran + E2E léger + salons vocaux + statut personnalisé + PWA */
-let v36ScreenStream = null;
-let v36ScreenSender = null;
-let v36LastRemoteOfferSdp = "";
-let v36LastRemoteAnswerSdp = "";
-let v36ActiveRoom = localStorage.getItem("duoVoiceRoom") || "";
-let v36PwaPrompt = null;
-
-function v36Utf8ToB64(str){
-  return btoa(unescape(encodeURIComponent(str)));
-}
-function v36B64ToUtf8(str){
-  return decodeURIComponent(escape(atob(str)));
-}
-function v36Xor(data, key){
-  key = String(key || "");
-  if(!key) return data;
-  let out = "";
-  for(let i=0;i<data.length;i++){
-    out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-  }
-  return out;
-}
-function v36E2EEnabled(){
-  return localStorage.getItem("duoE2EEnabled") === "1" && !!localStorage.getItem("duoE2EPassphrase");
-}
-function v36EncryptText(text){
-  if(!v36E2EEnabled() || !text || String(text).startsWith("🔐:")) return text;
-  const key = localStorage.getItem("duoE2EPassphrase") || "";
-  return "🔐:" + v36Utf8ToB64(v36Xor(String(text), key));
-}
-function v36DecryptText(text){
-  const raw = String(text || "");
-  if(!raw.startsWith("🔐:")) return raw;
+async function v35CreateCallHistory(payload){
   try{
-    const key = localStorage.getItem("duoE2EPassphrase") || "";
-    if(!key) return "🔐 Message chiffré — phrase secrète requise";
-    return v36Xor(v36B64ToUtf8(raw.slice(3)), key);
-  }catch{
-    return "🔐 Message chiffré — clé incorrecte";
-  }
-}
-function toggleE2E(){
-  const input = $("e2ePassphrase");
-  const btn = $("e2eToggleBtn");
-  const phrase = input?.value || localStorage.getItem("duoE2EPassphrase") || "";
-  const enabled = localStorage.getItem("duoE2EEnabled") === "1";
-  if(enabled){
-    localStorage.setItem("duoE2EEnabled", "0");
-  }else{
-    if(!phrase.trim()) return alert("Entre une phrase secrète E2E.");
-    localStorage.setItem("duoE2EPassphrase", phrase);
-    localStorage.setItem("duoE2EEnabled", "1");
-  }
-  if(btn){
-    const on = v36E2EEnabled();
-    btn.textContent = on ? "🔐 E2E ON" : "🔐 E2E OFF";
-    btn.classList.toggle("v36E2EOn", on);
-  }
-  renderAll?.();
-}
-window.toggleE2E = toggleE2E;
-
-try{
-  const __v36MessagePayloadBase = messagePayload;
-  messagePayload = function(payload){
-    const p = {...payload};
-    if(p.text) p.text = v36EncryptText(p.text);
-    return __v36MessagePayloadBase(p);
-  };
-}catch(e){ console.warn("V36 E2E payload patch ignoré", e); }
-
-try{
-  const __v36RenderTextBase = renderTextWithMentions;
-  renderTextWithMentions = function(text){
-    return __v36RenderTextBase(v36DecryptText(text));
-  };
-}catch(e){ console.warn("V36 E2E render patch ignoré", e); }
-
-function setCustomStatus(value){
-  localStorage.setItem("duoCustomStatus", value || "");
-  updatePresence({customStatus:value || ""});
-}
-window.setCustomStatus = setCustomStatus;
-
-try{
-  const __v36UpdatePresenceBase = updatePresence;
-  updatePresence = async function(extra={}){
-    return __v36UpdatePresenceBase({...extra, customStatus: localStorage.getItem("duoCustomStatus") || ""});
-  };
-}catch(e){ console.warn("V36 status patch ignoré", e); }
-
-function updateVoiceRoomChip(){
-  const label = v36ActiveRoom ? `🎤 ${v36ActiveRoom}` : "🎧 Direct";
-  if($("activeVoiceRoomChip")) $("activeVoiceRoomChip").textContent = label;
-}
-function joinVoiceRoom(){
-  v36ActiveRoom = $("voiceRoomSelect")?.value || "";
-  localStorage.setItem("duoVoiceRoom", v36ActiveRoom);
-  updateVoiceRoomChip();
-  updatePresence({action: v36ActiveRoom ? `🎤 dans le salon ${v36ActiveRoom}` : ""});
-  if(v36ActiveRoom) pushWidgetNotif?.("Salon vocal", `Tu as rejoint ${v36ActiveRoom}`, "voice-room");
-}
-window.joinVoiceRoom = joinVoiceRoom;
-
-try{
-  const __v36VoiceOtherNameBase = voiceOtherName;
-  voiceOtherName = function(){
-    return v36ActiveRoom ? `room:${v36ActiveRoom}` : __v36VoiceOtherNameBase();
-  };
-  const __v36RelevantBase = isDirectVoiceRecordRelevant;
-  isDirectVoiceRecordRelevant = function(r){
-    if(!r) return false;
-    const to = String(r.to || "");
-    if(to.startsWith("room:")){
-      const room = to.slice(5);
-      return !!v36ActiveRoom && room === v36ActiveRoom && normalizeVoiceNameValue(r.from) !== normalizeVoiceNameValue(voiceName()) && r.status !== "ended";
-    }
-    return __v36RelevantBase(r);
-  };
-}catch(e){ console.warn("V36 salons vocaux patch ignoré", e); }
-
-async function v36RenegotiateVoice(){
-  if(!voicePc || !directVoiceRecordId) return;
-  const offer = await voicePc.createOffer();
-  await voicePc.setLocalDescription(offer);
-  await updateDirectVoiceRecord(directVoiceRecordId, {
-    offer:{type:offer.type, sdp:offer.sdp},
-    answer:null
-  });
-  v36LastRemoteAnswerSdp = "";
-}
-async function toggleScreenShare(){
-  if(!voicePc || !directVoiceRecordId) return alert("Lance ou accepte un appel avant de partager l'écran.");
-  try{
-    if(v36ScreenStream){
-      try{ v36ScreenStream.getTracks().forEach(t=>t.stop()); }catch{}
-      if(v36ScreenSender){
-        try{ voicePc.removeTrack(v36ScreenSender); }catch{}
-      }
-      v36ScreenStream = null;
-      v36ScreenSender = null;
-      await v36RenegotiateVoice();
-      setVoiceStatus("Partage d'écran arrêté.");
-      return;
-    }
-    if(!navigator.mediaDevices?.getDisplayMedia) return alert("Partage d'écran non supporté par ce navigateur.");
-    v36ScreenStream = await navigator.mediaDevices.getDisplayMedia({video:true, audio:false});
-    const track = v36ScreenStream.getVideoTracks()[0];
-    if(!track) return;
-    v36ScreenSender = voicePc.addTrack(track, v36ScreenStream);
-    track.onended = () => toggleScreenShare().catch(()=>{});
-    setVoiceStatus("Partage d'écran lancé. Connexion...");
-    await v36RenegotiateVoice();
+    await ensurePbAuth();
+    const record = await pb.collection(CALL_HISTORY_COLLECTION).create(payload);
+    return record;
   }catch(e){
-    console.error("Partage écran impossible", e);
-    setVoiceStatus("Partage d'écran annulé ou impossible.");
+    console.warn("Historique vocal non enregistré. Vérifie la collection call_history.", e);
+    return null;
   }
 }
-window.toggleScreenShare = toggleScreenShare;
 
-try{
-  const __v36CreatePcBase = createVoicePc;
-  createVoicePc = function(){
-    const pc = __v36CreatePcBase();
-    const oldTrack = pc.ontrack;
-    pc.ontrack = event => {
-      try{ oldTrack && oldTrack(event); }catch{}
-      const track = event.track;
-      if(track?.kind === "video" && event.streams?.[0]){
-        const box = $("remoteScreenBox");
-        const video = $("remoteScreenVideo");
-        if(video){
-          video.srcObject = event.streams[0];
-          video.play().catch(()=>{});
-        }
-        box?.classList.add("show");
-        openVoiceModal("Partage d'écran", `${voiceOtherName()} partage son écran.`);
-      }
-    };
-    return pc;
-  };
-}catch(e){ console.warn("V36 screen pc patch ignoré", e); }
-
-try{
-  const __v36HandleDirectBase = handleDirectVoiceRecord;
-  handleDirectVoiceRecord = async function(record){
-    await __v36HandleDirectBase(record);
-    const data = directVoiceDataFromRecord(record);
-    if(!data || !voicePc || data.status !== "accepted") return;
-    const me = normalizeVoiceNameValue(voiceName());
-    const from = normalizeVoiceNameValue(data.from);
-    const to = normalizeVoiceNameValue(data.to);
-    if(data.offer?.sdp && from !== me && data.offer.sdp !== v36LastRemoteOfferSdp){
-      try{
-        v36LastRemoteOfferSdp = data.offer.sdp;
-        await voicePc.setRemoteDescription(new RTCSessionDescription(data.offer));
-        const answer = await voicePc.createAnswer();
-        await voicePc.setLocalDescription(answer);
-        await updateDirectVoiceRecord(data.id, {answer:{type:answer.type, sdp:answer.sdp}});
-      }catch(e){ console.warn("Renégociation écran côté receveur ignorée", e); }
-    }
-    if(data.answer?.sdp && from === me && data.answer.sdp !== v36LastRemoteAnswerSdp){
-      try{
-        v36LastRemoteAnswerSdp = data.answer.sdp;
-        if(voicePc.signalingState !== "stable"){
-          await voicePc.setRemoteDescription(new RTCSessionDescription(data.answer));
-        }
-      }catch(e){ console.warn("Renégociation écran côté appelant ignorée", e); }
-    }
-  };
-}catch(e){ console.warn("V36 renegotiation patch ignoré", e); }
-
-window.addEventListener("beforeinstallprompt", event => {
-  event.preventDefault();
-  v36PwaPrompt = event;
-  $("installPwaBtn")?.classList.add("show");
-});
-async function installPWA(){
-  if(!v36PwaPrompt) return alert("L'installation sera proposée par le navigateur quand l'app sera éligible.");
-  v36PwaPrompt.prompt();
-  await v36PwaPrompt.userChoice.catch(()=>{});
-  v36PwaPrompt = null;
-  $("installPwaBtn")?.classList.remove("show");
-}
-window.installPWA = installPWA;
-
-(function registerV36PWA(){
+async function v35UpdateCallHistory(id, payload){
+  if(!id) return null;
   try{
-    const manifest = {
-      name:"Golden Shower Duo",
-      short_name:"Golden Duo",
-      start_url:"./",
-      display:"standalone",
-      background_color:"#101114",
-      theme_color:"#111827",
-      icons:[]
-    };
-    const link = document.createElement("link");
-    link.rel = "manifest";
-    link.href = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
-    document.head.appendChild(link);
-    if("serviceWorker" in navigator){
-      const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{});`;
-      const url = URL.createObjectURL(new Blob([sw], {type:"text/javascript"}));
-      navigator.serviceWorker.register(url).catch(()=>{});
-    }
-  }catch(e){}
-})();
-
-setTimeout(() => {
-  if($("customStatusSelect")) $("customStatusSelect").value = localStorage.getItem("duoCustomStatus") || "";
-  if($("e2ePassphrase")) $("e2ePassphrase").value = localStorage.getItem("duoE2EPassphrase") || "";
-  if($("e2eToggleBtn")){
-    const on = v36E2EEnabled();
-    $("e2eToggleBtn").textContent = on ? "🔐 E2E ON" : "🔐 E2E OFF";
-    $("e2eToggleBtn").classList.toggle("v36E2EOn", on);
+    await ensurePbAuth();
+    return await pb.collection(CALL_HISTORY_COLLECTION).update(id, payload);
+  }catch(e){
+    console.warn("Historique vocal non mis à jour.", e);
+    return null;
   }
-  if($("voiceRoomSelect")) $("voiceRoomSelect").value = v36ActiveRoom;
-  updateVoiceRoomChip();
-}, 800);
+}
 
-console.info("Duo Update V36 screen share + E2E + voice rooms + custom status + PWA loaded");
+async function v35LogCall(status, extra={}){
+  const now = new Date();
+  const started = extra.startedAt || (v35ActiveCallStartedAt ? new Date(v35ActiveCallStartedAt) : now);
+  const ended = extra.endedAt || now;
+  const duration = extra.duration ?? Math.max(0, Math.round((ended.getTime() - started.getTime()) / 1000));
+  return v35CreateCallHistory({
+    from: extra.from || voiceName() || "Inconnu",
+    to: extra.to || voiceOtherName?.() || "Associé",
+    status,
+    duration,
+    startedAt: started.toISOString(),
+    endedAt: ended.toISOString()
+  });
+}
 
+async function openCallHistory(){
+  const backdrop = $("callHistoryBackdrop");
+  const body = $("callHistoryBody");
+  if(!backdrop || !body) return;
+  backdrop.classList.add("open");
+  body.innerHTML = '<p class="muted">Chargement...</p>';
+
+  try{
+    await ensurePbAuth();
+    const list = await pb.collection(CALL_HISTORY_COLLECTION).getList(1, 50, {sort:"-created"});
+    const items = list.items || [];
+    body.innerHTML = items.map(c=>{
+      const icon = c.status === "ended" ? "✅" : c.status === "missed" ? "❌" : c.status === "rejected" ? "🚫" : "📞";
+      const label = c.status === "ended" ? "Appel terminé" : c.status === "missed" ? "Appel manqué" : c.status === "rejected" ? "Appel refusé" : c.status;
+      return `<div class="callHistoryItem">
+        <strong>${icon} ${esc(c.from || "?")} → ${esc(c.to || "?")}</strong>
+        <div class="muted">${esc(label)} · ${v35FormatDuration(c.duration || 0)} · ${esc(stamp(c.created || c.startedAt))}</div>
+      </div>`;
+    }).join("") || '<p class="muted">Aucun appel dans l’historique.</p>';
+  }catch(e){
+    console.error(e);
+    body.innerHTML = '<p class="muted">Impossible de charger l’historique. Vérifie la collection call_history et ses API rules.</p>';
+  }
+}
+window.openCallHistory = openCallHistory;
+
+function closeCallHistory(event){
+  if(event && event.target !== $("callHistoryBackdrop")) return;
+  $("callHistoryBackdrop")?.classList.remove("open");
+}
+window.closeCallHistory = closeCallHistory;
+
+/* Hooks V35 sur appels V34 */
+const v35OriginalStartVoiceCall = startVoiceCall;
+startVoiceCall = async function(){
+  v35ActiveCallStartedAt = Date.now();
+  v35ActiveCallHistoryId = "";
+  await v35OriginalStartVoiceCall.apply(this, arguments);
+};
+window.startVoiceCall = startVoiceCall;
+
+const v35OriginalAcceptVoiceCall = acceptVoiceCall;
+acceptVoiceCall = async function(){
+  v35ActiveCallStartedAt = Date.now();
+  await v35OriginalAcceptVoiceCall.apply(this, arguments);
+  try{
+    if(voiceCallData?.from && voiceCallData?.to){
+      const rec = await v35CreateCallHistory({
+        from: voiceCallData.from,
+        to: voiceCallData.to,
+        status:"accepted",
+        duration:0,
+        startedAt:new Date(v35ActiveCallStartedAt).toISOString(),
+        endedAt:null
+      });
+      v35ActiveCallHistoryId = rec?.id || "";
+    }
+  }catch{}
+};
+window.acceptVoiceCall = acceptVoiceCall;
+
+const v35OriginalHangupVoiceCall = hangupVoiceCall;
+hangupVoiceCall = async function(){
+  const endedAt = new Date();
+  const startedAt = v35ActiveCallStartedAt ? new Date(v35ActiveCallStartedAt) : endedAt;
+  const duration = Math.max(0, Math.round((endedAt.getTime() - startedAt.getTime()) / 1000));
+  const from = voiceCallData?.from || voiceName() || "Inconnu";
+  const to = voiceCallData?.to || voiceOtherName?.() || "Associé";
+  try{
+    if(v35ActiveCallHistoryId){
+      await v35UpdateCallHistory(v35ActiveCallHistoryId, {
+        status:"ended",
+        duration,
+        endedAt: endedAt.toISOString()
+      });
+    }else{
+      await v35CreateCallHistory({
+        from, to, status: duration > 2 ? "ended" : "missed",
+        duration,
+        startedAt: startedAt.toISOString(),
+        endedAt: endedAt.toISOString()
+      });
+    }
+  }catch{}
+  await v35OriginalHangupVoiceCall.apply(this, arguments);
+};
+window.hangupVoiceCall = hangupVoiceCall;
+
+console.info("Duo Update V35 voice history + voice notes loaded");
 
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
-  $("date").value=today(); if($("sellerShippedAt")) $("sellerShippedAt").value=today(); $("senderName").value=localStorage.getItem('duoSender')||''; if($("miniSenderName")) $("miniSenderName").value=localStorage.getItem('duoSender')||'';
-  if($("sellerShareSender")) $("sellerShareSender").value=localStorage.getItem('duoSender')||'';
-  if($("sellerVendeur")) $("sellerVendeur").value=localStorage.getItem('duoSender')||'';
+  $("date").value=today(); $("senderName").value=localStorage.getItem('duoSender')||''; if($("miniSenderName")) $("miniSenderName").value=localStorage.getItem('duoSender')||'';
   ["senderName","miniSenderName","threadSenderName"].forEach(id=>$(id)?.addEventListener("input",()=>updatePresence()));
   try{
     await ensurePbAuth();
@@ -6924,7 +5460,7 @@ async function start(){
     }, 2000);
 
     onSnapshot(query(activityRef,orderBy('createdAt','desc'),limit(60)), snap=>{
-      activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity(); renderDailyReplay(); renderWidget();
+      activities=snap.docs.map(d=>({id:d.id,...d.data()})); renderActivity(); renderWidget();
     });
 
     onSnapshot(query(notesRef,orderBy('createdAt','desc'),limit(40)), snap=>{
@@ -6941,7 +5477,7 @@ async function start(){
         });
       }
       firstTasks=false;
-      renderTasks(); renderDailyReplay(); renderWidget();
+      renderTasks(); renderWidget();
     });
 
     onSnapshot(query(banHistoryRef,orderBy('createdAt','desc'),limit(80)), snap=>{
