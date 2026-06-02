@@ -1750,9 +1750,175 @@ tbody tr:hover td{background:#1b1f29!important}
 .callHistoryItem strong{display:block;margin-bottom:4px}
 .callHistoryItem .muted{font-size:12px}
 
+
+/* V42 — Login intégré + Remember me */
+.duoLoginOverlay{
+  position:fixed;
+  inset:0;
+  z-index:60000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(96,165,250,.12), transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(34,197,94,.08), transparent 28%),
+    rgba(0,0,0,.76);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+.duoLoginOverlay.open{display:flex}
+.duoLoginCard{
+  width:min(430px,100%);
+  background:#12151d;
+  color:#f9fafb;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  box-shadow:0 34px 120px rgba(0,0,0,.68);
+  overflow:hidden;
+}
+.duoLoginHead{
+  padding:24px 24px 18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg,#111827,#151923);
+}
+.duoLoginLogo{
+  width:44px;height:44px;border-radius:13px;
+  display:grid;place-items:center;
+  background:#2563eb;
+  box-shadow:0 0 0 7px rgba(37,99,235,.16);
+  font-size:23px;
+  margin-bottom:14px;
+}
+.duoLoginHead strong{display:block;font-size:24px;letter-spacing:-.045em}
+.duoLoginHead span{display:block;margin-top:6px;color:#aeb6c5;font-size:13px;line-height:1.45}
+.duoLoginBody{padding:22px 24px;display:grid;gap:13px}
+.duoLoginField{display:grid;gap:7px}
+.duoLoginField span{
+  color:#aeb6c5;
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.duoLoginField input{
+  width:100%!important;
+  min-width:0!important;
+  border-radius:12px!important;
+  padding:13px 14px!important;
+  background:#0b0f16!important;
+  color:#fff!important;
+  border:1px solid #303642!important;
+}
+.duoLoginField input:focus{
+  border-color:#60a5fa!important;
+  box-shadow:0 0 0 3px rgba(96,165,250,.14)!important;
+}
+.duoQuickUsers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.duoQuickUsers button{
+  background:#171b24;
+  color:#f9fafb;
+  border:1px solid #303642;
+  border-radius:11px;
+  padding:10px 11px;
+  cursor:pointer;
+  font-weight:900;
+}
+.duoQuickUsers button:hover{background:#202633;border-color:#4b5563}
+.duoRemember{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  color:#d1d5db;
+  font-size:13px;
+  font-weight:800;
+}
+.duoRemember label{display:flex;align-items:center;gap:9px;cursor:pointer}
+.duoRemember input{min-width:auto!important;width:16px;height:16px}
+.duoLoginError{
+  display:none;
+  border:1px solid rgba(239,68,68,.35);
+  background:rgba(127,29,29,.24);
+  color:#fecaca;
+  border-radius:11px;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:800;
+}
+.duoLoginError.show{display:block}
+.duoLoginActions{display:flex;gap:10px;align-items:center;margin-top:2px}
+.duoLoginActions button{
+  flex:1;
+  border-radius:12px;
+  padding:13px 14px;
+  cursor:pointer;
+  font-weight:1000;
+}
+.duoLoginSubmit{
+  background:#e5e7eb;
+  color:#111827;
+  border:1px solid #e5e7eb;
+}
+.duoLoginSubmit:hover{background:#fff;border-color:#fff}
+.duoLoginClear{
+  background:#171b24;
+  color:#f9fafb;
+  border:1px solid #303642;
+}
+.duoLoginFoot{
+  padding:0 24px 22px;
+  color:#7f8a9d;
+  font-size:12px;
+  line-height:1.45;
+}
+@media(max-width:520px){
+  .duoLoginCard{border-radius:16px}
+  .duoQuickUsers{grid-template-columns:1fr}
+  .duoLoginActions{flex-direction:column}
+  .duoLoginActions button{width:100%}
+}
+
 </style>
 </head>
 <body>
+
+<div id="duoLoginOverlay" class="duoLoginOverlay" aria-hidden="true">
+  <form id="duoLoginForm" class="duoLoginCard" autocomplete="on">
+    <div class="duoLoginHead">
+      <div class="duoLoginLogo">🔐</div>
+      <strong>Connexion Duo Update</strong>
+      <span>Connecte-toi avec ton pseudo PocketBase. Le remember me évite de retaper tes identifiants à chaque ouverture.</span>
+    </div>
+    <div class="duoLoginBody">
+      <div class="duoQuickUsers">
+        <button type="button" data-login-preset="dora">Dora</button>
+        <button type="button" data-login-preset="zerlezz">Zerlezz</button>
+      </div>
+      <label class="duoLoginField">
+        <span>Pseudo ou email</span>
+        <input id="duoLoginInput" name="username" placeholder="dora ou zerlezz" autocomplete="username" required />
+      </label>
+      <label class="duoLoginField">
+        <span>Mot de passe</span>
+        <input id="duoPasswordInput" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+      </label>
+      <div class="duoRemember">
+        <label><input id="duoRememberInput" type="checkbox" checked /> Se souvenir de moi</label>
+        <span id="duoLoginCurrent"></span>
+      </div>
+      <div id="duoLoginError" class="duoLoginError"></div>
+      <div class="duoLoginActions">
+        <button class="duoLoginSubmit" type="submit">Entrer</button>
+        <button class="duoLoginClear" type="button" id="duoClearLoginBtn">Effacer</button>
+      </div>
+    </div>
+    <div class="duoLoginFoot">
+      Astuce : utilise <b>dora</b> ou <b>zerlezz</b>. L’email complet fonctionne aussi.
+    </div>
+  </form>
+</div>
+
 <div class="app">
   <aside>
     <div class="brand">Duo Update</div>
@@ -2270,35 +2436,179 @@ function resolveLoginIdentifier(login){
   return aliases[key] || value;
 }
 
+
+function duoSavedLogin(){
+  try{
+    return JSON.parse(localStorage.getItem("duoRememberLogin") || "{}");
+  }catch(_){
+    return {};
+  }
+}
+function duoSetLoginError(message){
+  const el = document.getElementById("duoLoginError");
+  if(!el) return;
+  el.textContent = message || "";
+  el.classList.toggle("show", !!message);
+}
+function duoFillLoginForm(){
+  const saved = duoSavedLogin();
+  const loginInput = document.getElementById("duoLoginInput");
+  const passwordInput = document.getElementById("duoPasswordInput");
+  const rememberInput = document.getElementById("duoRememberInput");
+  if(loginInput && saved.login) loginInput.value = saved.login;
+  if(passwordInput && saved.password) passwordInput.value = saved.password;
+  if(rememberInput) rememberInput.checked = saved.remember !== false;
+  const current = document.getElementById("duoLoginCurrent");
+  if(current && authUserName()) current.textContent = "Connecté : " + authUserName();
+}
+function showDuoLoginModal(){
+  const overlay = document.getElementById("duoLoginOverlay");
+  if(!overlay) return Promise.reject(new Error("Login UI introuvable"));
+  duoSetLoginError("");
+  duoFillLoginForm();
+  overlay.classList.add("open");
+  overlay.setAttribute("aria-hidden", "false");
+
+  return new Promise((resolve, reject)=>{
+    const form = document.getElementById("duoLoginForm");
+    const loginInput = document.getElementById("duoLoginInput");
+    const passwordInput = document.getElementById("duoPasswordInput");
+    const rememberInput = document.getElementById("duoRememberInput");
+    const clearBtn = document.getElementById("duoClearLoginBtn");
+
+    const cleanup = () => {
+      form?.removeEventListener("submit", onSubmit);
+      clearBtn?.removeEventListener("click", onClear);
+      document.querySelectorAll("[data-login-preset]").forEach(btn=>btn.removeEventListener("click", onPreset));
+    };
+
+    const onPreset = (event) => {
+      const value = event.currentTarget?.getAttribute("data-login-preset") || "";
+      if(loginInput) loginInput.value = value;
+      passwordInput?.focus();
+    };
+
+    const onClear = () => {
+      localStorage.removeItem("duoRememberLogin");
+      sessionStorage.removeItem("duoPocketBaseLogin");
+      sessionStorage.removeItem("duoPocketBaseEmail");
+      sessionStorage.removeItem("duoPocketBasePassword");
+      if(loginInput) loginInput.value = "";
+      if(passwordInput) passwordInput.value = "";
+      if(rememberInput) rememberInput.checked = false;
+      duoSetLoginError("Identifiants mémorisés effacés.");
+      loginInput?.focus();
+    };
+
+    const onSubmit = async (event) => {
+      event.preventDefault();
+      duoSetLoginError("");
+      const login = (loginInput?.value || "").trim();
+      const password = passwordInput?.value || "";
+      const remember = !!rememberInput?.checked;
+
+      if(!login || !password){
+        duoSetLoginError("Pseudo/email et mot de passe obligatoires.");
+        return;
+      }
+
+      const submitBtn = form?.querySelector(".duoLoginSubmit");
+      if(submitBtn){
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Connexion...";
+      }
+
+      try{
+        const identifier = resolveLoginIdentifier(login);
+        const auth = await pb.collection("users").authWithPassword(identifier, password);
+
+        sessionStorage.setItem("duoPocketBaseLogin", login);
+        sessionStorage.setItem("duoPocketBaseEmail", identifier);
+        sessionStorage.setItem("duoPocketBasePassword", password);
+        localStorage.setItem("duoPocketBaseLastLogin", login);
+        localStorage.setItem("duoPocketBaseLastEmail", identifier);
+
+        if(remember){
+          localStorage.setItem("duoRememberLogin", JSON.stringify({ login, password, remember:true }));
+        }else{
+          localStorage.removeItem("duoRememberLogin");
+        }
+
+        if(auth?.record?.name){
+          sessionStorage.setItem("duoSenderSession", auth.record.name);
+          localStorage.setItem("duoSender", auth.record.name);
+        }
+
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+        cleanup();
+        syncSenderInputsFromAuth();
+        resolve(true);
+      }catch(error){
+        console.error("Connexion PocketBase impossible", error);
+        duoSetLoginError("Connexion impossible. Vérifie le pseudo et le mot de passe.");
+      }finally{
+        if(submitBtn){
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Entrer";
+        }
+      }
+    };
+
+    form?.addEventListener("submit", onSubmit);
+    clearBtn?.addEventListener("click", onClear);
+    document.querySelectorAll("[data-login-preset]").forEach(btn=>btn.addEventListener("click", onPreset));
+    setTimeout(()=>loginInput?.focus(), 80);
+  });
+}
+
+async function tryRememberedLogin(){
+  const saved = duoSavedLogin();
+  if(!saved.login || !saved.password) return false;
+  try{
+    const identifier = resolveLoginIdentifier(saved.login);
+    const auth = await pb.collection("users").authWithPassword(identifier, saved.password);
+    sessionStorage.setItem("duoPocketBaseLogin", saved.login);
+    sessionStorage.setItem("duoPocketBaseEmail", identifier);
+    sessionStorage.setItem("duoPocketBasePassword", saved.password);
+    if(auth?.record?.name){
+      sessionStorage.setItem("duoSenderSession", auth.record.name);
+      localStorage.setItem("duoSender", auth.record.name);
+    }
+    syncSenderInputsFromAuth();
+    return true;
+  }catch(error){
+    console.warn("Remember me invalide, ouverture du login.", error);
+    return false;
+  }
+}
+
 async function ensurePbAuth(){
-  if(pb.authStore.isValid) return true;
-
-  let login = sessionStorage.getItem("duoPocketBaseLogin") || sessionStorage.getItem("duoPocketBaseEmail") || "";
-  if(!login){
-    const lastLogin = localStorage.getItem("duoPocketBaseLastLogin") || localStorage.getItem("duoPocketBaseLastEmail") || "";
-    login = prompt("Pseudo ou email PocketBase (dora / zerlezz)", lastLogin) || "";
+  if(pb.authStore.isValid){
+    syncSenderInputsFromAuth();
+    return true;
   }
-  if(!login) throw new Error("Connexion PocketBase annulée");
 
-  let password = sessionStorage.getItem("duoPocketBasePassword") || "";
-  if(!password) password = prompt("Mot de passe PocketBase") || "";
-  if(!password) throw new Error("Mot de passe PocketBase manquant");
-
-  const identifier = resolveLoginIdentifier(login);
-  const auth = await pb.collection("users").authWithPassword(identifier, password);
-
-  sessionStorage.setItem("duoPocketBaseLogin", login.trim());
-  sessionStorage.setItem("duoPocketBaseEmail", identifier);
-  sessionStorage.setItem("duoPocketBasePassword", password);
-  localStorage.setItem("duoPocketBaseLastLogin", login.trim());
-  localStorage.setItem("duoPocketBaseLastEmail", identifier);
-
-  if(auth?.record?.name){
-    sessionStorage.setItem("duoSenderSession", auth.record.name);
-    localStorage.setItem("duoSender", auth.record.name);
+  const sessionLogin = sessionStorage.getItem("duoPocketBaseLogin") || sessionStorage.getItem("duoPocketBaseEmail") || "";
+  const sessionPassword = sessionStorage.getItem("duoPocketBasePassword") || "";
+  if(sessionLogin && sessionPassword){
+    try{
+      const identifier = resolveLoginIdentifier(sessionLogin);
+      const auth = await pb.collection("users").authWithPassword(identifier, sessionPassword);
+      if(auth?.record?.name){
+        sessionStorage.setItem("duoSenderSession", auth.record.name);
+        localStorage.setItem("duoSender", auth.record.name);
+      }
+      syncSenderInputsFromAuth();
+      return true;
+    }catch(error){
+      console.warn("Session login invalide, ouverture du login.", error);
+    }
   }
-  syncSenderInputsFromAuth();
-  return true;
+
+  if(await tryRememberedLogin()) return true;
+
+  return await showDuoLoginModal();
 }
 
 function initializeApp(){ return { pocketbase:true }; }
