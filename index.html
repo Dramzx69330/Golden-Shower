@@ -2135,6 +2135,26 @@ const PB_SESSION_ID = sessionStorage.getItem("duoPbSessionId") || (() => {
 const pb = new PocketBase(PB_URL, new LocalAuthStore("duo_pb_auth_" + PB_SESSION_ID));
 pb.autoCancellation(false);
 
+function authUser(){
+  return pb.authStore?.record || pb.authStore?.model || null;
+}
+function authUserName(){
+  return authUser()?.name || authUser()?.email?.split("@")[0] || "";
+}
+function authUserId(){
+  return authUser()?.id || "";
+}
+function syncSenderInputsFromAuth(){
+  const name = authUserName();
+  if(!name) return;
+  sessionStorage.setItem("duoSenderSession", name);
+  localStorage.setItem("duoSender", name);
+  ["senderName","miniSenderName","threadSenderName"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = name;
+  });
+}
+
 async function ensurePbAuth(){
   if(pb.authStore.isValid) return true;
 
@@ -2157,6 +2177,7 @@ async function ensurePbAuth(){
     sessionStorage.setItem("duoSenderSession", auth.record.name);
     localStorage.setItem("duoSender", auth.record.name);
   }
+  syncSenderInputsFromAuth();
   return true;
 }
 
@@ -3402,6 +3423,8 @@ document.addEventListener('click', e => {
 });
 
 function getCurrentSender(){
+  const authName = authUserName();
+  if(authName) return authName.trim();
   return ($("senderName")?.value || $("miniSenderName")?.value || $("threadSenderName")?.value || localStorage.getItem("duoSender") || "Anonyme").trim() || "Anonyme";
 }
 
@@ -3542,6 +3565,26 @@ function currentTypingNames(){
   }).map(t=>normalizeName(t.sender));
 }
 
+async function upsertDirectPresence(payload){
+  try{
+    await ensurePbAuth();
+    const user = payload.user || getCurrentSender();
+    const filter = `user="${escapePbValue(user)}"`;
+    const found = await pb.collection("presence").getList(1, 1, { filter });
+    const body = {
+      user,
+      page: payload.page || pageLabel(currentPageId) || currentPageId || "Dashboard",
+      online: payload.online !== false,
+      typing: !!payload.typing,
+      lastSeen: new Date().toISOString()
+    };
+    if(found.items?.[0]) await pb.collection("presence").update(found.items[0].id, body);
+    else await pb.collection("presence").create(body);
+  }catch(e){
+    console.warn("Presence PocketBase directe ignorée:", e?.message || e);
+  }
+}
+
 async function updatePresence(extra={}){
   if(!presenceRef) return;
   const sender=getCurrentSender();
@@ -3557,6 +3600,12 @@ async function updatePresence(extra={}){
     userAgent: navigator.userAgent.slice(0,120),
     ...extra
   }, {merge:true});
+  upsertDirectPresence({
+    user: sender,
+    page: pageLabel(currentPageId),
+    online: true,
+    typing: !!extra.typing
+  });
 }
 
 function setLiveAction(action){
@@ -4202,7 +4251,7 @@ const voiceTabFallbackId = sessionStorage.getItem("duoVoiceTabId") || (() => {
 })();
 
 function voiceClientId(){
-  return pb.authStore?.record?.id || voiceTabFallbackId;
+  return authUserId() || voiceTabFallbackId;
 }
 let voicePc = null;
 let voiceLocalStream = null;
@@ -4213,7 +4262,7 @@ let voiceMode = "";
 let voiceUnsub = null;
 
 function voiceName(){
-  return pb.authStore?.record?.name || sessionStorage.getItem("duoSenderSession") || $("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem("duoSender") || "Anonyme";
+  return authUserName() || sessionStorage.getItem("duoSenderSession") || $("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem("duoSender") || "Anonyme";
 }
 function setVoiceStatus(text){
   const el = $("voiceCallStatus");
@@ -4380,6 +4429,7 @@ function toggleVoiceCall(){
   else startVoiceCall();
 }
 window.toggleVoiceCall = toggleVoiceCall;
+console.info("Duo Update V31 PocketBase voice/presence fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
 
 
 let voicePollTimer = null;
@@ -4435,6 +4485,8 @@ async function start(){
   ["senderName","miniSenderName","threadSenderName"].forEach(id=>$(id)?.addEventListener("input",()=>updatePresence()));
   try{
     await ensurePbAuth();
+    syncSenderInputsFromAuth();
+    setTimeout(()=>updatePresence(), 250);
     const app=initializeApp(firebaseConfig);
     db=getFirestore(app);
     ordersRef=collection(db,'duos',duoId,'orders');
@@ -4451,8 +4503,9 @@ async function start(){
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
     if(voicePollTimer) clearInterval(voicePollTimer);
-    voicePollTimer = setInterval(pollVoiceCall, 1200);
+    voicePollTimer = setInterval(pollVoiceCall, 700);
     pollVoiceCall();
+    updatePresence();
 
     onSnapshot(query(urgenciesRef,orderBy('createdAt','desc'),limit(30)), snap=>{
       const changes=snap.docChanges().map(c=>({type:c.type,data:{id:c.doc.id,...c.doc.data()}}));
