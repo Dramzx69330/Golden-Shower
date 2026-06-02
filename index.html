@@ -1667,7 +1667,81 @@ tbody tr:hover td{background:#1b1f29!important}
       cursor:pointer;
     }
 
-</style>
+
+    /* V35 — Historique vocal + notes vocales */
+    .voiceNoteBtn{
+      border:1px solid rgba(96,165,250,.45)!important;
+      background:linear-gradient(180deg,rgba(96,165,250,.16),rgba(37,99,235,.10))!important;
+      color:#dbeafe!important;
+      border-radius:10px!important;
+      padding:10px 12px!important;
+      font-weight:900!important;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .voiceNoteBtn.recording{
+      border-color:rgba(239,68,68,.65)!important;
+      background:linear-gradient(180deg,rgba(239,68,68,.26),rgba(127,29,29,.18))!important;
+      color:#fecaca!important;
+      animation:voicePulse 1s infinite;
+    }
+    @keyframes voicePulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.28)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+    .voiceAttachment{
+      display:grid;
+      gap:8px;
+      min-width:min(280px,100%);
+    }
+    .voiceAttachmentHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      color:#dbeafe;
+      font-size:12px;
+      font-weight:900;
+    }
+    .voiceAttachment audio{
+      width:100%;
+      min-width:220px;
+      max-width:100%;
+    }
+    .voiceHistoryBox{
+      margin-top:14px;
+      display:grid;
+      gap:9px;
+      max-height:230px;
+      overflow:auto;
+    }
+    .voiceHistoryItem{
+      border:1px solid var(--line);
+      background:var(--panel2);
+      border-radius:10px;
+      padding:10px 11px;
+      display:grid;
+      gap:4px;
+      font-size:13px;
+    }
+    .voiceHistoryItem strong{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:var(--text);
+    }
+    .voiceHistoryItem span{color:var(--muted)}
+    .voiceHistoryStatus{
+      display:inline-flex;
+      border-radius:999px;
+      padding:3px 7px;
+      border:1px solid rgba(148,163,184,.22);
+      font-size:11px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .voiceHistoryStatus.ok{color:#86efac;background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.28)}
+    .voiceHistoryStatus.missed{color:#fcd34d;background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28)}
+    .voiceHistoryStatus.ended{color:#cbd5e1;background:rgba(148,163,184,.10)}
+
+  </style>
 </head>
 <body>
 <div class="app">
@@ -1859,6 +1933,7 @@ tbody tr:hover td{background:#1b1f29!important}
               <select id="shareAccountSelect"><option value="">Joindre un compte...</option></select>
               <input id="attachmentUrl" placeholder="Image / GIF / lien" style="min-width:210px">
               <label class="fileLabel">📎 Image<input id="attachmentFile" type="file" accept="image/*,.gif"></label>
+              <button type="button" id="voiceNoteBtn" class="voiceNoteBtn" onclick="toggleVoiceNoteRecording(false)">🎙 Vocal</button>
               <button class="primary" type="submit">Envoyer</button>
             </div>
           </form>
@@ -1871,6 +1946,7 @@ tbody tr:hover td{background:#1b1f29!important}
               <button class="danger" onclick="clearChatForBoth()">Effacer conversation</button>
             </div>
             <p class="muted" style="margin:0">Le clear supprime le chat chez vous deux.</p>
+            <div class="voiceHistoryBox" id="voiceHistoryBox"><p class="muted">Aucun appel récent.</p></div>
           </div>
           <div class="card pad">
             <h2>Notes épinglées</h2>
@@ -1993,6 +2069,7 @@ tbody tr:hover td{background:#1b1f29!important}
     <textarea id="miniChatText" placeholder="Répondre sans quitter la page..."></textarea>
     <div id="miniAttachmentPreview" class="miniAttachmentPreview"></div>
     <button type="button" id="voiceQuickBtn" class="voiceQuickBtn" onclick="toggleVoiceCall()">🎤 Appeler</button>
+    <button type="button" id="miniVoiceNoteBtn" class="voiceNoteBtn" onclick="toggleVoiceNoteRecording(true)">🎙 Note vocale</button>
     <button type="button" class="emergencyQuickBtn" onclick="openEmergencyComposer()">🚨 Urgence</button>
     <div class="line">
       <input id="miniSenderName" placeholder="Ton nom">
@@ -2908,7 +2985,7 @@ function renderWidget(){
         ${renderReplyPreview(m)}
         <div class="miniText">${renderTextWithMentions(m.text || (acc ? 'Compte partagé' : ''))}</div>
         ${acc ? renderMiniAccount(acc) : ''}
-        ${renderAttachment(m.attachmentUrl)}
+        ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
         ${renderMessageActions(m,true)}
         ${renderReactions(m)}
         ${renderReadReceipt(m)}
@@ -3308,10 +3385,18 @@ function renderAccountCard(a, reveal=false){
 }
 
 
-function renderAttachment(url){
+function renderAttachment(url, type='', durationMs=0){
   const u=String(url||'').trim();
   if(!u) return '';
-  const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
+  const isAudio = type === "voice" || /^data:audio\//i.test(u) || /\.(webm|ogg|mp3|m4a|wav)(\?.*)?$/i.test(u);
+  if(isAudio){
+    const dur = durationMs ? formatDurationMs(durationMs) : "";
+    return `<div class="attachmentPreview voiceAttachment">
+      <div class="voiceAttachmentHeader"><span>🎙 Note vocale</span><span>${esc(dur)}</span></div>
+      <audio controls preload="metadata" src="${esc(u)}"></audio>
+    </div>`;
+  }
+  const isImg=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i.test(u) || /^data:image\//i.test(u) || /giphy|tenor|media\.discordapp|images|image/i.test(u);
   return `<div class="attachmentPreview">${isImg?`<img src="${esc(u)}" alt="Pièce jointe" loading="lazy">`:`<a href="${esc(u)}" target="_blank" rel="noopener">Ouvrir la pièce jointe</a>`}</div>`;
 }
 function getClientReactionId(){
@@ -3701,16 +3786,16 @@ function renderThread(){
     ${replies.map(m=>`<div class="miniMsg ${normalizeName(m.sender)===normalizeName(getCurrentSender())?'me':''}" data-message-id="${esc(m.id)}">
       <div class="miniMeta"><strong>${esc(m.sender||'Anonyme')}</strong><span>${stamp(m.createdAt)}</span></div>
       <div class="miniText">${renderTextWithMentions(m.text||'')}</div>
-      ${renderAttachment(m.attachmentUrl)}
+      ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
       ${renderReactions(m)}
       ${renderReadReceipt(m)}
     </div>`).join('') || '<p class="muted">Aucune réponse dans ce thread.</p>'}`;
   body.scrollTop=body.scrollHeight;
 }
 
-function messagePayload({text, sender, attachmentUrl='', accountId='', priority='', replyTo='', threadRootId='', threadParentId=''}){
+function messagePayload({text, sender, attachmentUrl='', accountId='', priority='', replyTo='', threadRootId='', threadParentId='', type='', durationMs=0}){
   return {
-    text, sender, attachmentUrl, accountId, priority,
+    text, sender, attachmentUrl, accountId, priority, type, durationMs,
     mentions:extractMentions(text),
     replyTo: replyTo || null,
     threadRootId: threadRootId || null,
@@ -3731,7 +3816,7 @@ function renderChat(){
       ${renderReplyPreview(m)}
       <div class="msgText">${renderTextWithMentions(m.text||'')}</div>
       ${acc?renderAccountCard(acc,false):''}
-      ${renderAttachment(m.attachmentUrl)}
+      ${renderAttachment(m.attachmentUrl, m.type, m.durationMs)}
       ${renderMessageActions(m)}
       ${renderReactions(m)}
       ${renderReadReceipt(m)}
@@ -4952,7 +5037,238 @@ function startDirectVoiceSubscription(){
 
 startDirectVoiceSubscription();
 
-console.info("Duo Update V34 TURN/OpenRelay ICE buffer fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
+
+/* V35 — Historique vocal + notes vocales */
+function formatDurationMs(ms){
+  const total = Math.max(0, Math.round(Number(ms || 0) / 1000));
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+function callMetaFromRecord(record){
+  const candidates = record?.candidates && typeof record.candidates === "object" ? record.candidates : {};
+  return candidates.meta && typeof candidates.meta === "object" ? candidates.meta : {};
+}
+
+async function updateCallMeta(id, patch){
+  if(!id) return null;
+  const record = await getDirectVoiceRecord(id);
+  if(!record) return null;
+  const candidates = record.candidates && typeof record.candidates === "object"
+    ? record.candidates
+    : { caller: [], callee: [] };
+  const meta = candidates.meta && typeof candidates.meta === "object" ? candidates.meta : {};
+  candidates.meta = { ...meta, ...patch };
+  return await updateDirectVoiceRecord(id, { candidates });
+}
+
+async function renderVoiceHistory(){
+  const box = $("voiceHistoryBox");
+  if(!box) return;
+  try{
+    await ensurePbAuth();
+    const list = await pb.collection("calls").getList(1, 12, { sort:"-created" });
+    const rows = (list.items || []).filter(r => {
+      const me = normalizeVoiceNameValue(voiceName());
+      return normalizeVoiceNameValue(r.from) === me || normalizeVoiceNameValue(r.to) === me;
+    });
+    box.innerHTML = rows.map(r => {
+      const meta = callMetaFromRecord(r);
+      const status = meta.finalStatus || r.status || "ended";
+      const cls = status === "accepted" || status === "completed" ? "ok" : (status === "missed" || status === "refused" ? "missed" : "ended");
+      const duration = meta.durationMs ? formatDurationMs(meta.durationMs) : "00:00";
+      const at = r.created ? stamp(r.created) : "";
+      const label = status === "missed" ? "Manqué" : status === "refused" ? "Refusé" : status === "ringing" ? "En cours" : "Terminé";
+      return `<div class="voiceHistoryItem">
+        <strong>${esc(r.from || "?")} → ${esc(r.to || "?")} <em class="voiceHistoryStatus ${cls}">${esc(label)}</em></strong>
+        <span>${esc(at)} · durée ${esc(duration)}</span>
+      </div>`;
+    }).join("") || '<p class="muted">Aucun appel récent.</p>';
+  }catch(e){
+    box.innerHTML = '<p class="muted">Historique vocal indisponible.</p>';
+  }
+}
+window.renderVoiceHistory = renderVoiceHistory;
+
+const __v35StartVoiceCallBase = startVoiceCall;
+startVoiceCall = async function(){
+  await __v35StartVoiceCallBase();
+  if(directVoiceRecordId){
+    try{
+      await updateCallMeta(directVoiceRecordId, {
+        startedAt: new Date().toISOString(),
+        acceptedAt: null,
+        endedAt: null,
+        durationMs: 0,
+        finalStatus: "ringing"
+      });
+      renderVoiceHistory();
+    }catch(e){ console.warn("Historique appel non initialisé", e); }
+  }
+};
+window.startVoiceCall = startVoiceCall;
+
+const __v35AcceptVoiceCallBase = acceptVoiceCall;
+acceptVoiceCall = async function(){
+  await __v35AcceptVoiceCallBase();
+  if(directVoiceRecordId){
+    try{
+      await updateCallMeta(directVoiceRecordId, {
+        acceptedAt: new Date().toISOString(),
+        finalStatus: "accepted"
+      });
+      renderVoiceHistory();
+    }catch(e){ console.warn("Historique acceptation non enregistré", e); }
+  }
+};
+window.acceptVoiceCall = acceptVoiceCall;
+
+const __v35HangupVoiceCallBase = hangupVoiceCall;
+hangupVoiceCall = async function(){
+  const id = directVoiceRecordId;
+  const record = id ? await getDirectVoiceRecord(id) : null;
+  const meta = callMetaFromRecord(record);
+  const nowIso = new Date().toISOString();
+  let durationMs = 0;
+  if(meta.acceptedAt){
+    durationMs = Date.now() - new Date(meta.acceptedAt).getTime();
+  }
+  const finalStatus = meta.acceptedAt ? "completed" : "missed";
+  try{
+    if(id){
+      await updateCallMeta(id, {
+        endedAt: nowIso,
+        durationMs,
+        finalStatus,
+        endedBy: voiceName()
+      });
+    }
+  }catch(e){ console.warn("Historique fin appel non enregistré", e); }
+  await __v35HangupVoiceCallBase();
+  renderVoiceHistory();
+};
+window.hangupVoiceCall = hangupVoiceCall;
+
+const __v35HandleDirectVoiceRecordBase = handleDirectVoiceRecord;
+handleDirectVoiceRecord = async function(record){
+  await __v35HandleDirectVoiceRecordBase(record);
+  if(record?.status === "ended" || record?.status === "accepted" || record?.status === "ringing"){
+    renderVoiceHistory();
+  }
+};
+
+let voiceNoteRecorder = null;
+let voiceNoteChunks = [];
+let voiceNoteStartedAt = 0;
+let voiceNoteTargetMini = false;
+
+function bestVoiceMimeType(){
+  const types = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/ogg;codecs=opus",
+    "audio/mp4"
+  ];
+  return types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
+}
+
+function setVoiceNoteButtons(recording){
+  const label = recording ? "⏹ Stop" : "🎙 Vocal";
+  const miniLabel = recording ? "⏹ Stop vocal" : "🎙 Note vocale";
+  const btn = $("voiceNoteBtn");
+  const mini = $("miniVoiceNoteBtn");
+  if(btn){
+    btn.textContent = label;
+    btn.classList.toggle("recording", recording);
+  }
+  if(mini){
+    mini.textContent = miniLabel;
+    mini.classList.toggle("recording", recording);
+  }
+}
+
+async function blobToDataURL(blob){
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Lecture audio impossible"));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function sendVoiceNote(blob, durationMs, fromMini){
+  const senderEl = fromMini ? $("miniSenderName") : $("senderName");
+  const sender = senderEl?.value?.trim() || getCurrentSender() || voiceName() || "Anonyme";
+  localStorage.setItem("duoSender", sender);
+  const dataUrl = await blobToDataURL(blob);
+  await addDoc(chatRef, messagePayload({
+    text: "🎙 Note vocale",
+    sender,
+    attachmentUrl: dataUrl,
+    priority: "",
+    replyTo: currentReplyTo,
+    type: "voice",
+    durationMs
+  }));
+  if(currentReplyTo){
+    currentReplyTo = null;
+    $("replyBanner")?.classList.remove("show");
+  }
+}
+
+async function toggleVoiceNoteRecording(fromMini=false){
+  if(voiceNoteRecorder && voiceNoteRecorder.state === "recording"){
+    voiceNoteRecorder.stop();
+    return;
+  }
+  if(!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder){
+    alert("Notes vocales non supportées sur ce navigateur.");
+    return;
+  }
+  try{
+    await ensurePbAuth();
+    voiceNoteTargetMini = !!fromMini;
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+    voiceNoteChunks = [];
+    const mimeType = bestVoiceMimeType();
+    voiceNoteRecorder = new MediaRecorder(stream, mimeType ? {mimeType} : undefined);
+    voiceNoteStartedAt = Date.now();
+    voiceNoteRecorder.ondataavailable = e => {
+      if(e.data && e.data.size) voiceNoteChunks.push(e.data);
+    };
+    voiceNoteRecorder.onstop = async () => {
+      setVoiceNoteButtons(false);
+      stream.getTracks().forEach(t => t.stop());
+      const durationMs = Date.now() - voiceNoteStartedAt;
+      const blob = new Blob(voiceNoteChunks, {type: voiceNoteRecorder.mimeType || "audio/webm"});
+      voiceNoteRecorder = null;
+      voiceNoteChunks = [];
+      if(blob.size < 800 || durationMs < 450){
+        alert("Note vocale trop courte.");
+        return;
+      }
+      try{
+        await sendVoiceNote(blob, durationMs, voiceNoteTargetMini);
+      }catch(e){
+        console.error("Envoi note vocale impossible", e);
+        alert("Impossible d'envoyer la note vocale.");
+      }
+    };
+    voiceNoteRecorder.start();
+    setVoiceNoteButtons(true);
+  }catch(e){
+    console.error(e);
+    setVoiceNoteButtons(false);
+    alert("Autorisation micro refusée ou indisponible.");
+  }
+}
+window.toggleVoiceNoteRecording = toggleVoiceNoteRecording;
+
+setInterval(renderVoiceHistory, 15000);
+setTimeout(renderVoiceHistory, 1200);
+
+console.info("Duo Update V35 voice history + voice notes loaded", {pb: PB_URL, session: PB_SESSION_ID});
 
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
