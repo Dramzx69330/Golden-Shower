@@ -2231,6 +2231,17 @@ function makeSnapshot(records, changes){
   };
 }
 
+
+function makeDocSnapshot(record, ref){
+  const doc = record ? recordToFirestoreDoc(record) : null;
+  return {
+    id: ref?.firestoreId || doc?.id || "",
+    ref,
+    exists: () => !!record,
+    data: () => doc ? doc.data() : null
+  };
+}
+
 function getQueryLimit(ref){
   const c = (ref?.constraints || []).find(x => x.type === "limit");
   return c?.count || 200;
@@ -4370,6 +4381,18 @@ function toggleVoiceCall(){
 }
 window.toggleVoiceCall = toggleVoiceCall;
 
+
+let voicePollTimer = null;
+async function pollVoiceCall(){
+  if(!voiceCallRef) return;
+  try{
+    const records = await listRecords(voiceCallRef);
+    handleVoiceSnapshot(makeDocSnapshot(records[0] || null, voiceCallRef));
+  }catch(e){
+    console.warn("Polling vocal impossible", e);
+  }
+}
+
 function handleVoiceSnapshot(snap){
   if(!snap.exists()){
     voiceCallData = null;
@@ -4427,6 +4450,9 @@ async function start(){
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
+    if(voicePollTimer) clearInterval(voicePollTimer);
+    voicePollTimer = setInterval(pollVoiceCall, 1200);
+    pollVoiceCall();
 
     onSnapshot(query(urgenciesRef,orderBy('createdAt','desc'),limit(30)), snap=>{
       const changes=snap.docChanges().map(c=>({type:c.type,data:{id:c.doc.id,...c.doc.data()}}));
