@@ -2334,7 +2334,9 @@ function onSnapshot(ref, next, error){
     try{
       const initial = await listRecords(ref);
       knownIds = new Set(initial.map(r => r.id));
-      if(active) next(makeSnapshot(initial));
+      if(!active) return;
+      if(ref.__type === "doc") next(makeDocSnapshot(initial[0] || null, ref));
+      else next(makeSnapshot(initial));
     }catch(e){
       console.error("PocketBase initial snapshot error", e);
       if(error) error(e);
@@ -2355,7 +2357,12 @@ function onSnapshot(ref, next, error){
 
       try{
         const records = await listRecords(ref);
-        if(active) next(makeSnapshot(records, [{ type, doc:recordToFirestoreDoc(record) }]));
+        if(!active) return;
+        if(ref.__type === "doc"){
+          next(makeDocSnapshot(type === "removed" ? null : (records[0] || record), ref));
+        }else{
+          next(makeSnapshot(records, [{ type, doc:recordToFirestoreDoc(record) }]));
+        }
       }catch(e){
         if(error) error(e);
       }
@@ -4166,7 +4173,7 @@ function setTheme(theme){
 }
 window.setTheme = setTheme;
 
-/* V26 — Canal vocal WebRTC via Firestore */
+/* V28 — Canal vocal WebRTC via PocketBase (snapshot document corrigé) */
 const voiceClientId = localStorage.getItem("duoVoiceClientId") || (() => {
   const id = "vc_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
   localStorage.setItem("duoVoiceClientId", id);
@@ -4247,6 +4254,7 @@ async function ensureVoiceStream(){
 }
 
 async function startVoiceCall(){
+  await ensurePbAuth();
   if(!voiceCallRef) return alert("PocketBase pas encore prêt.");
   if(!navigator.mediaDevices?.getUserMedia) return alert("Micro non supporté par ce navigateur.");
   try{
