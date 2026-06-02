@@ -1741,7 +1741,22 @@ tbody tr:hover td{background:#1b1f29!important}
     .voiceHistoryStatus.missed{color:#fcd34d;background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28)}
     .voiceHistoryStatus.ended{color:#cbd5e1;background:rgba(148,163,184,.10)}
 
-  </style>
+  
+/* V36 — Partage écran, E2E, salons vocaux, statut personnalisé, PWA */
+.v36Controls{display:grid;gap:8px;margin-top:10px}
+.v36ControlRow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.v36ControlRow select,.v36ControlRow input{min-width:0!important;flex:1;padding:9px 10px!important;border-radius:9px!important;font-size:12px!important}
+.v36ControlRow button{padding:9px 10px!important;border-radius:9px!important;font-size:12px!important;font-weight:900!important}
+.v36Chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:900;color:var(--text)}
+.v36ScreenBox{display:none;border:1px solid #343b49;background:#0b0e14;border-radius:12px;overflow:hidden;margin-top:10px}
+.v36ScreenBox.show{display:block}
+.v36ScreenBox video{display:block;width:100%;max-height:260px;background:#000}
+.v36ScreenLabel{padding:8px 10px;font-size:12px;color:#cbd5e1;font-weight:900;border-bottom:1px solid #343b49}
+.v36InstallBtn{display:none}
+.v36InstallBtn.show{display:inline-flex}
+.v36E2EOn{border-color:rgba(34,197,94,.45)!important;color:#bbf7d0!important;background:rgba(34,197,94,.10)!important}
+
+</style>
 </head>
 <body>
 <div class="app">
@@ -1779,11 +1794,36 @@ tbody tr:hover td{background:#1b1f29!important}
         </div>
         <div id="livePresenceBox" class="livePresenceBox">
           <div class="livePresenceTitle"><span>Présence live</span><span id="presenceCount">0 en ligne</span></div>
+          <div class="v36Controls">
+            <div class="v36ControlRow">
+              <select id="customStatusSelect" onchange="setCustomStatus(this.value)" title="Statut personnalisé">
+                <option value="">🟢 Disponible</option>
+                <option value="🌙 Occupé">🌙 Occupé</option>
+                <option value="⚡ En mission">⚡ En mission</option>
+                <option value="🧠 Focus">🧠 Focus</option>
+                <option value="💤 AFK">💤 AFK</option>
+              </select>
+            </div>
+            <div class="v36ControlRow">
+              <input id="e2ePassphrase" type="password" placeholder="Phrase secrète E2E">
+              <button type="button" class="secondary small" id="e2eToggleBtn" onclick="toggleE2E()">🔐 E2E OFF</button>
+            </div>
+            <div class="v36ControlRow">
+              <select id="voiceRoomSelect" title="Salon vocal">
+                <option value="">🎧 Appel direct</option>
+                <option value="Général">🎤 Salon Général</option>
+                <option value="Staff">🎤 Salon Staff</option>
+                <option value="Urgence">🚨 Salon Urgence</option>
+              </select>
+              <button type="button" class="secondary small" onclick="joinVoiceRoom()">Rejoindre</button>
+            </div>
+          </div>
           <div id="livePresenceList" class="livePresenceList"></div>
         </div>
         <div style="margin-top:12px;display:flex;gap:10px;justify-content:flex-end">
           <button class="secondary small" onclick="enableNotifications()">Activer son</button>
           <button class="secondary small" onclick="exportCSV()">Export CSV</button>
+          <button class="secondary small v36InstallBtn" id="installPwaBtn" onclick="installPWA()">Installer app</button>
         </div>
       </div>
     </div>
@@ -2189,6 +2229,14 @@ tbody tr:hover td{background:#1b1f29!important}
     </div>
     <div class="voiceBody">
       <div id="voiceCallStatus" class="voiceStatus">Prêt.</div>
+      <div id="remoteScreenBox" class="v36ScreenBox">
+        <div class="v36ScreenLabel">Partage d'écran distant</div>
+        <video id="remoteScreenVideo" autoplay playsinline controls></video>
+      </div>
+      <div class="v36ControlRow">
+        <span id="activeVoiceRoomChip" class="v36Chip">🎧 Direct</span>
+        <button type="button" class="secondary" onclick="toggleScreenShare()">🖥️ Partager écran</button>
+      </div>
       <div class="voiceActions">
         <button type="button" class="secondary" id="voiceAcceptBtn" onclick="acceptVoiceCall()" style="display:none">Accepter</button>
         <button type="button" class="secondary" onclick="closeVoiceModal()">Fermer</button>
@@ -3723,7 +3771,7 @@ function renderPresence(){
   const html=list.map(u=>{
     const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
     const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
+    const status=u.online ? (u.customStatus ? `${esc(u.customStatus)} · ${u.typing ? '✍️ écrit' : '👀 '+esc(u.pageLabel||pageLabel(u.page))}` : (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`)) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
     const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
     return `<div class="presenceUser">
       <div class="presenceLeft">
@@ -5269,6 +5317,272 @@ setInterval(renderVoiceHistory, 15000);
 setTimeout(renderVoiceHistory, 1200);
 
 console.info("Duo Update V35 voice history + voice notes loaded", {pb: PB_URL, session: PB_SESSION_ID});
+
+
+/* V36 — Partage écran + E2E léger + salons vocaux + statut personnalisé + PWA */
+let v36ScreenStream = null;
+let v36ScreenSender = null;
+let v36LastRemoteOfferSdp = "";
+let v36LastRemoteAnswerSdp = "";
+let v36ActiveRoom = localStorage.getItem("duoVoiceRoom") || "";
+let v36PwaPrompt = null;
+
+function v36Utf8ToB64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function v36B64ToUtf8(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+function v36Xor(data, key){
+  key = String(key || "");
+  if(!key) return data;
+  let out = "";
+  for(let i=0;i<data.length;i++){
+    out += String.fromCharCode(data.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return out;
+}
+function v36E2EEnabled(){
+  return localStorage.getItem("duoE2EEnabled") === "1" && !!localStorage.getItem("duoE2EPassphrase");
+}
+function v36EncryptText(text){
+  if(!v36E2EEnabled() || !text || String(text).startsWith("🔐:")) return text;
+  const key = localStorage.getItem("duoE2EPassphrase") || "";
+  return "🔐:" + v36Utf8ToB64(v36Xor(String(text), key));
+}
+function v36DecryptText(text){
+  const raw = String(text || "");
+  if(!raw.startsWith("🔐:")) return raw;
+  try{
+    const key = localStorage.getItem("duoE2EPassphrase") || "";
+    if(!key) return "🔐 Message chiffré — phrase secrète requise";
+    return v36Xor(v36B64ToUtf8(raw.slice(3)), key);
+  }catch{
+    return "🔐 Message chiffré — clé incorrecte";
+  }
+}
+function toggleE2E(){
+  const input = $("e2ePassphrase");
+  const btn = $("e2eToggleBtn");
+  const phrase = input?.value || localStorage.getItem("duoE2EPassphrase") || "";
+  const enabled = localStorage.getItem("duoE2EEnabled") === "1";
+  if(enabled){
+    localStorage.setItem("duoE2EEnabled", "0");
+  }else{
+    if(!phrase.trim()) return alert("Entre une phrase secrète E2E.");
+    localStorage.setItem("duoE2EPassphrase", phrase);
+    localStorage.setItem("duoE2EEnabled", "1");
+  }
+  if(btn){
+    const on = v36E2EEnabled();
+    btn.textContent = on ? "🔐 E2E ON" : "🔐 E2E OFF";
+    btn.classList.toggle("v36E2EOn", on);
+  }
+  renderAll?.();
+}
+window.toggleE2E = toggleE2E;
+
+try{
+  const __v36MessagePayloadBase = messagePayload;
+  messagePayload = function(payload){
+    const p = {...payload};
+    if(p.text) p.text = v36EncryptText(p.text);
+    return __v36MessagePayloadBase(p);
+  };
+}catch(e){ console.warn("V36 E2E payload patch ignoré", e); }
+
+try{
+  const __v36RenderTextBase = renderTextWithMentions;
+  renderTextWithMentions = function(text){
+    return __v36RenderTextBase(v36DecryptText(text));
+  };
+}catch(e){ console.warn("V36 E2E render patch ignoré", e); }
+
+function setCustomStatus(value){
+  localStorage.setItem("duoCustomStatus", value || "");
+  updatePresence({customStatus:value || ""});
+}
+window.setCustomStatus = setCustomStatus;
+
+try{
+  const __v36UpdatePresenceBase = updatePresence;
+  updatePresence = async function(extra={}){
+    return __v36UpdatePresenceBase({...extra, customStatus: localStorage.getItem("duoCustomStatus") || ""});
+  };
+}catch(e){ console.warn("V36 status patch ignoré", e); }
+
+function updateVoiceRoomChip(){
+  const label = v36ActiveRoom ? `🎤 ${v36ActiveRoom}` : "🎧 Direct";
+  if($("activeVoiceRoomChip")) $("activeVoiceRoomChip").textContent = label;
+}
+function joinVoiceRoom(){
+  v36ActiveRoom = $("voiceRoomSelect")?.value || "";
+  localStorage.setItem("duoVoiceRoom", v36ActiveRoom);
+  updateVoiceRoomChip();
+  updatePresence({action: v36ActiveRoom ? `🎤 dans le salon ${v36ActiveRoom}` : ""});
+  if(v36ActiveRoom) pushWidgetNotif?.("Salon vocal", `Tu as rejoint ${v36ActiveRoom}`, "voice-room");
+}
+window.joinVoiceRoom = joinVoiceRoom;
+
+try{
+  const __v36VoiceOtherNameBase = voiceOtherName;
+  voiceOtherName = function(){
+    return v36ActiveRoom ? `room:${v36ActiveRoom}` : __v36VoiceOtherNameBase();
+  };
+  const __v36RelevantBase = isDirectVoiceRecordRelevant;
+  isDirectVoiceRecordRelevant = function(r){
+    if(!r) return false;
+    const to = String(r.to || "");
+    if(to.startsWith("room:")){
+      const room = to.slice(5);
+      return !!v36ActiveRoom && room === v36ActiveRoom && normalizeVoiceNameValue(r.from) !== normalizeVoiceNameValue(voiceName()) && r.status !== "ended";
+    }
+    return __v36RelevantBase(r);
+  };
+}catch(e){ console.warn("V36 salons vocaux patch ignoré", e); }
+
+async function v36RenegotiateVoice(){
+  if(!voicePc || !directVoiceRecordId) return;
+  const offer = await voicePc.createOffer();
+  await voicePc.setLocalDescription(offer);
+  await updateDirectVoiceRecord(directVoiceRecordId, {
+    offer:{type:offer.type, sdp:offer.sdp},
+    answer:null
+  });
+  v36LastRemoteAnswerSdp = "";
+}
+async function toggleScreenShare(){
+  if(!voicePc || !directVoiceRecordId) return alert("Lance ou accepte un appel avant de partager l'écran.");
+  try{
+    if(v36ScreenStream){
+      try{ v36ScreenStream.getTracks().forEach(t=>t.stop()); }catch{}
+      if(v36ScreenSender){
+        try{ voicePc.removeTrack(v36ScreenSender); }catch{}
+      }
+      v36ScreenStream = null;
+      v36ScreenSender = null;
+      await v36RenegotiateVoice();
+      setVoiceStatus("Partage d'écran arrêté.");
+      return;
+    }
+    if(!navigator.mediaDevices?.getDisplayMedia) return alert("Partage d'écran non supporté par ce navigateur.");
+    v36ScreenStream = await navigator.mediaDevices.getDisplayMedia({video:true, audio:false});
+    const track = v36ScreenStream.getVideoTracks()[0];
+    if(!track) return;
+    v36ScreenSender = voicePc.addTrack(track, v36ScreenStream);
+    track.onended = () => toggleScreenShare().catch(()=>{});
+    setVoiceStatus("Partage d'écran lancé. Connexion...");
+    await v36RenegotiateVoice();
+  }catch(e){
+    console.error("Partage écran impossible", e);
+    setVoiceStatus("Partage d'écran annulé ou impossible.");
+  }
+}
+window.toggleScreenShare = toggleScreenShare;
+
+try{
+  const __v36CreatePcBase = createVoicePc;
+  createVoicePc = function(){
+    const pc = __v36CreatePcBase();
+    const oldTrack = pc.ontrack;
+    pc.ontrack = event => {
+      try{ oldTrack && oldTrack(event); }catch{}
+      const track = event.track;
+      if(track?.kind === "video" && event.streams?.[0]){
+        const box = $("remoteScreenBox");
+        const video = $("remoteScreenVideo");
+        if(video){
+          video.srcObject = event.streams[0];
+          video.play().catch(()=>{});
+        }
+        box?.classList.add("show");
+        openVoiceModal("Partage d'écran", `${voiceOtherName()} partage son écran.`);
+      }
+    };
+    return pc;
+  };
+}catch(e){ console.warn("V36 screen pc patch ignoré", e); }
+
+try{
+  const __v36HandleDirectBase = handleDirectVoiceRecord;
+  handleDirectVoiceRecord = async function(record){
+    await __v36HandleDirectBase(record);
+    const data = directVoiceDataFromRecord(record);
+    if(!data || !voicePc || data.status !== "accepted") return;
+    const me = normalizeVoiceNameValue(voiceName());
+    const from = normalizeVoiceNameValue(data.from);
+    const to = normalizeVoiceNameValue(data.to);
+    if(data.offer?.sdp && from !== me && data.offer.sdp !== v36LastRemoteOfferSdp){
+      try{
+        v36LastRemoteOfferSdp = data.offer.sdp;
+        await voicePc.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await voicePc.createAnswer();
+        await voicePc.setLocalDescription(answer);
+        await updateDirectVoiceRecord(data.id, {answer:{type:answer.type, sdp:answer.sdp}});
+      }catch(e){ console.warn("Renégociation écran côté receveur ignorée", e); }
+    }
+    if(data.answer?.sdp && from === me && data.answer.sdp !== v36LastRemoteAnswerSdp){
+      try{
+        v36LastRemoteAnswerSdp = data.answer.sdp;
+        if(voicePc.signalingState !== "stable"){
+          await voicePc.setRemoteDescription(new RTCSessionDescription(data.answer));
+        }
+      }catch(e){ console.warn("Renégociation écran côté appelant ignorée", e); }
+    }
+  };
+}catch(e){ console.warn("V36 renegotiation patch ignoré", e); }
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  v36PwaPrompt = event;
+  $("installPwaBtn")?.classList.add("show");
+});
+async function installPWA(){
+  if(!v36PwaPrompt) return alert("L'installation sera proposée par le navigateur quand l'app sera éligible.");
+  v36PwaPrompt.prompt();
+  await v36PwaPrompt.userChoice.catch(()=>{});
+  v36PwaPrompt = null;
+  $("installPwaBtn")?.classList.remove("show");
+}
+window.installPWA = installPWA;
+
+(function registerV36PWA(){
+  try{
+    const manifest = {
+      name:"Golden Shower Duo",
+      short_name:"Golden Duo",
+      start_url:"./",
+      display:"standalone",
+      background_color:"#101114",
+      theme_color:"#111827",
+      icons:[]
+    };
+    const link = document.createElement("link");
+    link.rel = "manifest";
+    link.href = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(manifest));
+    document.head.appendChild(link);
+    if("serviceWorker" in navigator){
+      const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{});`;
+      const url = URL.createObjectURL(new Blob([sw], {type:"text/javascript"}));
+      navigator.serviceWorker.register(url).catch(()=>{});
+    }
+  }catch(e){}
+})();
+
+setTimeout(() => {
+  if($("customStatusSelect")) $("customStatusSelect").value = localStorage.getItem("duoCustomStatus") || "";
+  if($("e2ePassphrase")) $("e2ePassphrase").value = localStorage.getItem("duoE2EPassphrase") || "";
+  if($("e2eToggleBtn")){
+    const on = v36E2EEnabled();
+    $("e2eToggleBtn").textContent = on ? "🔐 E2E ON" : "🔐 E2E OFF";
+    $("e2eToggleBtn").classList.toggle("v36E2EOn", on);
+  }
+  if($("voiceRoomSelect")) $("voiceRoomSelect").value = v36ActiveRoom;
+  updateVoiceRoomChip();
+}, 800);
+
+console.info("Duo Update V36 screen share + E2E + voice rooms + custom status + PWA loaded");
+
 
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
