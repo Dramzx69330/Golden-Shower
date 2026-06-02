@@ -4287,10 +4287,30 @@ window.closeVoiceModal = closeVoiceModal;
 function createVoicePc(){
   const pc = new RTCPeerConnection({
     iceServers:[
-      {urls:"stun:stun.l.google.com:19302"},
-      {urls:"stun:stun1.l.google.com:19302"}
-    ]
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      {
+        urls: [
+          "turn:openrelay.metered.ca:80",
+          "turn:openrelay.metered.ca:443",
+          "turn:openrelay.metered.ca:443?transport=tcp"
+        ],
+        username: "openrelayproject",
+        credential: "openrelayproject"
+      }
+    ],
+    iceTransportPolicy: "all"
   });
+  window.pc = pc;
+  pc.oniceconnectionstatechange = () => {
+    console.log("VOICE ICE:", pc.iceConnectionState);
+    if(pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed"){
+      setVoiceStatus("Connecté. Audio actif.");
+    }
+    if(pc.iceConnectionState === "failed"){
+      setVoiceStatus("Connexion audio impossible. TURN requis ou réseau bloque WebRTC.");
+    }
+  };
   pc.ontrack = event => {
     const audio = $("remoteVoiceAudio");
     if(audio && event.streams && event.streams[0]){
@@ -4565,9 +4585,19 @@ async function addRemoteVoiceCandidatesDirect(data){
 createVoicePc = function(){
   const pc = new RTCPeerConnection({
     iceServers:[
-      {urls:"stun:stun.l.google.com:19302"},
-      {urls:"stun:stun1.l.google.com:19302"}
-    ]
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+      {
+        urls: [
+          "turn:openrelay.metered.ca:80",
+          "turn:openrelay.metered.ca:443",
+          "turn:openrelay.metered.ca:443?transport=tcp"
+        ],
+        username: "openrelayproject",
+        credential: "openrelayproject"
+      }
+    ],
+    iceTransportPolicy: "all"
   });
 
   pc.ontrack = event => {
@@ -4833,7 +4863,7 @@ function startDirectVoiceSubscription(){
 
 startDirectVoiceSubscription();
 
-console.info("Duo Update V32 direct calls voice fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
+console.info("Duo Update V33 TURN/OpenRelay voice fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
 
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
