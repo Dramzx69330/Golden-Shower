@@ -2123,18 +2123,26 @@ tbody tr:hover td{background:#1b1f29!important}
 <audio id="remoteVoiceAudio" autoplay playsinline></audio>
 
 <script type="module">
-import PocketBase from "https://esm.sh/pocketbase@0.26.2";
+import PocketBase, { LocalAuthStore } from "https://esm.sh/pocketbase@0.26.2";
 
 const PB_URL = "https://dramzx692.duckdns.org";
 const PB_RECORDS_COLLECTION = "duo_records";
-const pb = new PocketBase(PB_URL);
+const PB_SESSION_ID = sessionStorage.getItem("duoPbSessionId") || (() => {
+  const id = "tab_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+  sessionStorage.setItem("duoPbSessionId", id);
+  return id;
+})();
+const pb = new PocketBase(PB_URL, new LocalAuthStore("duo_pb_auth_" + PB_SESSION_ID));
 pb.autoCancellation(false);
 
 async function ensurePbAuth(){
   if(pb.authStore.isValid) return true;
 
-  let email = localStorage.getItem("duoPocketBaseEmail") || "";
-  if(!email) email = prompt("Email PocketBase (Dora ou Zerlezz)") || "";
+  let email = sessionStorage.getItem("duoPocketBaseEmail") || "";
+  if(!email){
+    const lastEmail = localStorage.getItem("duoPocketBaseLastEmail") || "";
+    email = prompt("Email PocketBase (Dora ou Zerlezz)", lastEmail) || "";
+  }
   if(!email) throw new Error("Connexion PocketBase annulée");
 
   let password = sessionStorage.getItem("duoPocketBasePassword") || "";
@@ -2142,9 +2150,11 @@ async function ensurePbAuth(){
   if(!password) throw new Error("Mot de passe PocketBase manquant");
 
   const auth = await pb.collection("users").authWithPassword(email.trim(), password);
-  localStorage.setItem("duoPocketBaseEmail", email.trim());
+  sessionStorage.setItem("duoPocketBaseEmail", email.trim());
   sessionStorage.setItem("duoPocketBasePassword", password);
+  localStorage.setItem("duoPocketBaseLastEmail", email.trim());
   if(auth?.record?.name){
+    sessionStorage.setItem("duoSenderSession", auth.record.name);
     localStorage.setItem("duoSender", auth.record.name);
   }
   return true;
@@ -4174,11 +4184,15 @@ function setTheme(theme){
 window.setTheme = setTheme;
 
 /* V28 — Canal vocal WebRTC via PocketBase (snapshot document corrigé) */
-const voiceClientId = localStorage.getItem("duoVoiceClientId") || (() => {
+const voiceTabFallbackId = sessionStorage.getItem("duoVoiceTabId") || (() => {
   const id = "vc_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-  localStorage.setItem("duoVoiceClientId", id);
+  sessionStorage.setItem("duoVoiceTabId", id);
   return id;
 })();
+
+function voiceClientId(){
+  return pb.authStore?.record?.id || voiceTabFallbackId;
+}
 let voicePc = null;
 let voiceLocalStream = null;
 let voiceCallData = null;
@@ -4188,7 +4202,7 @@ let voiceMode = "";
 let voiceUnsub = null;
 
 function voiceName(){
-  return $("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem("duoSender") || "Anonyme";
+  return pb.authStore?.record?.name || sessionStorage.getItem("duoSenderSession") || $("miniSenderName")?.value || $("senderName")?.value || localStorage.getItem("duoSender") || "Anonyme";
 }
 function setVoiceStatus(text){
   const el = $("voiceCallStatus");
@@ -4228,7 +4242,7 @@ function createVoicePc(){
     if(!event.candidate || !voiceCallRef) return;
     const field = voiceMode === "caller" ? "callerCandidates" : "calleeCandidates";
     const arr = Array.isArray(voiceCallData?.[field]) ? voiceCallData[field].slice() : [];
-    arr.push({id:`${voiceClientId}_${Date.now()}_${voiceCandidateSeq++}`, candidate:event.candidate.toJSON()});
+    arr.push({id:`${voiceClientId()}_${Date.now()}_${voiceCandidateSeq++}`, candidate:event.candidate.toJSON()});
     try{
       await setDoc(voiceCallRef, {[field]: arr, updatedAt: serverTimestamp()}, {merge:true});
     }catch(e){ console.warn("Candidate vocal non envoyé", e); }
@@ -4269,7 +4283,7 @@ async function startVoiceCall(){
     await voicePc.setLocalDescription(offer);
     await setDoc(voiceCallRef, {
       status:"ringing",
-      caller:voiceClientId,
+      caller:voiceClientId(),
       callerName:voiceName(),
       callee:"",
       calleeName:"",
@@ -4305,7 +4319,7 @@ async function acceptVoiceCall(){
     await voicePc.setLocalDescription(answer);
     await setDoc(voiceCallRef, {
       status:"accepted",
-      callee:voiceClientId,
+      callee:voiceClientId(),
       calleeName:voiceName(),
       answer:{type:answer.type, sdp:answer.sdp},
       updatedAt:serverTimestamp()
@@ -4322,7 +4336,7 @@ window.acceptVoiceCall = acceptVoiceCall;
 async function hangupVoiceCall(){
   try{
     if(voiceCallRef){
-      await setDoc(voiceCallRef, {status:"ended", endedBy:voiceClientId, updatedAt:serverTimestamp()}, {merge:true});
+      await setDoc(voiceCallRef, {status:"ended", endedBy:voiceClientId(), updatedAt:serverTimestamp()}, {merge:true});
     }
   }catch(e){}
   cleanupVoice();
@@ -4369,7 +4383,7 @@ function handleVoiceSnapshot(snap){
     return;
   }
 
-  if(data.status === "ringing" && data.caller !== voiceClientId){
+  if(data.status === "ringing" && data.caller !== voiceClientId()){
     if(!voicePc && !voiceMode){
       openVoiceModal("Appel entrant", `${data.callerName || "Associé"} t'appelle.`);
       setVoiceStatus("Appel vocal entrant. Tu peux accepter ou fermer.");
@@ -4379,15 +4393,15 @@ function handleVoiceSnapshot(snap){
     }
   }
 
-  if(data.status === "accepted" && data.caller === voiceClientId && data.answer && voicePc && !voicePc.currentRemoteDescription){
+  if(data.status === "accepted" && data.caller === voiceClientId() && data.answer && voicePc && !voicePc.currentRemoteDescription){
     voicePc.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(console.warn);
     setVoiceStatus(`${data.calleeName || "Associé"} a accepté. Connexion...`);
   }
 
-  if(data.status === "accepted" && (data.caller === voiceClientId || data.callee === voiceClientId)){
+  if(data.status === "accepted" && (data.caller === voiceClientId() || data.callee === voiceClientId())){
     setVoiceButton(true, "🎤 En appel");
     addRemoteVoiceCandidates(data);
-  }else if(data.status === "ringing" && data.caller === voiceClientId){
+  }else if(data.status === "ringing" && data.caller === voiceClientId()){
     addRemoteVoiceCandidates(data);
   }
 }
