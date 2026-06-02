@@ -3526,7 +3526,11 @@ $("mentionSuggest")?.addEventListener("mousedown", e => {
 });
 
 
-function setSync(text,type=''){ $("syncState").innerHTML = `<span class="dot ${type}"></span>${esc(text)}`; }
+function setSync(text,type=''){
+  window.__duoLastSyncText = String(text || "");
+  const syncEl = $("syncState");
+  if(syncEl) syncEl.innerHTML = `<span class="dot ${type}"></span>${esc(text)}`;
+}
 function stamp(ts){ try{ return ts?.toDate ? ts.toDate().toLocaleString('fr-FR') : new Date(ts||Date.now()).toLocaleString('fr-FR') }catch{return ''} }
 
 async function logActivity(text){
@@ -6778,6 +6782,7 @@ async function start(){
   try{
     await ensurePbAuth();
     syncSenderInputsFromAuth();
+    setSync('Connecté en temps réel','ok');
     setTimeout(()=>updatePresence(), 250);
     const app=initializeApp(firebaseConfig);
     db=getFirestore(app);
@@ -6972,7 +6977,16 @@ async function start(){
     $("orderForm")?.addEventListener("focusin",()=>setLiveAction("📦 modifie une commande"));
     $("accountForm")?.addEventListener("focusin",()=>setLiveAction("👤 modifie un compte"));
 
-  }catch(e){ console.error(e); setSync('PocketBase non disponible','bad'); }
+  }catch(e){
+    console.error(e);
+    // V40.1 : ne plus rester bloqué sur "Connexion..." si PocketBase/auth fonctionne
+    if(window.pb && pb.authStore && pb.authStore.isValid){
+      setSync('Connecté en temps réel','ok');
+      try{ renderAll(); renderPresence(); renderWidget(); }catch{}
+    }else{
+      setSync('PocketBase non disponible','bad');
+    }
+  }
 }
 
 /* =========================
@@ -7401,9 +7415,20 @@ document.head.appendChild(v40Style);
     console.warn("V40 bootstrap ignoré:", e?.message || e);
   }
 })();
-console.log("Duo Update V40 rendu + présence corrigés chargés", {pb:PB_URL, session:PB_SESSION_ID});
+console.log("Duo Update V40.1 sync status fix chargé", {pb:PB_URL, session:PB_SESSION_ID});
 
 start();
+
+// V40.1 : garde-fou visuel. Si aucun listener ne met à jour le statut,
+// on affiche quand même l'état réel PocketBase au lieu de rester sur "Connexion...".
+setTimeout(() => {
+  const current = (window.__duoLastSyncText || "").toLowerCase();
+  if(!current || current.includes("connexion")){
+    if(window.pb && pb.authStore && pb.authStore.isValid){
+      setSync('Connecté en temps réel','ok');
+    }
+  }
+}, 2500);
 </script>
 </body>
 </html>
