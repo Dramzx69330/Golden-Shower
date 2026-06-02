@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duo Update V44 — WhatsApp Web</title>
+  <title>Duo Update V44.2 — WhatsApp Actions</title>
   <style>
     :root{
       --bg:#f6f7f9;
@@ -3080,9 +3080,161 @@ function whatsappAlertEnabled(){
 function cleanWhatsAppText(value){
   return String(value || "")
     .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
+    .replace(/\r\n/g, "\n")
+    .replace(/[\t ]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
     .trim()
-    .slice(0, 1200);
+    .slice(0, 1800);
+}
+
+function waValue(value, fallback = "—"){
+  const v = String(value ?? "").trim();
+  return v ? v : fallback;
+}
+
+function waMoney(value){
+  return `${Number(value || 0).toLocaleString("fr-FR")} €`;
+}
+
+function waLine(label, value){
+  return `${label}: ${waValue(value)}`;
+}
+
+function waActor(){
+  return waValue(getCurrentSender ? getCurrentSender() : localStorage.getItem("duoSender"), "Système");
+}
+
+function waDate(){
+  return new Date().toLocaleString("fr-FR", {
+    day:"2-digit",
+    month:"2-digit",
+    year:"numeric",
+    hour:"2-digit",
+    minute:"2-digit"
+  });
+}
+
+function orderSummaryLines(order = {}){
+  return [
+    waLine("👤 Vendeur", order.vendeur),
+    waLine("🧑 Client", order.client),
+    waLine("🛒 Plateforme", order.plateforme),
+    waLine("👥 Compte", order.accountId ? accountLabel(order.accountId) : "Aucun"),
+    waLine("📦 Produit", order.produit),
+    waLine("⚖️ Poids", order.poids),
+    waLine("🏷️ Série", order.serie),
+    waLine("📌 Statut", order.statut),
+    waLine("🚚 Suivi", order.tracking),
+    waLine("💰 Prix", waMoney(order.prix)),
+    waLine("📝 Note", order.note)
+  ].filter(line => !line.endsWith(": —") && !line.endsWith(": Aucun"));
+}
+
+function accountSummaryLines(account = {}){
+  return [
+    waLine("🛒 Plateforme", account.plateforme),
+    waLine("👤 Nom", account.name),
+    waLine("👥 Owner", account.owner),
+    waLine("📧 Email", account.email),
+    waLine("📦 Annonces", account.listings),
+    waLine("⭐ Favori", account.favorite === "oui" ? "Oui" : "Non"),
+    waLine("📌 Statut", normalizeAccountStatus ? normalizeAccountStatus(account.status) : account.status),
+    waLine("📝 Raison", account.statusReason),
+    waLine("📋 Note", account.note)
+  ].filter(line => !line.endsWith(": —"));
+}
+
+function diffLines(oldData = {}, newData = {}, labels = {}){
+  return Object.keys(labels).map(key => {
+    const before = key === "prix" ? waMoney(oldData?.[key]) : waValue(oldData?.[key]);
+    const after = key === "prix" ? waMoney(newData?.[key]) : waValue(newData?.[key]);
+    if(before === after) return "";
+    return `• ${labels[key]}: ${before} → ${after}`;
+  }).filter(Boolean);
+}
+
+function buildOrderWhatsApp(action, order = {}, oldOrder = null){
+  const labels = {
+    date:"Date",
+    vendeur:"Vendeur",
+    client:"Client",
+    plateforme:"Plateforme",
+    produit:"Produit",
+    poids:"Poids",
+    serie:"Série",
+    statut:"Statut",
+    prix:"Prix",
+    tracking:"Suivi",
+    note:"Note",
+    accountId:"Compte"
+  };
+
+  const changes = oldOrder ? diffLines(
+    {...oldOrder, accountId: oldOrder.accountId ? accountLabel(oldOrder.accountId) : ""},
+    {...order, accountId: order.accountId ? accountLabel(order.accountId) : ""},
+    labels
+  ) : [];
+
+  return [
+    `Action: ${action}`,
+    waLine("Fait par", waActor()),
+    waLine("Heure", waDate()),
+    "",
+    ...orderSummaryLines(order),
+    changes.length ? "" : "",
+    changes.length ? "Modifications:" : "",
+    ...changes
+  ].filter(Boolean).join("\n");
+}
+
+function buildAccountWhatsApp(action, account = {}, oldAccount = null, extraLines = []){
+  const labels = {
+    plateforme:"Plateforme",
+    name:"Nom",
+    owner:"Owner",
+    email:"Email",
+    listings:"Annonces",
+    favorite:"Favori",
+    status:"Statut",
+    statusReason:"Raison",
+    note:"Note"
+  };
+
+  const normalizedOld = oldAccount ? {...oldAccount, status: normalizeAccountStatus(oldAccount.status)} : null;
+  const normalizedNew = {...account, status: normalizeAccountStatus(account.status)};
+
+  const changes = oldAccount ? diffLines(normalizedOld, normalizedNew, labels) : [];
+
+  return [
+    `Action: ${action}`,
+    waLine("Fait par", waActor()),
+    waLine("Heure", waDate()),
+    "",
+    ...accountSummaryLines(account),
+    extraLines.length ? "" : "",
+    ...extraLines,
+    changes.length ? "" : "",
+    changes.length ? "Modifications:" : "",
+    ...changes,
+    "",
+    "🔐 Mot de passe non envoyé par sécurité."
+  ].filter(Boolean).join("\n");
+}
+
+async function notifyOrderWhatsApp(action, order, oldOrder = null, keySuffix = ""){
+  await sendWhatsAppAlert(
+    `📦 ${action}`,
+    buildOrderWhatsApp(action, order, oldOrder),
+    `order-${action}-${keySuffix || order?.id || order?.client || ""}-${Date.now()}`
+  );
+}
+
+async function notifyAccountWhatsApp(action, account, oldAccount = null, keySuffix = "", extraLines = []){
+  await sendWhatsAppAlert(
+    `👤 ${action}`,
+    buildAccountWhatsApp(action, account, oldAccount, extraLines),
+    `account-${action}-${keySuffix || account?.id || account?.name || ""}-${Date.now()}`
+  );
 }
 
 async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
@@ -3101,13 +3253,9 @@ async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
     at: new Date().toISOString()
   };
 
-  const message = ["🔔 Duo Update", payload.title, payload.body].filter(Boolean).join("\n");
-
   try{
-    // Méthode principale : POST vers le serveur WhatsApp Web du VPS.
     const res = await fetch(WHATSAPP_ALERTS.endpoint, {
       method: "POST",
-      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       cache: "no-store"
@@ -3119,25 +3267,8 @@ async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
     }
 
     console.info("WhatsApp Web alert envoyée:", title);
-    return true;
-  }catch(e){
-    console.warn("WhatsApp POST échoué, fallback GET:", e);
-  }
-
-  try{
-    // Fallback : route GET testée sur ton VPS (/wa/send?to=...&msg=...).
-    const getUrl = WHATSAPP_ALERTS.endpoint
-      + "?to=33699495147&msg="
-      + encodeURIComponent(message);
-
-    const img = new Image();
-    img.src = getUrl + "&_=" + Date.now();
-
-    console.info("WhatsApp Web alert fallback GET déclenché:", title);
-    return true;
   }catch(e){
     console.warn("WhatsApp Web alert non envoyée:", e);
-    return false;
   }
 }
 
@@ -4376,15 +4507,17 @@ $("orderForm").addEventListener("submit", async e=>{
   const id=$("orderId").value;
   const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),accountId:$("orderAccount").value,shippedAt:$("shippedAt").value,tracking:$("tracking").value.trim(),note:$("note").value.trim(),updatedAt:serverTimestamp()};
   if(!data.vendeur) return alert("Vendeur obligatoire.");
-  if(id){ await setDoc(doc(ordersRef,id),data,{merge:true}); await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`); }
+
+  if(id){
+    const oldOrder=orders.find(x=>x.id===id);
+    await setDoc(doc(ordersRef,id),data,{merge:true});
+    await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`);
+    await notifyOrderWhatsApp("Commande modifiée", {...oldOrder, ...data, id}, oldOrder, id);
+  }
   else{
-    await addDoc(ordersRef,{...data,createdAt:serverTimestamp()});
+    const created = await addDoc(ordersRef,{...data,createdAt:serverTimestamp()});
     await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`);
-    await sendWhatsAppAlert(
-      "🛒 Nouvelle commande",
-      `${data.vendeur || "Vendeur"} · ${data.client || "Client inconnu"} · ${data.plateforme || "Plateforme"} · ${data.prix || 0}€`,
-      `order-${data.vendeur}-${data.client}-${data.prix}-${Date.now()}`
-    );
+    await notifyOrderWhatsApp("Nouvelle commande", {...data, id: created.id}, null, created.id);
   }
   clearOrder();
 });
@@ -4394,6 +4527,7 @@ $("accountForm").addEventListener("submit", async e=>{
   const id=$("accountId").value;
   const data={plateforme:$("accPlateforme").value,name:$("accName").value.trim(),owner:$("accOwner").value.trim(),email:$("accEmail").value.trim(),password:$("accPassword").value, listings:Number($("accListings").value||0),favorite:$("accFavorite").value,status:$("accStatus").value,statusReason:$("accStatusReason").value.trim(),note:$("accNote").value.trim(),updatedAt:serverTimestamp()};
   if(!data.name) return alert("Nom du compte obligatoire.");
+
   if(id){
     const oldAcc=accounts.find(x=>x.id===id);
     await setDoc(doc(accountsRef,id),data,{merge:true});
@@ -4404,11 +4538,17 @@ $("accountForm").addEventListener("submit", async e=>{
       await logActivity(`Statut compte changé : ${data.name} (${fromStatus} → ${toStatus})`);
       pushWidgetNotif('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`, 'account-status');
       toast('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`);
+      await notifyAccountWhatsApp("Statut compte changé", {...oldAcc, ...data, id}, oldAcc, id, [`Ancien statut: ${fromStatus}`, `Nouveau statut: ${toStatus}`]);
     } else {
       await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`);
+      await notifyAccountWhatsApp("Compte modifié", {...oldAcc, ...data, id}, oldAcc, id);
     }
   }
-  else{ await addDoc(accountsRef,{...data,createdAt:serverTimestamp()}); await logActivity(`Nouveau compte ajouté : ${data.plateforme} · ${data.name}`); }
+  else{
+    const created = await addDoc(accountsRef,{...data,createdAt:serverTimestamp()});
+    await logActivity(`Nouveau compte ajouté : ${data.plateforme} · ${data.name}`);
+    await notifyAccountWhatsApp("Nouveau compte ajouté", {...data, id: created.id}, null, created.id);
+  }
   clearAccount();
 });
 
@@ -4543,7 +4683,14 @@ window.editOrder=id=>{
   ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','orderAccount','shippedAt','tracking','note'].forEach(k=>$(k).value=k==='orderId'?id:(k==='orderAccount'?(r.accountId||''):(r[k]??'')));
   goPage('dashboard');
 };
-window.removeOrder=async id=>{ if(confirm('Supprimer cette commande ?')){ await deleteDoc(doc(ordersRef,id)); await logActivity('Une commande a été supprimée'); } };
+window.removeOrder=async id=>{
+  const oldOrder=orders.find(x=>x.id===id);
+  if(confirm('Supprimer cette commande ?')){
+    await deleteDoc(doc(ordersRef,id));
+    await logActivity(`Commande supprimée : ${oldOrder?.vendeur || ''} ${oldOrder?.client || ''}`.trim() || 'Une commande a été supprimée');
+    if(oldOrder) await notifyOrderWhatsApp("Commande supprimée", oldOrder, null, id);
+  }
+};
 window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date").value=today(); };
 
 window.clearAccount=()=>{ $("accountForm").reset(); $("accountId").value=''; };
@@ -4554,7 +4701,15 @@ window.editAccount=id=>{
 };
 window.toggleFavorite=async id=>{
   const a=accounts.find(x=>x.id===id); if(!a) return;
-  await setDoc(doc(accountsRef,id),{favorite:a.favorite==='oui'?'non':'oui',updatedAt:serverTimestamp()},{merge:true});
+  const nextFavorite = a.favorite==='oui' ? 'non' : 'oui';
+  await setDoc(doc(accountsRef,id),{favorite:nextFavorite,updatedAt:serverTimestamp()},{merge:true});
+  await logActivity(`Favori compte changé : ${a.plateforme} · ${a.name} (${nextFavorite === 'oui' ? 'favori' : 'non favori'})`);
+  await notifyAccountWhatsApp(
+    nextFavorite === 'oui' ? "Compte marqué favori" : "Compte retiré des favoris",
+    {...a, favorite: nextFavorite},
+    a,
+    id
+  );
 };
 
 window.setAccountStatusQuick=async(id,status)=>{
@@ -4647,6 +4802,18 @@ window.setAccountStatusQuick=async(id,status)=>{
       console.warn('Notification statut non affichée:', notifErr);
     }
 
+    try{
+      await notifyAccountWhatsApp(
+        "Statut compte changé",
+        a,
+        {...a, status: previousStatus, statusReason: previousReason, bannedAt: previousBannedAt},
+        id,
+        [`Ancien statut: ${from}`, `Nouveau statut: ${to}`, reason ? `Raison: ${reason}` : ""].filter(Boolean)
+      );
+    }catch(waErr){
+      console.warn('WhatsApp statut non envoyé:', waErr);
+    }
+
   }catch(err){
     console.error('Erreur changement statut compte:', err);
 
@@ -4669,17 +4836,28 @@ window.quickToggleBan=async id=>{
   const current=normalizeAccountStatus(a.status);
   if(current==='BANNI'){
     const reason=prompt('Raison de la réactivation ?', 'Compte réactivé') || 'Compte réactivé';
-    await setDoc(doc(accountsRef,id),{status:'ACTIF',statusReason:reason,updatedAt:serverTimestamp()},{merge:true});
+    const updated={...a,status:'ACTIF',statusReason:reason,bannedAt:null};
+    await setDoc(doc(accountsRef,id),{status:'ACTIF',statusReason:reason,bannedAt:null,updatedAt:serverTimestamp()},{merge:true});
     await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:'BANNI',to:'ACTIF',reason,createdAt:serverTimestamp()});
     await logActivity(`Compte réactivé : ${a.plateforme} · ${a.name}`);
+    await notifyAccountWhatsApp("Compte réactivé", updated, a, id, [`Ancien statut: BANNI`, `Nouveau statut: ACTIF`, `Raison: ${reason}`]);
   }else{
     const reason=prompt('Pourquoi ce compte est banni ?', a.statusReason || '') || '';
+    const updated={...a,status:'BANNI',statusReason:reason,bannedAt:new Date().toISOString()};
     await setDoc(doc(accountsRef,id),{status:'BANNI',statusReason:reason,bannedAt:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
     await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:current,to:'BANNI',reason,createdAt:serverTimestamp()});
     await logActivity(`Compte banni : ${a.plateforme} · ${a.name}`);
+    await notifyAccountWhatsApp("Compte banni", updated, a, id, [`Ancien statut: ${current}`, `Nouveau statut: BANNI`, reason ? `Raison: ${reason}` : ""].filter(Boolean));
   }
 };
-window.removeAccount=async id=>{ if(confirm('Supprimer ce compte ?')){ await deleteDoc(doc(accountsRef,id)); await logActivity('Un compte a été supprimé'); } };
+window.removeAccount=async id=>{
+  const oldAcc=accounts.find(x=>x.id===id);
+  if(confirm('Supprimer ce compte ?')){
+    await deleteDoc(doc(accountsRef,id));
+    await logActivity(oldAcc ? `Compte supprimé : ${oldAcc.plateforme} · ${oldAcc.name}` : 'Un compte a été supprimé');
+    if(oldAcc) await notifyAccountWhatsApp("Compte supprimé", oldAcc, null, id);
+  }
+};
 window.togglePassword=id=>{
   const a=accounts.find(x=>x.id===id); const el=$(`pw-${id}`); if(!a||!el) return;
   el.textContent = el.textContent.includes('•') ? (a.password||'') : '••••••••';
