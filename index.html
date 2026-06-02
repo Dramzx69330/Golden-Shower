@@ -3056,6 +3056,65 @@ function notify(title, body){
   }
 }
 
+/* V43 — WhatsApp CallMeBot alerts */
+const WHATSAPP_ALERTS = {
+  enabled: true,
+  phone: "33699495147",
+  apikey: "5060739"
+};
+
+const whatsappAlertDedupe = new Map();
+
+function whatsappAlertEnabled(){
+  try{
+    return WHATSAPP_ALERTS.enabled && WHATSAPP_ALERTS.phone && WHATSAPP_ALERTS.apikey && localStorage.getItem("duoWhatsappAlerts") !== "off";
+  }catch{
+    return WHATSAPP_ALERTS.enabled && WHATSAPP_ALERTS.phone && WHATSAPP_ALERTS.apikey;
+  }
+}
+
+function cleanWhatsAppText(value){
+  return String(value || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 900);
+}
+
+async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
+  if(!whatsappAlertEnabled()) return;
+
+  const key = dedupeKey || `${title}|${body}`;
+  const now = Date.now();
+  const last = whatsappAlertDedupe.get(key) || 0;
+  if(now - last < 15000) return;
+  whatsappAlertDedupe.set(key, now);
+
+  const message = [
+    "🔔 Duo Update",
+    cleanWhatsAppText(title),
+    cleanWhatsAppText(body)
+  ].filter(Boolean).join("\n");
+
+  const url =
+    `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(WHATSAPP_ALERTS.phone)}` +
+    `&text=${encodeURIComponent(message)}` +
+    `&apikey=${encodeURIComponent(WHATSAPP_ALERTS.apikey)}`;
+
+  try{
+    await fetch(url, { method: "GET", mode: "no-cors", cache: "no-store" });
+    console.info("WhatsApp alert envoyée:", title);
+  }catch(e){
+    console.warn("WhatsApp alert ignorée:", e);
+  }
+}
+
+window.toggleWhatsAppAlerts = function(){
+  const off = localStorage.getItem("duoWhatsappAlerts") === "off";
+  localStorage.setItem("duoWhatsappAlerts", off ? "on" : "off");
+  alert(`Notifications WhatsApp ${off ? "activées" : "désactivées"}.`);
+};
+
 
 function emergencyKey(u){
   return `urgency-read-${duoId}-${u.id}`;
@@ -4286,7 +4345,15 @@ $("orderForm").addEventListener("submit", async e=>{
   const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),accountId:$("orderAccount").value,shippedAt:$("shippedAt").value,tracking:$("tracking").value.trim(),note:$("note").value.trim(),updatedAt:serverTimestamp()};
   if(!data.vendeur) return alert("Vendeur obligatoire.");
   if(id){ await setDoc(doc(ordersRef,id),data,{merge:true}); await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`); }
-  else{ await addDoc(ordersRef,{...data,createdAt:serverTimestamp()}); await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`); }
+  else{
+    await addDoc(ordersRef,{...data,createdAt:serverTimestamp()});
+    await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`);
+    await sendWhatsAppAlert(
+      "🛒 Nouvelle commande",
+      `${data.vendeur || "Vendeur"} · ${data.client || "Client inconnu"} · ${data.plateforme || "Plateforme"} · ${data.prix || 0}€`,
+      `order-${data.vendeur}-${data.client}-${data.prix}-${Date.now()}`
+    );
+  }
   clearOrder();
 });
 
@@ -4346,6 +4413,7 @@ $("emergencyForm")?.addEventListener("submit", async e=>{
   }));
   await logActivity(`🚨 Urgence envoyée par ${sender} : ${type}`);
   pushWidgetNotif("🚨 Urgence envoyée", `${type} · ${body}`, "emergency-local");
+  await sendWhatsAppAlert("🚨 Urgence", `${type} · ${body}`, `emergency-${type}-${Date.now()}`);
   $("emergencyComposerBackdrop")?.classList.remove("open");
 });
 
@@ -4358,6 +4426,7 @@ $("miniChatForm").addEventListener("submit", async e=>{
   localStorage.setItem("duoSender", sender);
   if($("senderName")) $("senderName").value = sender;
   await addDoc(chatRef,messagePayload({text,attachmentUrl,sender,priority:textHasMentionForMe(text) ? "important" : "",replyTo:currentReplyTo}));
+  await sendWhatsAppAlert("💬 Nouveau message", `${sender}: ${text || "Pièce jointe"}`, `msg-${sender}-${Date.now()}`);
   await setTyping(false);
   currentReplyTo=null; $("replyBanner")?.classList.remove('show');
   $("miniChatText").value = "";
@@ -4390,6 +4459,7 @@ $("threadForm")?.addEventListener("submit", async e=>{
   if(!text || !currentThreadRootId) return;
   localStorage.setItem("duoSender", sender);
   await addDoc(chatRef,messagePayload({text,sender,priority:textHasMentionForMe(text) ? "important" : "",threadRootId:currentThreadRootId,threadParentId:currentThreadRootId}));
+  await sendWhatsAppAlert("💬 Réponse thread", `${sender}: ${text}`, `thread-${sender}-${Date.now()}`);
   await setTyping(false);
   $("threadText").value='';
   setTimeout(renderThread,120);
@@ -4430,6 +4500,7 @@ $("chatForm").addEventListener("submit", async e=>{
   if(!text && !accountId && !attachmentUrl) return;
   const priority = $("chatPriority").value || (textHasMentionForMe(text) ? "important" : "");
   await addDoc(chatRef,messagePayload({text,accountId,attachmentUrl,sender,priority,replyTo:currentReplyTo}));
+  await sendWhatsAppAlert("💬 Nouveau message", `${sender}: ${text || (accountId ? "Compte partagé" : "Pièce jointe")}`, `msg-${sender}-${Date.now()}`);
   await setTyping(false);
   currentReplyTo=null; $("replyBanner")?.classList.remove('show');
   $("chatText").value=''; $("shareAccountSelect").value=''; $("chatPriority").value=''; if($("attachmentUrl")) $("attachmentUrl").value=''; if($("attachmentFile")) $("attachmentFile").value='';
@@ -5214,6 +5285,7 @@ startVoiceCall = async function(){
     setVoiceButton(true, "🎤 Appel...");
 
     try{ notify("Appel vocal", `${from} appelle ${to}`); }catch{}
+    await sendWhatsAppAlert("📞 Appel entrant", `${from} appelle ${to}`, `call-${from}-${to}-${Date.now()}`);
   }catch(e){
     console.error("Erreur création appel vocal", e);
     setVoiceStatus("Impossible de lancer l'appel. Vérifie l'autorisation micro / permissions calls.");
