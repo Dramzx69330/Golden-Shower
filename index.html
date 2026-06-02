@@ -4479,6 +4479,362 @@ function handleVoiceSnapshot(snap){
   }
 }
 
+
+/* V32 — Vocal direct via collection PocketBase "calls" */
+let directVoiceRecordId = null;
+let directVoiceSubStarted = false;
+let directVoicePollBusy = false;
+
+function normalizeVoiceNameValue(v){
+  return String(v || "").trim().toLowerCase();
+}
+
+function voiceOtherName(){
+  const me = normalizeVoiceNameValue(voiceName());
+  if(me === "dora") return "Zerlezz";
+  if(me === "zerlezz") return "Dora";
+  const other = MENTION_MEMBERS.find(n => normalizeVoiceNameValue(n) !== me);
+  return other || "Zerlezz";
+}
+
+function isDirectVoiceRecordRelevant(r){
+  if(!r || r.status === "ended") return false;
+  const me = normalizeVoiceNameValue(voiceName());
+  const from = normalizeVoiceNameValue(r.from);
+  const to = normalizeVoiceNameValue(r.to);
+  return from === me || to === me;
+}
+
+function directVoiceDataFromRecord(r){
+  if(!r) return null;
+  return {
+    id: r.id,
+    status: r.status,
+    from: r.from,
+    to: r.to,
+    caller: r.from,
+    callerName: r.from,
+    callee: r.to,
+    calleeName: r.to,
+    offer: r.offer || null,
+    answer: r.answer || null,
+    candidates: r.candidates || { caller: [], callee: [] },
+    created: r.created,
+    updated: r.updated
+  };
+}
+
+async function getDirectVoiceRecord(id){
+  if(!id) return null;
+  try{
+    await ensurePbAuth();
+    return await pb.collection("calls").getOne(id);
+  }catch(e){
+    return null;
+  }
+}
+
+async function updateDirectVoiceRecord(id, data){
+  await ensurePbAuth();
+  return await pb.collection("calls").update(id, data);
+}
+
+async function createDirectVoiceRecord(data){
+  await ensurePbAuth();
+  return await pb.collection("calls").create(data);
+}
+
+async function addRemoteVoiceCandidatesDirect(data){
+  if(!voicePc || !data) return;
+  const candidates = data.candidates || {};
+  const list = voiceMode === "caller"
+    ? (Array.isArray(candidates.callee) ? candidates.callee : [])
+    : (Array.isArray(candidates.caller) ? candidates.caller : []);
+
+  for(const item of list){
+    if(!item?.id || voiceSeenCandidates.has(item.id)) continue;
+    voiceSeenCandidates.add(item.id);
+    try{
+      await voicePc.addIceCandidate(new RTCIceCandidate(item.candidate));
+    }catch(e){
+      console.warn("ICE distant ignoré", e);
+    }
+  }
+}
+
+createVoicePc = function(){
+  const pc = new RTCPeerConnection({
+    iceServers:[
+      {urls:"stun:stun.l.google.com:19302"},
+      {urls:"stun:stun1.l.google.com:19302"}
+    ]
+  });
+
+  pc.ontrack = event => {
+    const audio = $("remoteVoiceAudio");
+    if(audio && event.streams && event.streams[0]){
+      audio.srcObject = event.streams[0];
+      audio.play().catch(()=>{});
+    }
+  };
+
+  pc.onicecandidate = async event => {
+    if(!event.candidate || !directVoiceRecordId) return;
+    const side = voiceMode === "caller" ? "caller" : "callee";
+
+    try{
+      const record = await getDirectVoiceRecord(directVoiceRecordId);
+      if(!record) return;
+
+      const candidates = record.candidates && typeof record.candidates === "object"
+        ? record.candidates
+        : { caller: [], callee: [] };
+
+      const list = Array.isArray(candidates[side]) ? candidates[side].slice() : [];
+      list.push({
+        id: `${side}_${voiceClientId()}_${Date.now()}_${voiceCandidateSeq++}`,
+        candidate: event.candidate.toJSON()
+      });
+
+      candidates[side] = list;
+      await updateDirectVoiceRecord(directVoiceRecordId, { candidates });
+    }catch(e){
+      console.warn("Candidate vocal non envoyé", e);
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    if(pc.connectionState === "connected"){
+      setVoiceStatus("Connecté. Appel vocal actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+
+    if(["failed","disconnected","closed"].includes(pc.connectionState)){
+      setVoiceStatus("Appel terminé ou connexion coupée.");
+      setVoiceButton(false);
+    }
+  };
+
+  return pc;
+};
+
+startVoiceCall = async function(){
+  await ensurePbAuth();
+
+  if(!navigator.mediaDevices?.getUserMedia){
+    return alert("Micro non supporté par ce navigateur.");
+  }
+
+  try{
+    openVoiceModal("Appel vocal", "Demande d'appel en cours...");
+    setVoiceStatus("Autorisation micro...");
+
+    voiceMode = "caller";
+    voiceSeenCandidates.clear();
+    directVoiceRecordId = null;
+
+    voicePc = createVoicePc();
+
+    const stream = await ensureVoiceStream();
+    stream.getTracks().forEach(t => voicePc.addTrack(t, stream));
+
+    const offer = await voicePc.createOffer();
+    await voicePc.setLocalDescription(offer);
+
+    const from = voiceName();
+    const to = voiceOtherName();
+
+    const record = await createDirectVoiceRecord({
+      from,
+      to,
+      status: "ringing",
+      offer: { type: offer.type, sdp: offer.sdp },
+      answer: null,
+      candidates: { caller: [], callee: [] }
+    });
+
+    directVoiceRecordId = record.id;
+    voiceCallData = directVoiceDataFromRecord(record);
+
+    console.info("Appel vocal créé dans PocketBase calls", record);
+
+    setVoiceStatus(`Appel envoyé à ${to}. En attente de réponse...`);
+    setVoiceButton(true, "🎤 Appel...");
+
+    try{ notify("Appel vocal", `${from} appelle ${to}`); }catch{}
+  }catch(e){
+    console.error("Erreur création appel vocal", e);
+    setVoiceStatus("Impossible de lancer l'appel. Vérifie l'autorisation micro / permissions calls.");
+    setVoiceButton(false);
+  }
+};
+
+acceptVoiceCall = async function(){
+  if(!voiceCallData?.id || !voiceCallData?.offer) return;
+
+  try{
+    $("voiceAcceptBtn").style.display = "none";
+    voiceMode = "callee";
+    directVoiceRecordId = voiceCallData.id;
+    voiceSeenCandidates.clear();
+
+    setVoiceStatus("Connexion au canal vocal...");
+
+    voicePc = createVoicePc();
+
+    const stream = await ensureVoiceStream();
+    stream.getTracks().forEach(t => voicePc.addTrack(t, stream));
+
+    await voicePc.setRemoteDescription(new RTCSessionDescription(voiceCallData.offer));
+
+    const answer = await voicePc.createAnswer();
+    await voicePc.setLocalDescription(answer);
+
+    const updated = await updateDirectVoiceRecord(directVoiceRecordId, {
+      status: "accepted",
+      answer: { type: answer.type, sdp: answer.sdp }
+    });
+
+    voiceCallData = directVoiceDataFromRecord(updated);
+
+    setVoiceButton(true, "🎤 En appel");
+    setVoiceStatus("Appel accepté. Connexion...");
+  }catch(e){
+    console.error("Erreur acceptation appel vocal", e);
+    setVoiceStatus("Impossible d'accepter l'appel.");
+  }
+};
+window.acceptVoiceCall = acceptVoiceCall;
+
+hangupVoiceCall = async function(){
+  try{
+    if(directVoiceRecordId){
+      await updateDirectVoiceRecord(directVoiceRecordId, { status:"ended" });
+    }
+  }catch(e){
+    console.warn("Impossible de terminer l'appel côté PocketBase", e);
+  }
+  cleanupVoice();
+};
+window.hangupVoiceCall = hangupVoiceCall;
+
+cleanupVoice = function(){
+  try{ voicePc?.close(); }catch{}
+  voicePc = null;
+  try{ voiceLocalStream?.getTracks().forEach(t=>t.stop()); }catch{}
+  voiceLocalStream = null;
+  voiceMode = "";
+  directVoiceRecordId = null;
+  voiceCallData = null;
+  voiceSeenCandidates.clear();
+  setVoiceButton(false);
+  $("voiceAcceptBtn") && ($("voiceAcceptBtn").style.display = "none");
+  closeVoiceModal();
+};
+
+toggleVoiceCall = function(){
+  if(voicePc || voiceMode || directVoiceRecordId) hangupVoiceCall();
+  else startVoiceCall();
+};
+window.toggleVoiceCall = toggleVoiceCall;
+
+async function handleDirectVoiceRecord(record){
+  if(!record || !isDirectVoiceRecordRelevant(record)) return;
+
+  const data = directVoiceDataFromRecord(record);
+  voiceCallData = data;
+
+  const me = normalizeVoiceNameValue(voiceName());
+  const from = normalizeVoiceNameValue(data.from);
+  const to = normalizeVoiceNameValue(data.to);
+
+  if(data.status === "ended"){
+    if(voicePc || voiceMode || directVoiceRecordId === data.id) cleanupVoice();
+    return;
+  }
+
+  if(data.status === "ringing" && to === me && from !== me){
+    directVoiceRecordId = data.id;
+
+    if(!voicePc && !voiceMode){
+      openVoiceModal("Appel entrant", `${data.from || "Associé"} t'appelle.`);
+      setVoiceStatus("Appel vocal entrant. Tu peux accepter ou fermer.");
+      $("voiceAcceptBtn").style.display = "";
+      setVoiceButton(true, "🎤 Appel entrant");
+      try{ playNotify(); }catch{}
+    }
+    return;
+  }
+
+  if(data.status === "accepted" && from === me && data.answer && voicePc && !voicePc.currentRemoteDescription){
+    directVoiceRecordId = data.id;
+    try{
+      await voicePc.setRemoteDescription(new RTCSessionDescription(data.answer));
+      setVoiceStatus(`${data.to || "Associé"} a accepté. Connexion...`);
+    }catch(e){
+      console.warn("Réponse vocale distante ignorée", e);
+    }
+  }
+
+  if(data.status === "accepted" && (from === me || to === me)){
+    directVoiceRecordId = data.id;
+    setVoiceButton(true, "🎤 En appel");
+    await addRemoteVoiceCandidatesDirect(data);
+  }
+
+  if(data.status === "ringing" && from === me){
+    directVoiceRecordId = data.id;
+    await addRemoteVoiceCandidatesDirect(data);
+  }
+}
+
+pollVoiceCall = async function(){
+  if(directVoicePollBusy) return;
+  directVoicePollBusy = true;
+
+  try{
+    await ensurePbAuth();
+    const list = await pb.collection("calls").getList(1, 30, { sort: "-created" });
+    const records = (list.items || []).filter(isDirectVoiceRecordRelevant);
+
+    for(const record of records){
+      await handleDirectVoiceRecord(record);
+      if(record.status !== "ended") break;
+    }
+  }catch(e){
+    console.warn("Polling vocal calls impossible", e);
+  }finally{
+    directVoicePollBusy = false;
+  }
+};
+
+function startDirectVoiceSubscription(){
+  if(directVoiceSubStarted) return;
+  directVoiceSubStarted = true;
+
+  ensurePbAuth()
+    .then(() => pb.collection("calls").subscribe("*", async event => {
+      if(!event?.record) return;
+      await handleDirectVoiceRecord(event.record);
+    }))
+    .then(unsub => {
+      const previousCleanup = window.__duoVoiceCallsUnsub;
+      if(typeof previousCleanup === "function"){
+        try{ previousCleanup(); }catch{}
+      }
+      window.__duoVoiceCallsUnsub = unsub;
+      console.info("V32 écoute calls PocketBase active");
+    })
+    .catch(e => {
+      console.warn("Écoute realtime calls impossible, fallback polling actif", e);
+    });
+}
+
+startDirectVoiceSubscription();
+
+console.info("Duo Update V32 direct calls voice fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
+
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
   $("date").value=today(); $("senderName").value=localStorage.getItem('duoSender')||''; if($("miniSenderName")) $("miniSenderName").value=localStorage.getItem('duoSender')||'';
