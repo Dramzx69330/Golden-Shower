@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Duo Update V35 — Gestion commandes</title>
+  <title>Duo Update V44 — WhatsApp Web</title>
   <style>
     :root{
       --bg:#f6f7f9;
@@ -3056,20 +3056,24 @@ function notify(title, body){
   }
 }
 
-/* V43 — WhatsApp CallMeBot alerts */
+/* V44 — WhatsApp Web alerts via VPS Node.js
+   CallMeBot retiré : le site envoie une requête à ton VPS.
+   Le VPS envoie ensuite le WhatsApp via whatsapp-web.js connecté à ton numéro.
+*/
 const WHATSAPP_ALERTS = {
   enabled: true,
-  phone: "33699495147",
-  apikey: "5060739"
+  endpoint: "https://dramzx692.duckdns.org/wa/send"
 };
 
 const whatsappAlertDedupe = new Map();
 
 function whatsappAlertEnabled(){
   try{
-    return WHATSAPP_ALERTS.enabled && WHATSAPP_ALERTS.phone && WHATSAPP_ALERTS.apikey && localStorage.getItem("duoWhatsappAlerts") !== "off";
+    return WHATSAPP_ALERTS.enabled &&
+      WHATSAPP_ALERTS.endpoint &&
+      localStorage.getItem("duoWhatsappAlerts") !== "off";
   }catch{
-    return WHATSAPP_ALERTS.enabled && WHATSAPP_ALERTS.phone && WHATSAPP_ALERTS.apikey;
+    return WHATSAPP_ALERTS.enabled && WHATSAPP_ALERTS.endpoint;
   }
 }
 
@@ -3078,7 +3082,7 @@ function cleanWhatsAppText(value){
     .replace(/<[^>]*>/g, "")
     .replace(/\s+/g, " ")
     .trim()
-    .slice(0, 900);
+    .slice(0, 1200);
 }
 
 async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
@@ -3087,25 +3091,32 @@ async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
   const key = dedupeKey || `${title}|${body}`;
   const now = Date.now();
   const last = whatsappAlertDedupe.get(key) || 0;
-  if(now - last < 15000) return;
+  if(now - last < 12000) return;
   whatsappAlertDedupe.set(key, now);
 
-  const message = [
-    "🔔 Duo Update",
-    cleanWhatsAppText(title),
-    cleanWhatsAppText(body)
-  ].filter(Boolean).join("\n");
-
-  const url =
-    `https://api.callmebot.com/whatsapp.php?phone=${encodeURIComponent(WHATSAPP_ALERTS.phone)}` +
-    `&text=${encodeURIComponent(message)}` +
-    `&apikey=${encodeURIComponent(WHATSAPP_ALERTS.apikey)}`;
+  const payload = {
+    title: cleanWhatsAppText(title),
+    body: cleanWhatsAppText(body),
+    source: "duo-update",
+    at: new Date().toISOString()
+  };
 
   try{
-    await fetch(url, { method: "GET", mode: "no-cors", cache: "no-store" });
-    console.info("WhatsApp alert envoyée:", title);
+    const res = await fetch(WHATSAPP_ALERTS.endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${txt}`);
+    }
+
+    console.info("WhatsApp Web alert envoyée:", title);
   }catch(e){
-    console.warn("WhatsApp alert ignorée:", e);
+    console.warn("WhatsApp Web alert non envoyée:", e);
   }
 }
 
