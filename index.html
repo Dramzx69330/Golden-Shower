@@ -3086,79 +3086,24 @@ function syncSenderInputsFromAuth(){
   });
 }
 
-/* V39.1 — Connexion par pseudo ou email
-   Utilisation possible :
-   - dora + mot de passe
-   - zerlezz + mot de passe
-   - dora@live.fr + mot de passe
-   - Zerlezz@live.fr + mot de passe
-*/
-const PB_LOGIN_ALIASES = {
-  dora: "dora@live.fr",
-  zerlezz: "Zerlezz@live.fr",
-  zerlezz123: "Zerlezz@live.fr"
-};
-
-function normalizeLoginInput(login){
-  return String(login || "").trim();
-}
-
-async function resolvePocketBaseLogin(login){
-  const raw = normalizeLoginInput(login);
-  if(!raw) return "";
-
-  // Email direct.
-  if(raw.includes("@")) return raw;
-
-  const key = raw.toLowerCase();
-
-  // Aliases rapides sans requête PocketBase.
-  if(PB_LOGIN_ALIASES[key]) return PB_LOGIN_ALIASES[key];
-
-  // Fallback optionnel si tu ajoutes un champ username dans PocketBase.
-  // Si la règle List users est fermée, on ignore et on essaie le login brut.
-  try{
-    const found = await pb.collection("users").getList(1, 1, {
-      filter: `username="${escapePbValue(key)}" || name="${escapePbValue(raw)}"`
-    });
-    if(found?.items?.[0]?.email) return found.items[0].email;
-  }catch(err){
-    console.warn("Recherche pseudo PocketBase ignorée:", err?.message || err);
-  }
-
-  return raw;
-}
-
-async function authWithPseudoOrEmail(login, password){
-  const identifier = await resolvePocketBaseLogin(login);
-  if(!identifier) throw new Error("Pseudo ou email manquant");
-  return await pb.collection("users").authWithPassword(identifier, password);
-}
-
 async function ensurePbAuth(){
   if(pb.authStore.isValid) return true;
 
-  let login = sessionStorage.getItem("duoPocketBaseLogin") || "";
-  if(!login){
-    const lastLogin = localStorage.getItem("duoPocketBaseLastLogin") || localStorage.getItem("duoPocketBaseLastEmail") || "";
-    login = prompt("Pseudo ou email PocketBase (dora / zerlezz)", lastLogin) || "";
+  let email = sessionStorage.getItem("duoPocketBaseEmail") || "";
+  if(!email){
+    const lastEmail = localStorage.getItem("duoPocketBaseLastEmail") || "";
+    email = prompt("Email PocketBase (Dora ou Zerlezz)", lastEmail) || "";
   }
-  login = normalizeLoginInput(login);
-  if(!login) throw new Error("Connexion PocketBase annulée");
+  if(!email) throw new Error("Connexion PocketBase annulée");
 
   let password = sessionStorage.getItem("duoPocketBasePassword") || "";
   if(!password) password = prompt("Mot de passe PocketBase") || "";
   if(!password) throw new Error("Mot de passe PocketBase manquant");
 
-  const auth = await authWithPseudoOrEmail(login, password);
-  const resolvedEmail = auth?.record?.email || await resolvePocketBaseLogin(login);
-
-  sessionStorage.setItem("duoPocketBaseLogin", login);
-  sessionStorage.setItem("duoPocketBaseEmail", resolvedEmail);
+  const auth = await pb.collection("users").authWithPassword(email.trim(), password);
+  sessionStorage.setItem("duoPocketBaseEmail", email.trim());
   sessionStorage.setItem("duoPocketBasePassword", password);
-  localStorage.setItem("duoPocketBaseLastLogin", login);
-  localStorage.setItem("duoPocketBaseLastEmail", resolvedEmail);
-
+  localStorage.setItem("duoPocketBaseLastEmail", email.trim());
   if(auth?.record?.name){
     sessionStorage.setItem("duoSenderSession", auth.record.name);
     localStorage.setItem("duoSender", auth.record.name);
@@ -7029,6 +6974,435 @@ async function start(){
 
   }catch(e){ console.error(e); setSync('PocketBase non disponible','bad'); }
 }
+
+/* =========================
+   V40 — Rendu propre + présence unique + avatars + login pseudo stable
+   ========================= */
+
+const DUO_LOGIN_ALIASES = {
+  dora: "dora@live.fr",
+  zerlezz: "Zerlezz@live.fr",
+  zerlezz123: "Zerlezz@live.fr"
+};
+
+let __duoUsersDirectory = [];
+let __duoUsersLoadedAt = 0;
+let __duoPresenceCleanupDone = false;
+
+function canonicalLoginName(v){
+  return String(v || "")
+    .trim()
+    .replace(/^@+/, "")
+    .toLowerCase();
+}
+
+function displayNameFromRecord(u){
+  if(!u) return "";
+  return String(u.name || u.username || (u.email ? String(u.email).split("@")[0] : "") || "")
+    .trim();
+}
+
+function authUserName(){
+  return displayNameFromRecord(authUser()) || "";
+}
+
+function authUserUsername(){
+  return String(authUser()?.username || "").trim();
+}
+
+function syncSenderInputsFromAuth(){
+  const name = authUserName();
+  if(!name) return;
+  sessionStorage.setItem("duoSenderSession", name);
+  localStorage.setItem("duoSender", name);
+
+  ["senderName","miniSenderName","threadSenderName"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.value = name;
+    el.placeholder = "Connecté : " + name;
+    el.setAttribute("data-auth-locked","true");
+  });
+
+  const pass = document.getElementById("e2ePassphrase");
+  if(pass && pass.value === "....") pass.value = "";
+}
+
+async function resolveLoginIdentifier(login){
+  let identifier = String(login || "").trim();
+  if(!identifier) return "";
+
+  const key = canonicalLoginName(identifier);
+  if(DUO_LOGIN_ALIASES[key]) return DUO_LOGIN_ALIASES[key];
+
+  if(identifier.includes("@")) return identifier;
+
+  try{
+    const filter = `username="${escapePbValue(identifier)}" || name="${escapePbValue(identifier)}"`;
+    const found = await pb.collection("users").getList(1, 1, { filter });
+    const user = found?.items?.[0];
+    if(user?.email) return user.email;
+  }catch(e){
+    // Si le champ username n'existe pas encore ou si la règle bloque, on retombe sur alias/email.
+    console.warn("Recherche pseudo PocketBase ignorée:", e?.message || e);
+  }
+
+  return identifier;
+}
+
+async function ensurePbAuth(){
+  if(pb.authStore.isValid){
+    syncSenderInputsFromAuth();
+    return true;
+  }
+
+  let login = sessionStorage.getItem("duoPocketBaseLogin") || sessionStorage.getItem("duoPocketBaseEmail") || "";
+  if(!login){
+    const lastLogin = localStorage.getItem("duoPocketBaseLastLogin") || localStorage.getItem("duoPocketBaseLastEmail") || "";
+    login = prompt("Pseudo ou email PocketBase (dora / zerlezz)", lastLogin) || "";
+  }
+  if(!login) throw new Error("Connexion PocketBase annulée");
+
+  let password = sessionStorage.getItem("duoPocketBasePassword") || "";
+  if(!password) password = prompt("Mot de passe PocketBase") || "";
+  if(!password) throw new Error("Mot de passe PocketBase manquant");
+
+  const identifier = await resolveLoginIdentifier(login);
+  const auth = await pb.collection("users").authWithPassword(identifier.trim(), password);
+
+  sessionStorage.setItem("duoPocketBaseLogin", login.trim());
+  sessionStorage.setItem("duoPocketBaseEmail", identifier.trim());
+  sessionStorage.setItem("duoPocketBasePassword", password);
+  localStorage.setItem("duoPocketBaseLastLogin", login.trim());
+  localStorage.setItem("duoPocketBaseLastEmail", identifier.trim());
+
+  const display = displayNameFromRecord(auth?.record) || login.trim();
+  if(display){
+    sessionStorage.setItem("duoSenderSession", display);
+    localStorage.setItem("duoSender", display);
+  }
+
+  await refreshUserDirectory(true);
+  syncSenderInputsFromAuth();
+  return true;
+}
+
+function getCurrentSender(){
+  const authName = authUserName();
+  if(authName) return authName.trim();
+
+  return (
+    sessionStorage.getItem("duoSenderSession") ||
+    $("senderName")?.value ||
+    $("miniSenderName")?.value ||
+    $("threadSenderName")?.value ||
+    localStorage.getItem("duoSender") ||
+    "Anonyme"
+  ).trim() || "Anonyme";
+}
+
+async function refreshUserDirectory(force=false){
+  const now = Date.now();
+  if(!force && __duoUsersDirectory.length && now - __duoUsersLoadedAt < 60000) return __duoUsersDirectory;
+  try{
+    await ensurePbAuth();
+    __duoUsersDirectory = await pb.collection("users").getFullList({ sort:"name" });
+    __duoUsersLoadedAt = Date.now();
+  }catch(e){
+    console.warn("Users directory non disponible:", e?.message || e);
+  }
+  return __duoUsersDirectory;
+}
+
+function findUserForName(name){
+  const n = normalizeName(name);
+  if(!n) return null;
+  return __duoUsersDirectory.find(u => {
+    const candidates = [
+      u.name,
+      u.username,
+      u.email && String(u.email).split("@")[0],
+      u.email
+    ].filter(Boolean).map(normalizeName);
+    return candidates.includes(n);
+  }) || null;
+}
+
+function avatarHtmlForPresence(name){
+  const user = findUserForName(name);
+  if(user?.avatar){
+    const url = pb.files.getURL ? pb.files.getURL(user, user.avatar) : pb.files.getUrl(user, user.avatar);
+    return `<img class="presenceAvatarImg" src="${esc(url)}" alt="${esc(name)}">`;
+  }
+  const initials = String(name || "?").slice(0,2).toUpperCase();
+  return `<div class="presenceAvatar">${esc(initials)}</div>`;
+}
+
+function getPresenceName(u){
+  return String(u?.sender || u?.user || u?.name || "Anonyme").trim() || "Anonyme";
+}
+
+function presenceTimeMs(u){
+  const raw = u?.lastSeen || u?.updatedAt || u?.updated || u?.createdAt || u?.created;
+  if(raw?.toDate) return raw.toDate().getTime();
+  const t = new Date(raw || 0).getTime();
+  return Number.isFinite(t) ? t : 0;
+}
+
+function dedupePresenceRows(rows){
+  const now = Date.now();
+  const map = new Map();
+
+  for(const raw of rows || []){
+    const name = getPresenceName(raw);
+    const key = normalizeName(name);
+    if(!key || key === "anonyme") continue;
+
+    const ts = presenceTimeMs(raw);
+    const age = ts ? now - ts : Infinity;
+    const online = raw.online === true && age < 90000;
+    const idle = online && age > 30000;
+
+    const row = {
+      ...raw,
+      sender: name,
+      user: name,
+      _presenceKey: key,
+      _presenceTs: ts,
+      age,
+      online,
+      idle
+    };
+
+    const prev = map.get(key);
+    if(!prev || (Number(row.online) - Number(prev.online)) > 0 || row._presenceTs > prev._presenceTs){
+      map.set(key, row);
+    }
+  }
+
+  return [...map.values()].sort((a,b)=>{
+    if(b.online !== a.online) return Number(b.online) - Number(a.online);
+    return String(a.sender).localeCompare(String(b.sender));
+  });
+}
+
+async function upsertDirectPresence(payload){
+  try{
+    await ensurePbAuth();
+    const user = payload.user || getCurrentSender();
+    const filter = `user="${escapePbValue(user)}"`;
+    const found = await pb.collection("presence").getList(1, 10, { filter, sort:"-updated" });
+    const body = {
+      user,
+      page: payload.page || pageLabel(currentPageId) || currentPageId || "Dashboard",
+      online: payload.online !== false,
+      typing: !!payload.typing,
+      lastSeen: new Date().toISOString()
+    };
+
+    const first = found.items?.[0];
+    if(first) await pb.collection("presence").update(first.id, body);
+    else await pb.collection("presence").create(body);
+
+    for(const duplicate of (found.items || []).slice(1)){
+      try{ await pb.collection("presence").delete(duplicate.id); }catch{}
+    }
+  }catch(e){
+    console.warn("Presence PocketBase directe ignorée:", e?.message || e);
+  }
+}
+
+async function updatePresence(extra={}){
+  const sender = getCurrentSender();
+  if(!sender || normalizeName(sender) === "anonyme") return;
+
+  localStorage.setItem("duoSender", sender);
+  sessionStorage.setItem("duoSenderSession", sender);
+
+  const online = extra.online !== false;
+  const payload = {
+    sender,
+    user: sender,
+    page: currentPageId || "dashboard",
+    pageLabel: pageLabel(currentPageId),
+    action: currentLiveAction || "",
+    online,
+    lastSeen: serverTimestamp(),
+    userAgent: navigator.userAgent.slice(0,120),
+    ...extra
+  };
+
+  if(presenceRef){
+    try{
+      await setDoc(doc(presenceRef, presenceDocId(sender)), payload, {merge:true});
+    }catch(e){
+      console.warn("Presence duo_records ignorée:", e?.message || e);
+    }
+  }
+
+  upsertDirectPresence({
+    user: sender,
+    page: pageLabel(currentPageId),
+    online,
+    typing: !!extra.typing
+  });
+}
+
+function renderPresence(){
+  const now = Date.now();
+  const typingNames = currentTypingNames();
+  const list = dedupePresenceRows(presenceUsers).map(u => ({
+    ...u,
+    typing: typingNames.includes(normalizeName(u.sender || u.user))
+  }));
+
+  const onlineCount = list.filter(u => u.online).length;
+  if($("presenceCount")) $("presenceCount").textContent = `${onlineCount} en ligne`;
+
+  const html = list.map(u=>{
+    const dotClass = u.online ? (u.idle ? "idle" : "") : "offline";
+    const name = getPresenceName(u);
+    const page = u.pageLabel || pageLabel(u.page);
+    const custom = u.customStatus || "";
+    const status = u.online
+      ? (custom ? `${esc(custom)} · ${u.typing ? "✍️ écrit" : "👀 " + esc(page)}` : (u.typing ? "✍️ écrit actuellement" : `👀 regarde ${esc(page)}`))
+      : `hors ligne ${u.age && isFinite(u.age) ? "depuis " + Math.max(1, Math.round(u.age/60000)) + " min" : ""}`;
+    const action = u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : "");
+
+    return `<div class="presenceUser ${u.online ? "is-online" : "is-offline"}">
+      <div class="presenceLeft">
+        ${avatarHtmlForPresence(name)}
+        <div style="min-width:0">
+          <div class="presenceName">${esc(name)}</div>
+          <div class="presenceMeta">${status}</div>
+          ${action}
+        </div>
+      </div>
+      <span class="presenceDot ${dotClass}"></span>
+    </div>`;
+  }).join("") || '<p class="muted">Aucun associé connecté.</p>';
+
+  if($("livePresenceList")) $("livePresenceList").innerHTML = html;
+  if($("dashboardPresenceList")) $("dashboardPresenceList").innerHTML = html;
+
+  const actions = list.filter(u=>u.online && (u.action || u.typing)).map(u=>`
+    <div class="row"><div><strong>${esc(u.sender)}</strong><div class="muted">${esc(u.typing ? "✍️ écrit actuellement" : u.action)}</div></div><span class="muted">${esc(u.pageLabel || pageLabel(u.page))}</span></div>
+  `).join("");
+  if($("dashboardLiveActions")) $("dashboardLiveActions").innerHTML = actions || '<p class="muted">Aucune action en direct.</p>';
+}
+
+async function cleanupPresenceDuplicates(){
+  if(__duoPresenceCleanupDone) return;
+  __duoPresenceCleanupDone = true;
+
+  try{
+    await ensurePbAuth();
+
+    // Nettoyage direct collection presence.
+    const direct = await pb.collection("presence").getFullList({ sort:"-updated" });
+    const seenDirect = new Set();
+    for(const rec of direct){
+      const key = normalizeName(rec.user || rec.sender);
+      if(!key || key === "anonyme" || seenDirect.has(key)){
+        try{ await pb.collection("presence").delete(rec.id); }catch{}
+      }else{
+        seenDirect.add(key);
+      }
+    }
+
+    // Nettoyage de l'ancien pont Firestore dans duo_records.
+    const records = await pb.collection(PB_RECORDS_COLLECTION).getFullList({
+      filter:`kind="presence"`,
+      sort:"-updated"
+    });
+    const seenBridge = new Set();
+    for(const rec of records){
+      const data = rec.data || {};
+      const key = normalizeName(data.sender || data.user);
+      if(!key || key === "anonyme" || seenBridge.has(key)){
+        try{ await pb.collection(PB_RECORDS_COLLECTION).delete(rec.id); }catch{}
+      }else{
+        seenBridge.add(key);
+      }
+    }
+  }catch(e){
+    console.warn("Nettoyage présence ignoré:", e?.message || e);
+  }
+}
+
+// Petit correctif UI : présence/avatars plus propres + rendu mobile moins serré.
+const v40Style = document.createElement("style");
+v40Style.textContent = `
+  .presenceAvatarImg{
+    width:28px;
+    height:28px;
+    border-radius:999px;
+    object-fit:cover;
+    flex:0 0 auto;
+    border:1px solid rgba(255,255,255,.14);
+    background:#111827;
+  }
+
+  .presenceUser.is-offline{
+    opacity:.68;
+  }
+
+  .presenceUser.is-online{
+    border-color:rgba(34,197,94,.30)!important;
+  }
+
+  [data-auth-locked="true"]{
+    opacity:.9;
+  }
+
+  @media(max-width:900px){
+    .top{
+      display:grid!important;
+      gap:16px!important;
+    }
+
+    .livePresenceBox{
+      width:100%!important;
+      max-width:100%!important;
+      min-width:0!important;
+    }
+
+    .v36ControlRow{
+      display:grid!important;
+      grid-template-columns:1fr!important;
+      gap:8px!important;
+    }
+
+    .v36ControlRow input,
+    .v36ControlRow select,
+    .v36ControlRow button{
+      width:100%!important;
+      min-width:0!important;
+    }
+
+    .presenceUser{
+      padding:10px!important;
+    }
+
+    main{
+      padding-bottom:84px!important;
+    }
+  }
+`;
+document.head.appendChild(v40Style);
+
+// Bootstrap patch avant les abonnements temps réel.
+(async()=>{
+  try{
+    await refreshUserDirectory(true);
+    await cleanupPresenceDuplicates();
+    syncSenderInputsFromAuth();
+  }catch(e){
+    console.warn("V40 bootstrap ignoré:", e?.message || e);
+  }
+})();
+console.log("Duo Update V40 rendu + présence corrigés chargés", {pb:PB_URL, session:PB_SESSION_ID});
+
 start();
 </script>
 </body>
