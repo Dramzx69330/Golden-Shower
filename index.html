@@ -3101,9 +3101,13 @@ async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
     at: new Date().toISOString()
   };
 
+  const message = ["🔔 Duo Update", payload.title, payload.body].filter(Boolean).join("\n");
+
   try{
+    // Méthode principale : POST vers le serveur WhatsApp Web du VPS.
     const res = await fetch(WHATSAPP_ALERTS.endpoint, {
       method: "POST",
+      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       cache: "no-store"
@@ -3115,8 +3119,25 @@ async function sendWhatsAppAlert(title, body = "", dedupeKey = ""){
     }
 
     console.info("WhatsApp Web alert envoyée:", title);
+    return true;
+  }catch(e){
+    console.warn("WhatsApp POST échoué, fallback GET:", e);
+  }
+
+  try{
+    // Fallback : route GET testée sur ton VPS (/wa/send?to=...&msg=...).
+    const getUrl = WHATSAPP_ALERTS.endpoint
+      + "?to=33699495147&msg="
+      + encodeURIComponent(message);
+
+    const img = new Image();
+    img.src = getUrl + "&_=" + Date.now();
+
+    console.info("WhatsApp Web alert fallback GET déclenché:", title);
+    return true;
   }catch(e){
     console.warn("WhatsApp Web alert non envoyée:", e);
+    return false;
   }
 }
 
