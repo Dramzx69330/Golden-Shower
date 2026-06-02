@@ -4311,6 +4311,32 @@ function createVoicePc(){
       setVoiceStatus("Connexion audio impossible. TURN requis ou réseau bloque WebRTC.");
     }
   };
+  window.pc = pc;
+  pc.oniceconnectionstatechange = () => {
+    console.log("VOICE ICE:", pc.iceConnectionState);
+    if(pc.iceConnectionState === "checking") setVoiceStatus("Connexion audio en cours...");
+    if(pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed"){
+      setVoiceStatus("Connecté. Audio actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+    if(pc.iceConnectionState === "failed"){
+      setVoiceStatus("Connexion audio échouée. Le relais TURN est bloqué ou indisponible.");
+    }
+  };
+  pc.onconnectionstatechange = () => {
+    console.log("VOICE CONN:", pc.connectionState);
+    if(pc.connectionState === "connected"){
+      setVoiceStatus("Connecté. Appel vocal actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+    if(["failed","disconnected","closed"].includes(pc.connectionState)){
+      setVoiceStatus("Appel terminé ou connexion coupée.");
+      setVoiceButton(false);
+    }
+  };
+
   pc.ontrack = event => {
     const audio = $("remoteVoiceAudio");
     if(audio && event.streams && event.streams[0]){
@@ -4430,6 +4456,7 @@ function cleanupVoice(){
   voiceLocalStream = null;
   voiceMode = "";
   voiceSeenCandidates.clear();
+  directVoicePendingCandidates = [];
   setVoiceButton(false);
   $("voiceAcceptBtn") && ($("voiceAcceptBtn").style.display = "none");
   closeVoiceModal();
@@ -4504,6 +4531,7 @@ function handleVoiceSnapshot(snap){
 let directVoiceRecordId = null;
 let directVoiceSubStarted = false;
 let directVoicePollBusy = false;
+let directVoicePendingCandidates = [];
 
 function normalizeVoiceNameValue(v){
   return String(v || "").trim().toLowerCase();
@@ -4564,6 +4592,27 @@ async function createDirectVoiceRecord(data){
   return await pb.collection("calls").create(data);
 }
 
+async function flushDirectVoicePendingCandidates(){
+  if(!directVoiceRecordId || !directVoicePendingCandidates.length) return;
+  const pending = directVoicePendingCandidates.splice(0);
+  for(const payload of pending){
+    try{
+      const record = await getDirectVoiceRecord(directVoiceRecordId);
+      if(!record) return;
+      const candidates = record.candidates && typeof record.candidates === "object"
+        ? record.candidates
+        : { caller: [], callee: [] };
+      const list = Array.isArray(candidates[payload.side]) ? candidates[payload.side].slice() : [];
+      list.push(payload.item);
+      candidates[payload.side] = list;
+      await updateDirectVoiceRecord(directVoiceRecordId, { candidates });
+      console.log("VOICE ICE pending candidate sent:", payload.side);
+    }catch(e){
+      console.warn("Candidate vocal en attente non envoyé", e);
+    }
+  }
+}
+
 async function addRemoteVoiceCandidatesDirect(data){
   if(!voicePc || !data) return;
   const candidates = data.candidates || {};
@@ -4600,6 +4649,32 @@ createVoicePc = function(){
     iceTransportPolicy: "all"
   });
 
+  window.pc = pc;
+  pc.oniceconnectionstatechange = () => {
+    console.log("VOICE ICE:", pc.iceConnectionState);
+    if(pc.iceConnectionState === "checking") setVoiceStatus("Connexion audio en cours...");
+    if(pc.iceConnectionState === "connected" || pc.iceConnectionState === "completed"){
+      setVoiceStatus("Connecté. Audio actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+    if(pc.iceConnectionState === "failed"){
+      setVoiceStatus("Connexion audio échouée. Le relais TURN est bloqué ou indisponible.");
+    }
+  };
+  pc.onconnectionstatechange = () => {
+    console.log("VOICE CONN:", pc.connectionState);
+    if(pc.connectionState === "connected"){
+      setVoiceStatus("Connecté. Appel vocal actif.");
+      setVoiceButton(true, "🎤 En appel");
+      closeVoiceModal();
+    }
+    if(["failed","disconnected","closed"].includes(pc.connectionState)){
+      setVoiceStatus("Appel terminé ou connexion coupée.");
+      setVoiceButton(false);
+    }
+  };
+
   pc.ontrack = event => {
     const audio = $("remoteVoiceAudio");
     if(audio && event.streams && event.streams[0]){
@@ -4609,8 +4684,21 @@ createVoicePc = function(){
   };
 
   pc.onicecandidate = async event => {
-    if(!event.candidate || !directVoiceRecordId) return;
+    if(!event.candidate) return;
     const side = voiceMode === "caller" ? "caller" : "callee";
+    const payload = {
+      side,
+      item: {
+        id: `${side}_${voiceClientId()}_${Date.now()}_${voiceCandidateSeq++}`,
+        candidate: event.candidate.toJSON()
+      }
+    };
+
+    if(!directVoiceRecordId){
+      directVoicePendingCandidates.push(payload);
+      console.log("VOICE ICE candidate buffered:", side);
+      return;
+    }
 
     try{
       const record = await getDirectVoiceRecord(directVoiceRecordId);
@@ -4621,10 +4709,8 @@ createVoicePc = function(){
         : { caller: [], callee: [] };
 
       const list = Array.isArray(candidates[side]) ? candidates[side].slice() : [];
-      list.push({
-        id: `${side}_${voiceClientId()}_${Date.now()}_${voiceCandidateSeq++}`,
-        candidate: event.candidate.toJSON()
-      });
+      list.push(payload.item);
+      console.log("VOICE ICE candidate sent:", side);
 
       candidates[side] = list;
       await updateDirectVoiceRecord(directVoiceRecordId, { candidates });
@@ -4662,6 +4748,7 @@ startVoiceCall = async function(){
 
     voiceMode = "caller";
     voiceSeenCandidates.clear();
+    directVoicePendingCandidates = [];
     directVoiceRecordId = null;
 
     voicePc = createVoicePc();
@@ -4686,6 +4773,7 @@ startVoiceCall = async function(){
 
     directVoiceRecordId = record.id;
     voiceCallData = directVoiceDataFromRecord(record);
+    await flushDirectVoicePendingCandidates();
 
     console.info("Appel vocal créé dans PocketBase calls", record);
 
@@ -4727,6 +4815,7 @@ acceptVoiceCall = async function(){
     });
 
     voiceCallData = directVoiceDataFromRecord(updated);
+    await flushDirectVoicePendingCandidates();
 
     setVoiceButton(true, "🎤 En appel");
     setVoiceStatus("Appel accepté. Connexion...");
@@ -4863,7 +4952,7 @@ function startDirectVoiceSubscription(){
 
 startDirectVoiceSubscription();
 
-console.info("Duo Update V33 TURN/OpenRelay voice fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
+console.info("Duo Update V34 TURN/OpenRelay ICE buffer fix loaded", {pb: PB_URL, session: PB_SESSION_ID});
 
 async function start(){
   setTheme(localStorage.getItem("duoTheme") || "discord");
