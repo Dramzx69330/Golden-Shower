@@ -2311,79 +2311,19 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V46.1.1 — Fix proportions tableau commandes + bordereaux PDF */
-#ordersTable,
-table.ordersTable,
-.page table{
-  width:100%!important;
-  max-width:100%!important;
-}
-
-#ordersTable{
-  table-layout:fixed!important;
-}
-
-#ordersTable th,
-#ordersTable td{
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  word-break:normal!important;
-}
-
-#ordersTable th:nth-child(1), #ordersTable td:nth-child(1){width:76px!important}
-#ordersTable th:nth-child(2), #ordersTable td:nth-child(2){width:88px!important}
-#ordersTable th:nth-child(3), #ordersTable td:nth-child(3){width:112px!important}
-#ordersTable th:nth-child(4), #ordersTable td:nth-child(4){width:100px!important}
-#ordersTable th:nth-child(5), #ordersTable td:nth-child(5){width:130px!important}
-#ordersTable th:nth-child(6), #ordersTable td:nth-child(6){width:88px!important}
-#ordersTable th:nth-child(7), #ordersTable td:nth-child(7){width:64px!important}
-#ordersTable th:nth-child(8), #ordersTable td:nth-child(8){width:90px!important}
-#ordersTable th:nth-child(9), #ordersTable td:nth-child(9){width:130px!important}
-#ordersTable th:nth-child(10), #ordersTable td:nth-child(10){width:160px!important}
-#ordersTable th:nth-child(11), #ordersTable td:nth-child(11){width:86px!important;text-align:right!important}
-#ordersTable th:nth-child(12), #ordersTable td:nth-child(12){width:92px!important;text-align:right!important}
-
-.pdfChip,
-#ordersTable .pdfChip,
-a.pdfChip{
-  max-width:150px!important;
-  width:auto!important;
-  min-width:0!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-  vertical-align:middle!important;
-  justify-content:flex-start!important;
-}
-
-#ordersTable .pdfChip{
-  display:inline-flex!important;
-}
-
-#ordersTable .pdfChip .pdfName,
-#ordersTable .pdfChip span{
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-}
-
-@media(max-width:1100px){
-  #ordersTable{
-    min-width:1080px!important;
-  }
-}
-
-
-/* V46.2 — Mobile iPhone only. Ne modifie pas le rendu PC. */
+/* V46.4 — SAFE MOBILE ONLY PATCH
+   CSS uniquement. Ne touche pas PocketBase, ne touche pas au JS, PC inchangé. */
 @media (max-width: 768px) {
-  html, body {
+  html,
+  body {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
   }
 
   body {
-    background: #0b0d11 !important;
+    background: #090b0f !important;
   }
 
   .app {
@@ -2395,19 +2335,21 @@ a.pdfChip{
   aside {
     position: sticky !important;
     top: 0 !important;
-    z-index: 9000 !important;
-    height: auto !important;
+    z-index: 5000 !important;
     width: 100% !important;
-    padding: 12px 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px 10px 8px !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--line) !important;
-    background: rgba(15, 17, 22, .96) !important;
-    backdrop-filter: blur(14px) !important;
+    background: rgba(15, 17, 22, .97) !important;
+    backdrop-filter: blur(12px) !important;
   }
 
   aside .brand {
     font-size: 15px !important;
-    margin-bottom: 2px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 2px !important;
   }
 
   aside .sub {
@@ -2416,9 +2358,12 @@ a.pdfChip{
 
   .nav {
     display: flex !important;
+    grid-template-columns: none !important;
     gap: 8px !important;
     overflow-x: auto !important;
-    padding: 8px 0 2px !important;
+    overflow-y: hidden !important;
+    padding: 8px 0 0 !important;
+    -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
   }
 
@@ -2429,17 +2374,25 @@ a.pdfChip{
   .nav button {
     flex: 0 0 auto !important;
     width: auto !important;
-    padding: 10px 13px !important;
+    min-width: 94px !important;
+    padding: 10px 12px !important;
     border-radius: 999px !important;
     font-size: 12px !important;
+    line-height: 1 !important;
+    text-align: center !important;
     white-space: nowrap !important;
   }
 
   main {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 14px 10px 92px !important;
     margin: 0 !important;
+    padding: 16px 10px 90px !important;
+  }
+
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .top {
@@ -2447,333 +2400,20 @@ a.pdfChip{
     margin-bottom: 14px !important;
   }
 
+  .top > div {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
   h1 {
-    font-size: 28px !important;
+    font-size: 30px !important;
     line-height: 1.05 !important;
     margin-bottom: 8px !important;
   }
 
   h2 {
-    font-size: 20px !important;
-  }
-
-  h3 {
-    font-size: 16px !important;
-  }
-
-  .globalSearchWrap {
-    max-width: 100% !important;
-    margin-top: 10px !important;
-  }
-
-  .globalSearch,
-  input,
-  select,
-  textarea {
-    width: 100% !important;
-    min-width: 0 !important;
-    font-size: 16px !important;
-  }
-
-  .themeSwitcher,
-  .livePresenceBox {
-    display: none !important;
-  }
-
-  .grid,
-  .cards,
-  .two,
-  .three,
-  .form,
-  .chatWrap,
-  .chartGrid,
-  .liveNowStrip,
-  .accountStatusDashboard {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .card {
-    width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 12px !important;
-    box-shadow: none !important;
-  }
-
-  .pad {
-    padding: 14px !important;
-  }
-
-  .metric span {
-    font-size: 11px !important;
-  }
-
-  .metric strong {
-    margin-top: 7px !important;
-    font-size: 25px !important;
-  }
-
-  .cards .card {
-    min-height: auto !important;
-  }
-
-  .accountStatusTile {
-    padding: 12px !important;
-  }
-
-  .accountStatusTile strong {
-    font-size: 24px !important;
-  }
-
-  .toolbar {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 9px !important;
-  }
-
-  button.primary,
-  button.secondary,
-  button.danger {
-    width: 100% !important;
-    min-height: 44px !important;
-  }
-
-  .liveNowCard,
-  .smartAlert,
-  .row,
-  .noteItem,
-  .taskItem {
-    width: 100% !important;
-  }
-
-  .smartAlert {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Tableaux desktop masqués visuellement et transformés en scroll horizontal propre */
-  .card:has(table),
-  .tableWrap,
-  .ordersWrap {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  table {
-    min-width: 920px !important;
-    width: 920px !important;
-    table-layout: fixed !important;
-    font-size: 12px !important;
-  }
-
-  th, td {
-    padding: 10px 8px !important;
-  }
-
-  .pdfChip {
-    max-width: 110px !important;
-  }
-
-  /* Formulaire nouvelle commande : compact iPhone */
-  .form label {
-    font-size: 10px !important;
-    gap: 6px !important;
-  }
-
-  .form input,
-  .form select,
-  .form textarea {
-    padding: 11px 12px !important;
-    border-radius: 9px !important;
-  }
-
-  /* Chat widget adapté iPhone */
-  .floatingChatBtn {
-    right: 14px !important;
-    bottom: 18px !important;
-    width: 54px !important;
-    height: 54px !important;
     font-size: 22px !important;
-  }
-
-  .messengerPanel {
-    right: 8px !important;
-    left: 8px !important;
-    bottom: 82px !important;
-    width: auto !important;
-    height: min(620px, calc(100vh - 110px)) !important;
-    border-radius: 15px !important;
-  }
-
-  .messengerComposer .line {
-    grid-template-columns: 1fr 42px 86px !important;
-  }
-
-  .messengerComposer input:nth-child(2) {
-    grid-column: 1 / -1 !important;
-  }
-
-  .toastStack {
-    right: 10px !important;
-    left: 10px !important;
-    bottom: 82px !important;
-    width: auto !important;
-  }
-
-  /* Présence dashboard top : cachée sur mobile pour éviter l'effet mini desktop */
-  .top .livePresenceBox,
-  .top .themeSwitcher,
-  .topRight,
-  .dashboardPresence,
-  .presenceFloating {
-    display: none !important;
-  }
-
-  /* Centre contrôle mobile */
-  .controlHero,
-  .controlGrid,
-  .controlActions,
-  .controlHealth,
-  .controlRadar {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Nettoie les gros espaces vides */
-  section,
-  .page {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .clientModal,
-  .voiceModal,
-  .emergencyModal,
-  .threadPanel {
-    width: calc(100vw - 18px) !important;
-    max-width: calc(100vw - 18px) !important;
-  }
-}
-
-@media (max-width: 480px) {
-  main {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
-  h1 {
-    font-size: 25px !important;
-  }
-
-  .pad {
-    padding: 12px !important;
-  }
-
-  .metric strong {
-    font-size: 23px !important;
-  }
-
-  table {
-    min-width: 860px !important;
-    width: 860px !important;
-  }
-
-  th, td {
-    font-size: 11px !important;
-  }
-}
-
-
-/* V46.3 — vrai mode iPhone, PC inchangé */
-@media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden !important;
-    background: #080a0d !important;
-    -webkit-text-size-adjust: 100% !important;
-  }
-
-  body {
-    font-size: 14px !important;
-  }
-
-  .app {
-    display: block !important;
-    min-height: 100vh !important;
-  }
-
-  /* Menu en bas type app mobile */
-  aside {
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    top: auto !important;
-    z-index: 9999 !important;
-    width: 100% !important;
-    height: 66px !important;
-    padding: 7px 8px calc(7px + env(safe-area-inset-bottom)) !important;
-    background: rgba(13, 15, 20, .96) !important;
-    border-top: 1px solid rgba(255,255,255,.10) !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    backdrop-filter: blur(18px) !important;
-  }
-
-  aside .brand,
-  aside .sub {
-    display: none !important;
-  }
-
-  .nav {
-    display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 6px !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    height: 100% !important;
-  }
-
-  .nav button {
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 50px !important;
-    padding: 6px 4px !important;
-    border-radius: 13px !important;
-    font-size: 11px !important;
-    line-height: 1.1 !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  main {
-    padding: 18px 12px calc(96px + env(safe-area-inset-bottom)) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-  }
-
-  .page {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .top {
-    display: block !important;
-    margin: 0 0 14px !important;
-  }
-
-  h1 {
-    font-size: 31px !important;
-    line-height: 1 !important;
-    margin: 0 0 10px !important;
-    letter-spacing: -0.05em !important;
-  }
-
-  h2 {
-    font-size: 22px !important;
-    line-height: 1.1 !important;
+    line-height: 1.15 !important;
   }
 
   h3 {
@@ -2786,44 +2426,38 @@ a.pdfChip{
   }
 
   .globalSearchWrap {
-    width: 100% !important;
     max-width: 100% !important;
-    margin: 14px 0 0 !important;
+    width: 100% !important;
+    margin-top: 12px !important;
   }
 
-  .globalSearch {
-    height: 48px !important;
-    font-size: 15px !important;
-    border-radius: 13px !important;
-    padding: 0 14px !important;
+  .globalSearch,
+  input,
+  select,
+  textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
   }
 
+  /* Cache seulement les widgets trop larges du haut sur mobile.
+     La page Contrôle garde ses infos live. */
   .top .livePresenceBox,
-  .livePresenceBox,
-  .themeSwitcher {
+  .top .themeSwitcher {
     display: none !important;
   }
 
   .sync {
-    margin-top: 12px !important;
-    display: inline-flex !important;
-    font-size: 13px !important;
+    margin-top: 10px !important;
   }
 
-  .top button,
-  .top .secondary,
-  .top .primary {
-    width: auto !important;
+  .top button.secondary,
+  .top button.primary {
+    width: 100% !important;
+    margin-top: 8px !important;
   }
 
-  .top > div:last-child {
-    margin-top: 12px !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* Dashboard compact */
   .grid,
   .two,
   .three,
@@ -2832,42 +2466,39 @@ a.pdfChip{
   .chartGrid,
   .liveNowStrip,
   .accountStatusDashboard {
+    display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
 
   .cards {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr !important;
     gap: 10px !important;
   }
 
   .card {
-    border-radius: 16px !important;
-    box-shadow: none !important;
+    width: 100% !important;
     max-width: 100% !important;
+    border-radius: 14px !important;
     overflow: hidden !important;
+    box-shadow: none !important;
   }
 
   .pad {
-    padding: 16px !important;
-  }
-
-  .metric {
-    min-height: 92px !important;
+    padding: 15px !important;
   }
 
   .metric span {
-    font-size: 10px !important;
-    letter-spacing: .12em !important;
+    font-size: 11px !important;
+    letter-spacing: .10em !important;
   }
 
   .metric strong {
-    font-size: 27px !important;
-    margin-top: 10px !important;
+    font-size: 28px !important;
+    margin-top: 8px !important;
   }
 
-  /* Etat comptes moins énorme */
   .accountStatusDashboard {
     gap: 8px !important;
   }
@@ -2877,78 +2508,90 @@ a.pdfChip{
     border-radius: 12px !important;
   }
 
-  .accountStatusTile span {
-    font-size: 10px !important;
-  }
-
   .accountStatusTile strong {
-    font-size: 22px !important;
+    font-size: 23px !important;
   }
 
-  .accountStatusAlert,
-  .smartAlert {
+  .accountStatusAlert {
+    padding: 11px 12px !important;
     font-size: 13px !important;
-    padding: 12px !important;
-    border-radius: 12px !important;
+    line-height: 1.35 !important;
   }
 
-  /* Formulaire nouvelle commande lisible */
-  .form {
+  .smartAlert {
     display: grid !important;
     grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 12px !important;
+    font-size: 13px !important;
   }
 
   .form label {
     font-size: 10px !important;
-    letter-spacing: .10em !important;
+    letter-spacing: .09em !important;
+    gap: 6px !important;
   }
 
-  input, select, textarea {
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+  input,
+  select,
+  textarea {
     min-height: 44px !important;
     padding: 11px 12px !important;
-    font-size: 16px !important;
-    border-radius: 11px !important;
+    border-radius: 10px !important;
   }
 
   textarea {
-    min-height: 90px !important;
+    min-height: 88px !important;
   }
 
   button.primary,
   button.secondary,
   button.danger {
     min-height: 44px !important;
-    border-radius: 11px !important;
+    border-radius: 10px !important;
   }
 
-  /* Tableaux : scroll horizontal propre uniquement sur mobile */
+  .toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Tableaux: ne casse pas les données, scroll horizontal sur mobile uniquement. */
+  table {
+    min-width: 940px !important;
+    width: 940px !important;
+    table-layout: fixed !important;
+    font-size: 12px !important;
+  }
+
+  th,
+  td {
+    padding: 10px 8px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .pdfChip {
+    max-width: 125px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .card table {
+    display: table !important;
+  }
+
   .card:has(table) {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
-  table {
-    width: 980px !important;
-    min-width: 980px !important;
-    table-layout: fixed !important;
-    font-size: 12px !important;
-  }
-
-  th, td {
-    padding: 10px 8px !important;
-  }
-
-  .pdfChip {
-    max-width: 120px !important;
-  }
-
-  /* Chat flottant pas devant les formulaires */
+  /* Widget chat mobile */
   .floatingChatBtn {
     right: 14px !important;
-    bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+    bottom: 18px !important;
     width: 52px !important;
     height: 52px !important;
     font-size: 21px !important;
@@ -2957,16 +2600,25 @@ a.pdfChip{
   .messengerPanel {
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+    bottom: 82px !important;
     width: auto !important;
-    height: min(620px, calc(100vh - 170px)) !important;
+    height: min(620px, calc(100vh - 110px)) !important;
+    border-radius: 15px !important;
   }
 
   .toastStack {
     left: 10px !important;
     right: 10px !important;
-    bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+    bottom: 82px !important;
     width: auto !important;
+  }
+
+  .messengerComposer .line {
+    grid-template-columns: 1fr 42px 88px !important;
+  }
+
+  .messengerComposer input:nth-child(2) {
+    grid-column: 1 / -1 !important;
   }
 
   .clientModal,
@@ -2980,24 +2632,25 @@ a.pdfChip{
 
 @media (max-width: 430px) {
   main {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  .cards {
-    grid-template-columns: 1fr !important;
-  }
-
-  .metric {
-    min-height: 86px !important;
-  }
-
-  .pad {
-    padding: 15px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 
   h1 {
     font-size: 28px !important;
+  }
+
+  .pad {
+    padding: 14px !important;
+  }
+
+  .metric strong {
+    font-size: 26px !important;
+  }
+
+  table {
+    min-width: 900px !important;
+    width: 900px !important;
   }
 }
 
@@ -7843,22 +7496,5 @@ async function start(){
 }
 start();
 </script>
-
-
-<script>
-/* V46.3.1 — affichage PDF sûr, sans MutationObserver */
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('a.pdfChip,.pdfChip').forEach(function(chip){
-    if (chip.dataset.pdfCleaned === '1') return;
-    const raw = (chip.textContent || '').trim();
-    if (!chip.getAttribute('title') && raw) chip.setAttribute('title', raw);
-    const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?\s*(?:Ko|KB|Mo|MB))/i);
-    const size = sizeMatch ? ' · ' + sizeMatch[1].replace('KB','Ko').replace('MB','Mo') : '';
-    chip.textContent = '📎 PDF' + size;
-    chip.dataset.pdfCleaned = '1';
-  });
-});
-</script>
-
 </body>
 </html>
