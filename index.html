@@ -2692,6 +2692,123 @@ tbody tr:hover td{background:#1b1f29!important}
   }
 }
 
+
+/* V47 — Photos Dora -> Zerlezz */
+.photosHeader{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+  margin-bottom:18px;
+}
+.photosGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+.photoCard{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.photoThumb{
+  position:relative;
+  aspect-ratio:1/1;
+  background:#0b0e14;
+  overflow:hidden;
+}
+.photoThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:filter .18s ease, transform .18s ease, opacity .18s ease;
+}
+.photoCard.used .photoThumb img{
+  filter:blur(9px) grayscale(.4);
+  transform:scale(1.04);
+  opacity:.58;
+}
+.photoUsedOverlay{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.38);
+  color:#fff;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:12px;
+}
+.photoCard.used .photoUsedOverlay{display:flex}
+.photoBody{
+  padding:13px;
+  display:grid;
+  gap:10px;
+}
+.photoTitle{
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.photoMeta{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+.photoActions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.photoActions button,
+.photoActions a{
+  flex:1;
+  min-width:110px;
+  text-align:center;
+  text-decoration:none;
+}
+.photoDownloadDisabled{
+  opacity:.5!important;
+  cursor:not-allowed!important;
+  pointer-events:none!important;
+}
+.photoUploadPanel{
+  margin-bottom:18px;
+}
+.photoUploadPanel .form{
+  grid-template-columns:1.2fr .8fr auto;
+  align-items:end;
+}
+.photoInfoBox{
+  border:1px solid rgba(96,165,250,.35);
+  background:rgba(96,165,250,.08);
+  color:var(--text);
+  border-radius:12px;
+  padding:12px 14px;
+  margin-bottom:14px;
+  line-height:1.45;
+}
+@media(max-width:1100px){
+  .photosGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:768px){
+  .photosHeader{display:block}
+  .photosGrid{grid-template-columns:1fr 1fr;gap:10px}
+  .photoUploadPanel .form{grid-template-columns:1fr!important}
+  .photoBody{padding:11px}
+  .photoActions{display:grid}
+}
+@media(max-width:430px){
+  .photosGrid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -2738,6 +2855,7 @@ tbody tr:hover td{background:#1b1f29!important}
     <div class="sub">Gestion propre des commandes Vinted / Leboncoin, comptes et chat direct.</div>
     <div class="nav">
       <button class="active" data-page="dashboard">Dashboard</button>
+        <button data-page="photos">Photos</button>
       <button data-page="control">Contrôle</button>
       <button data-page="clients">Clients</button>
       <button data-page="comptes">Comptes</button>
@@ -3161,7 +3279,48 @@ tbody tr:hover td{background:#1b1f29!important}
         <div id="activity" class="activity list"></div>
       </div>
     </section>
-  </main>
+  
+      <section class="page" id="page-photos">
+        <div class="photosHeader">
+          <div>
+            <h1>Photos</h1>
+            <p class="muted">Dora ajoute les photos. Zerlezz peut les télécharger une seule fois. Après téléchargement, la photo reste visible mais devient floutée et verrouillée.</p>
+          </div>
+        </div>
+
+        <div class="photoInfoBox">
+          <strong>Fonctionnement :</strong><br>
+          Dora peut poster des photos d’or / lingotins. Quand Zerlezz télécharge une photo, elle passe en état <strong>utilisée</strong> : flou visuel + bouton téléchargement désactivé.
+        </div>
+
+        <div class="card pad photoUploadPanel" id="photoUploadPanel">
+          <h2>Ajouter une photo</h2>
+          <div class="form">
+            <label>
+              PHOTO
+              <input type="file" id="duoPhotoFile" accept="image/*">
+            </label>
+            <label>
+              NOM / NOTE
+              <input type="text" id="duoPhotoTitle" placeholder="Ex : Lingotin 10g, Perth Mint...">
+            </label>
+            <button class="primary" id="duoPhotoUploadBtn" type="button">Publier</button>
+          </div>
+          <p class="muted" style="margin:10px 0 0">Upload réservé à Dora.</p>
+        </div>
+
+        <div class="card pad">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px">
+            <h2 style="margin:0">Galerie disponible</h2>
+            <button class="secondary small" id="duoPhotosRefreshBtn" type="button">Actualiser</button>
+          </div>
+          <div class="photosGrid" id="duoPhotosGrid">
+            <p class="muted">Chargement des photos...</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
 </div>
 
 
