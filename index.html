@@ -3476,7 +3476,7 @@ tbody tr:hover td{background:#1b1f29!important}
       </div>
     </section>
 
-      <section class="page" id="page-photos">
+      <section class="page" id="photos">
         <div class="photosShell">
           <div class="photosHero">
             <div class="photosHeroTop">
@@ -6749,9 +6749,10 @@ function goPage(id){
     clients:['Clients','Nom, nombre de commandes et dépense totale.'],
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
-    stats:['Stats','Performance par vendeur, plateforme et produit.']
+    stats:['Stats','Performance par vendeur, plateforme et produit.'],
+    photos:['Photos','Galerie privée Dora → Zerlezz : publication, téléchargement unique et verrouillage automatique.']
   };
-  $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
+  const pageMeta = titles[id] || [id.charAt(0).toUpperCase()+id.slice(1), ""]; $("pageTitle").textContent=pageMeta[0]; $("pageDesc").textContent=pageMeta[1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
 }
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.page)));
