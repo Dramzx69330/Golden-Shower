@@ -2311,8 +2311,28 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V46.4 — SAFE MOBILE ONLY PATCH
-   CSS uniquement. Ne touche pas PocketBase, ne touche pas au JS, PC inchangé. */
+/* V46.5 — Desktop préservé + Mobile only propre */
+
+/* Desktop/tablette large : empêche uniquement le débordement du tableau commandes */
+@media (min-width: 769px) {
+  .card:has(table) {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+  }
+
+  table {
+    max-width: 100% !important;
+  }
+
+  .pdfChip {
+    max-width: 190px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* Mobile uniquement : ne s'applique pas au PC */
 @media (max-width: 768px) {
   html,
   body {
@@ -2400,11 +2420,6 @@ tbody tr:hover td{background:#1b1f29!important}
     margin-bottom: 14px !important;
   }
 
-  .top > div {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
   h1 {
     font-size: 30px !important;
     line-height: 1.05 !important;
@@ -2441,8 +2456,6 @@ tbody tr:hover td{background:#1b1f29!important}
     font-size: 16px !important;
   }
 
-  /* Cache seulement les widgets trop larges du haut sur mobile.
-     La page Contrôle garde ses infos live. */
   .top .livePresenceBox,
   .top .themeSwitcher {
     display: none !important;
@@ -2512,18 +2525,11 @@ tbody tr:hover td{background:#1b1f29!important}
     font-size: 23px !important;
   }
 
-  .accountStatusAlert {
+  .accountStatusAlert,
+  .smartAlert {
     padding: 11px 12px !important;
     font-size: 13px !important;
     line-height: 1.35 !important;
-  }
-
-  .smartAlert {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-    padding: 12px !important;
-    font-size: 13px !important;
   }
 
   .form label {
@@ -2557,7 +2563,12 @@ tbody tr:hover td{background:#1b1f29!important}
     gap: 8px !important;
   }
 
-  /* Tableaux: ne casse pas les données, scroll horizontal sur mobile uniquement. */
+  /* Tableau commandes sur mobile : scroll horizontal propre, pas appliqué au PC */
+  .card:has(table) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
   table {
     min-width: 940px !important;
     width: 940px !important;
@@ -2579,16 +2590,6 @@ tbody tr:hover td{background:#1b1f29!important}
     white-space: nowrap !important;
   }
 
-  .card table {
-    display: table !important;
-  }
-
-  .card:has(table) {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  /* Widget chat mobile */
   .floatingChatBtn {
     right: 14px !important;
     bottom: 18px !important;
