@@ -2693,14 +2693,186 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V47 — Photos Dora -> Zerlezz */
-.photosHeader{
+
+/* V47.7 — Page Photos premium */
+.photosShell{
+  display:grid;
+  gap:18px;
+}
+.photosHero{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:24px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(245,158,11,.18), transparent 32%),
+    radial-gradient(circle at 90% 10%, rgba(96,165,250,.13), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+.photosHeroTop{
   display:flex;
   justify-content:space-between;
-  gap:16px;
+  gap:18px;
   align-items:flex-start;
-  margin-bottom:18px;
 }
+.photosHero h1{
+  margin:0 0 8px!important;
+}
+.photosHero p{
+  max-width:720px;
+  margin:0;
+  color:var(--muted);
+  line-height:1.55;
+}
+.photosStats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  min-width:340px;
+}
+.photosStat{
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.16);
+  border-radius:14px;
+  padding:13px 14px;
+}
+.photosStat span{
+  display:block;
+  font-size:10px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  color:var(--muted);
+}
+.photosStat strong{
+  display:block;
+  margin-top:7px;
+  font-size:24px;
+  color:#fff;
+}
+.photosToolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.photosToolbarLeft{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.photosSearch{
+  min-width:280px!important;
+  max-width:360px!important;
+}
+.photosUploadCard{
+  border:1px solid rgba(245,158,11,.26)!important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(245,158,11,.12), transparent 34%),
+    linear-gradient(180deg,#181b22,#15171d)!important;
+}
+.photosUploadCard.locked{
+  border-color:rgba(148,163,184,.18)!important;
+  opacity:.92;
+}
+.photoDrop{
+  border:1px dashed rgba(245,158,11,.50);
+  background:rgba(245,158,11,.06);
+  border-radius:16px;
+  padding:18px;
+  display:grid;
+  gap:12px;
+}
+.photoDrop.locked{
+  border-color:rgba(148,163,184,.22);
+  background:rgba(148,163,184,.055);
+}
+.photoDropHeader{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.photoDropIcon{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:rgba(245,158,11,.18);
+  border:1px solid rgba(245,158,11,.28);
+  font-size:23px;
+}
+.photoDropTitle strong{
+  display:block;
+  color:#fff;
+  font-size:17px;
+}
+.photoDropTitle span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+.photoUploadPreview{
+  display:none;
+  align-items:center;
+  gap:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.16);
+  border-radius:14px;
+  padding:10px;
+}
+.photoUploadPreview.show{display:flex}
+.photoUploadPreview img{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border-radius:12px;
+  background:#0b0e14;
+}
+.photoUploadPreview div{
+  min-width:0;
+}
+.photoUploadPreview strong{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.photoUploadPreview span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+.photosUploadGrid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:end;
+}
+.photosUploadGrid label{
+  display:grid;
+  gap:7px;
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  color:var(--muted);
+}
+.photosLockedBox{
+  border:1px solid rgba(245,158,11,.32);
+  background:rgba(245,158,11,.08);
+  color:var(--text);
+  border-radius:14px;
+  padding:14px 15px;
+  line-height:1.45;
+}
+.photosLockedBox strong{color:#fbbf24}
 .photosGrid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
@@ -2708,37 +2880,64 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 .photoCard{
   position:relative;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
   overflow:hidden;
-  box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+  box-shadow:0 18px 45px rgba(0,0,0,.22);
+}
+.photoCard.available{
+  border-color:rgba(34,197,94,.22);
+}
+.photoCard.used{
+  border-color:rgba(148,163,184,.16);
 }
 .photoThumb{
   position:relative;
   aspect-ratio:1/1;
   background:#0b0e14;
-  overflow:hidden;
 }
 .photoThumb img{
   width:100%;
   height:100%;
-  object-fit:cover;
   display:block;
+  object-fit:cover;
   transition:filter .18s ease, transform .18s ease, opacity .18s ease;
 }
+.photoCard:not(.used):hover .photoThumb img{
+  transform:scale(1.035);
+}
 .photoCard.used .photoThumb img{
-  filter:blur(9px) grayscale(.4);
-  transform:scale(1.04);
+  filter:blur(10px) grayscale(.35);
+  transform:scale(1.05);
   opacity:.58;
 }
+.photoBadge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:1000;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.34);
+  color:#fff;
+}
+.photoBadge.available{color:#bbf7d0}
+.photoBadge.used{color:#e5e7eb}
 .photoUsedOverlay{
   position:absolute;
   inset:0;
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.38);
+  text-align:center;
+  background:rgba(0,0,0,.40);
   color:#fff;
   font-weight:1000;
   text-transform:uppercase;
@@ -2747,12 +2946,13 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 .photoCard.used .photoUsedOverlay{display:flex}
 .photoBody{
-  padding:13px;
+  padding:14px;
   display:grid;
   gap:10px;
 }
 .photoTitle{
-  font-weight:900;
+  color:#fff;
+  font-weight:1000;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -2760,78 +2960,50 @@ tbody tr:hover td{background:#1b1f29!important}
 .photoMeta{
   color:var(--muted);
   font-size:12px;
-  line-height:1.35;
+  line-height:1.45;
 }
 .photoActions{
-  display:flex;
+  display:grid;
+  grid-template-columns:1fr;
   gap:8px;
-  flex-wrap:wrap;
 }
 .photoActions button,
 .photoActions a{
-  flex:1;
-  min-width:110px;
+  width:100%;
+  justify-content:center;
   text-align:center;
   text-decoration:none;
 }
 .photoDownloadDisabled{
-  opacity:.5!important;
+  opacity:.55!important;
   cursor:not-allowed!important;
   pointer-events:none!important;
 }
-.photoUploadPanel{
-  margin-bottom:18px;
+.photosEmpty{
+  grid-column:1/-1;
+  border:1px dashed rgba(255,255,255,.16);
+  border-radius:16px;
+  padding:26px;
+  text-align:center;
+  color:var(--muted);
+  background:rgba(255,255,255,.025);
 }
-.photoUploadPanel .form{
-  grid-template-columns:1.2fr .8fr auto;
-  align-items:end;
-}
-.photoInfoBox{
-  border:1px solid rgba(96,165,250,.35);
-  background:rgba(96,165,250,.08);
-  color:var(--text);
-  border-radius:12px;
-  padding:12px 14px;
-  margin-bottom:14px;
-  line-height:1.45;
-}
-@media(max-width:1100px){
+@media(max-width:1180px){
   .photosGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photosHeroTop{display:grid}
+  .photosStats{min-width:0}
 }
 @media(max-width:768px){
-  .photosHeader{display:block}
+  .photosHero{padding:18px}
+  .photosStats{grid-template-columns:1fr}
+  .photosToolbar{display:grid}
+  .photosSearch{min-width:0!important;max-width:100%!important}
   .photosGrid{grid-template-columns:1fr 1fr;gap:10px}
-  .photoUploadPanel .form{grid-template-columns:1fr!important}
-  .photoBody{padding:11px}
-  .photoActions{display:grid}
+  .photosUploadGrid{grid-template-columns:1fr}
 }
 @media(max-width:430px){
   .photosGrid{grid-template-columns:1fr}
 }
-
-
-/* V47.3 — Photos upload Dora clair */
-.photoUploadLocked{
-  border:1px solid rgba(245,158,11,.35);
-  background:rgba(245,158,11,.08);
-  color:var(--text);
-  border-radius:12px;
-  padding:12px 14px;
-  line-height:1.45;
-}
-.photoUploadLocked strong{color:#fbbf24}
-#photoUploadPanel.is-hidden-for-user .form{
-  display:none!important;
-}
-#photoUploadPanel.is-hidden-for-user .photoUploadLocked{
-  display:block!important;
-}
-#photoUploadPanel:not(.is-hidden-for-user) .photoUploadLocked{
-  display:none!important;
-}
-
-
-
 
 </style>
 </head>
@@ -3303,46 +3475,84 @@ tbody tr:hover td{background:#1b1f29!important}
         <div id="activity" class="activity list"></div>
       </div>
     </section>
-  
+
       <section class="page" id="page-photos">
-        <div class="photosHeader">
-          <div>
-            <h1>Photos</h1>
-            <p class="muted">Dora ajoute les photos. Zerlezz peut les télécharger une seule fois. Après téléchargement, la photo reste visible mais devient floutée et verrouillée.</p>
+        <div class="photosShell">
+          <div class="photosHero">
+            <div class="photosHeroTop">
+              <div>
+                <h1>Photos</h1>
+                <p>Galerie privée pour les photos d’or et de lingotins. Dora publie les photos depuis cette page. Zerlezz peut les télécharger une seule fois : après téléchargement, la photo reste visible mais devient floutée et verrouillée.</p>
+              </div>
+              <div class="photosStats">
+                <div class="photosStat"><span>Total</span><strong id="photosTotalStat">0</strong></div>
+                <div class="photosStat"><span>Disponibles</span><strong id="photosAvailableStat">0</strong></div>
+                <div class="photosStat"><span>Utilisées</span><strong id="photosUsedStat">0</strong></div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="photoInfoBox">
-          <strong>Fonctionnement :</strong><br>
-          Dora peut poster des photos d’or / lingotins. Quand Zerlezz télécharge une photo, elle passe en état <strong>utilisée</strong> : flou visuel + bouton téléchargement désactivé.
-        </div>
+          <div class="card pad photosUploadCard" id="photoUploadPanel">
+            <h2>Publier une photo</h2>
+            <div class="photoDrop" id="photoDropZone">
+              <div class="photoDropHeader">
+                <div class="photoDropIcon">🥇</div>
+                <div class="photoDropTitle">
+                  <strong>Upload réservé à Dora</strong>
+                  <span>Ajoute une photo d’or, lingotin, preuve ou visuel à partager avec Zerlezz.</span>
+                </div>
+              </div>
 
-        <div class="card pad photoUploadPanel" id="photoUploadPanel">
-          <h2>Ajouter une photo</h2>
-          <div class="form">
-            <label>
-              PHOTO
-              <input type="file" id="duoPhotoFile" accept="image/*">
-            </label>
-            <label>
-              NOM / NOTE
-              <input type="text" id="duoPhotoTitle" placeholder="Ex : Lingotin 10g, Perth Mint...">
-            </label>
-            <button class="primary" id="duoPhotoUploadBtn" type="button">Publier</button>
+              <div class="photoUploadPreview" id="photoUploadPreview">
+                <img id="photoUploadPreviewImg" alt="">
+                <div>
+                  <strong id="photoUploadPreviewName">Photo sélectionnée</strong>
+                  <span id="photoUploadPreviewMeta">Prête à publier</span>
+                </div>
+              </div>
+
+              <div class="photosUploadGrid">
+                <label>
+                  PHOTO
+                  <input type="file" id="duoPhotoFile" accept="image/*">
+                </label>
+                <label>
+                  NOM / NOTE
+                  <input type="text" id="duoPhotoTitle" placeholder="Ex : Lingotin 10g, Perth Mint...">
+                </label>
+                <button class="primary" id="duoPhotoUploadBtn" type="button">Publier la photo</button>
+              </div>
+
+              <div class="photosLockedBox" id="photosLockedBox" style="display:none">
+                <strong>Upload verrouillé.</strong><br>
+                Connecte-toi avec le compte <strong>Dora</strong> pour publier des photos depuis cette page.
+              </div>
+            </div>
           </div>
-          <p class="muted" style="margin:10px 0 0">Upload réservé à Dora.</p>
-        </div>
 
-        <div class="card pad">
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px">
-            <h2 style="margin:0">Galerie disponible</h2>
-            <button class="secondary small" id="duoPhotosRefreshBtn" type="button">Actualiser</button>
-          </div>
-          <div class="photosGrid" id="duoPhotosGrid">
-            <p class="muted">Chargement des photos...</p>
+          <div class="card pad">
+            <div class="photosToolbar">
+              <div>
+                <h2 style="margin:0">Galerie</h2>
+                <p class="muted" style="margin:6px 0 0">Les photos utilisées restent visibles mais ne peuvent plus être téléchargées.</p>
+              </div>
+              <div class="photosToolbarLeft">
+                <input class="photosSearch" id="photosSearchInput" type="search" placeholder="Rechercher une photo...">
+                <select id="photosFilterSelect">
+                  <option value="all">Toutes</option>
+                  <option value="available">Disponibles</option>
+                  <option value="used">Utilisées</option>
+                </select>
+                <button class="secondary small" id="duoPhotosRefreshBtn" type="button">Actualiser</button>
+              </div>
+            </div>
+            <div class="photosGrid" id="duoPhotosGrid" style="margin-top:16px">
+              <div class="photosEmpty">Chargement des photos...</div>
+            </div>
           </div>
         </div>
       </section>
+
 
     </main>
 </div>
@@ -7724,80 +7934,47 @@ async function start(){
 start();
 </script>
 
-<script>
-/* V47.3 — Photos Dora -> Zerlezz
-   Upload depuis la page Photos pour Dora.
-   Téléchargement unique pour Zerlezz puis flou + bouton verrouillé.
 
-   PocketBase collection "photos" :
-   - title text
-   - image file
-   - uploadedBy text
-   - downloadedBy text
-   - downloadedAt date
-   - used bool
-*/
+<script>
+/* V47.7 — Photos Dora premium */
 (function(){
   const COLLECTION = "photos";
+  let lastPhotos = [];
 
-  function getPB(){
-    return window.pb || window.pocketbase || window.PB || null;
-  }
+  function getPB(){ return window.pb || window.pocketbase || window.PB || null; }
 
   function normalize(value){
-    return String(value || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .trim();
+    return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
   }
 
   function getCurrentIdentity(){
     const pb = getPB();
     const model = pb && pb.authStore && pb.authStore.model ? pb.authStore.model : {};
     const values = [
-      window.currentUser,
-      window.currentUsername,
-      window.userName,
-      window.duoUser,
-      window.duoUsername,
-      localStorage.getItem("duoUser"),
-      localStorage.getItem("duoUsername"),
-      localStorage.getItem("currentUser"),
-      localStorage.getItem("currentUsername"),
-      model.name,
-      model.username,
-      model.email
+      window.currentUser, window.currentUsername, window.userName, window.duoUser, window.duoUsername,
+      localStorage.getItem("duoUser"), localStorage.getItem("duoUsername"),
+      localStorage.getItem("currentUser"), localStorage.getItem("currentUsername"),
+      model.name, model.username, model.email
     ].filter(Boolean);
-
-    return {
-      raw: values.join(" "),
-      model
-    };
+    return { raw: values.join(" "), model };
   }
 
   function getCurrentName(){
     const id = getCurrentIdentity();
     return String(
-      id.model.name ||
-      id.model.username ||
-      window.currentUser ||
-      window.currentUsername ||
-      localStorage.getItem("duoUser") ||
-      localStorage.getItem("duoUsername") ||
-      id.model.email ||
-      ""
+      id.model.name || id.model.username || window.currentUser || window.currentUsername ||
+      localStorage.getItem("duoUser") || localStorage.getItem("duoUsername") || id.model.email || ""
     ).trim();
   }
 
   function isDora(){
     const id = normalize(getCurrentIdentity().raw);
-    return id.includes("dora") || id.includes("dora@");
+    return id.includes("dora");
   }
 
   function isZerlezz(){
     const id = normalize(getCurrentIdentity().raw);
-    return id.includes("zerlezz") || id.includes("zerle") || id.includes("zerlezz@");
+    return id.includes("zerlezz") || id.includes("zerle");
   }
 
   function escapeHtml(value){
@@ -7808,99 +7985,167 @@ start();
 
   function fmtDate(value){
     if(!value) return "-";
-    try { return new Date(value).toLocaleString("fr-FR"); }
-    catch(e){ return "-"; }
+    try{return new Date(value).toLocaleString("fr-FR")}
+    catch(e){return "-"}
+  }
+
+  function fmtSize(bytes){
+    if(!bytes) return "";
+    const n = Number(bytes);
+    if(!n) return "";
+    if(n < 1024*1024) return Math.round(n/1024) + " Ko";
+    return (n/(1024*1024)).toFixed(1).replace(".",",") + " Mo";
+  }
+
+  function setStats(records){
+    const total = records.length;
+    const used = records.filter(r=>!!r.used || !!r.downloadedAt).length;
+    const available = total - used;
+    const a = document.getElementById("photosTotalStat");
+    const b = document.getElementById("photosAvailableStat");
+    const c = document.getElementById("photosUsedStat");
+    if(a) a.textContent = total;
+    if(b) b.textContent = available;
+    if(c) c.textContent = used;
   }
 
   function updateUploadVisibility(){
     const panel = document.getElementById("photoUploadPanel");
-    if(!panel) return;
+    const locked = document.getElementById("photosLockedBox");
+    const uploadGrid = panel && panel.querySelector(".photosUploadGrid");
+    const drop = document.getElementById("photoDropZone");
+    const canUpload = isDora();
 
-    if(isDora()){
-      panel.classList.remove("is-hidden-for-user");
-    }else{
-      panel.classList.add("is-hidden-for-user");
-    }
+    if(panel) panel.classList.toggle("locked", !canUpload);
+    if(drop) drop.classList.toggle("locked", !canUpload);
+    if(locked) locked.style.display = canUpload ? "none" : "";
+    if(uploadGrid) uploadGrid.style.display = canUpload ? "grid" : "none";
   }
 
-  async function ensurePhotosCollectionHint(error){
+  function applyClientFilters(records){
+    const search = normalize(document.getElementById("photosSearchInput")?.value || "");
+    const filter = document.getElementById("photosFilterSelect")?.value || "all";
+
+    return records.filter((r)=>{
+      const used = !!r.used || !!r.downloadedAt;
+      if(filter === "available" && used) return false;
+      if(filter === "used" && !used) return false;
+
+      if(search){
+        const haystack = normalize([r.title, r.uploadedBy, r.downloadedBy, r.image].join(" "));
+        if(!haystack.includes(search)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderPhotos(records){
+    const pb = getPB();
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+
+    setStats(lastPhotos);
+    const filtered = applyClientFilters(records);
+
+    if(!filtered.length){
+      grid.innerHTML = '<div class="photosEmpty">Aucune photo à afficher.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map((r)=>{
+      const fileName = r.image;
+      const url = fileName && pb ? pb.files.getUrl(r, fileName) : "";
+      const used = !!r.used || !!r.downloadedAt;
+      const canDownload = isZerlezz() && !used && url;
+      const title = r.title || "Photo";
+      const meta = used
+        ? `Téléchargée par ${escapeHtml(r.downloadedBy || "-")} · ${escapeHtml(fmtDate(r.downloadedAt))}`
+        : "Disponible pour Zerlezz";
+      const size = r.image ? (r.imageSize || "") : "";
+
+      return `
+        <article class="photoCard ${used ? "used" : "available"}" data-photo-id="${escapeHtml(r.id)}">
+          <div class="photoThumb">
+            ${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" loading="lazy">` : ""}
+            <div class="photoBadge ${used ? "used" : "available"}">${used ? "🔒 Utilisée" : "🟢 Disponible"}</div>
+            <div class="photoUsedOverlay">Déjà téléchargée</div>
+          </div>
+          <div class="photoBody">
+            <div class="photoTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+            <div class="photoMeta">
+              Ajoutée par ${escapeHtml(r.uploadedBy || "Dora")}<br>
+              ${meta}${size ? "<br>" + escapeHtml(fmtSize(size)) : ""}
+            </div>
+            <div class="photoActions">
+              ${canDownload
+                ? `<button class="primary small" type="button" data-photo-download="${escapeHtml(r.id)}">Télécharger</button>`
+                : `<button class="secondary small photoDownloadDisabled" type="button" disabled>${used ? "Verrouillée" : "Téléchargement Zerlezz"}</button>`
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  async function showCollectionHint(error){
     console.warn("Photos PocketBase:", error);
     const grid = document.getElementById("duoPhotosGrid");
     if(!grid) return;
     grid.innerHTML = `
-      <div class="photoInfoBox" style="grid-column:1/-1">
-        <strong>Collection PocketBase manquante ou règles API à vérifier.</strong><br><br>
-        Crée une collection <strong>photos</strong> avec ces champs :<br>
-        <code>title text</code><br>
-        <code>image file</code><br>
-        <code>uploadedBy text</code><br>
-        <code>downloadedBy text</code><br>
-        <code>downloadedAt date</code><br>
-        <code>used bool</code><br><br>
-        Règles API conseillées :<br>
-        <code>@request.auth.id != ""</code>
+      <div class="photosEmpty">
+        <strong>Collection PocketBase photos à configurer.</strong><br><br>
+        Champs : <code>title text</code>, <code>image file</code>, <code>uploadedBy text</code>,
+        <code>downloadedBy text</code>, <code>downloadedAt date</code>, <code>used bool</code>.<br><br>
+        Règle API : <code>@request.auth.id != ""</code>
       </div>
     `;
   }
 
   async function loadPhotos(){
     updateUploadVisibility();
-
     const pb = getPB();
     const grid = document.getElementById("duoPhotosGrid");
     if(!grid) return;
-
     if(!pb || !pb.collection){
-      grid.innerHTML = '<p class="muted">PocketBase pas encore prêt...</p>';
+      grid.innerHTML = '<div class="photosEmpty">PocketBase pas encore prêt...</div>';
       return;
     }
 
     try{
-      const records = await pb.collection(COLLECTION).getFullList({
-        sort: "-created"
-      });
-
-      if(!records.length){
-        grid.innerHTML = '<p class="muted">Aucune photo pour le moment.</p>';
-        return;
-      }
-
-      grid.innerHTML = records.map((r)=>{
-        const fileName = r.image;
-        const url = fileName ? pb.files.getUrl(r, fileName) : "";
-        const used = !!r.used || !!r.downloadedAt;
-        const canDownload = isZerlezz() && !used && url;
-        const title = r.title || "Photo";
-        const downloaded = r.downloadedBy
-          ? `Téléchargée par ${escapeHtml(r.downloadedBy)} · ${escapeHtml(fmtDate(r.downloadedAt))}`
-          : "Disponible";
-
-        return `
-          <article class="photoCard ${used ? "used" : ""}" data-photo-id="${escapeHtml(r.id)}">
-            <div class="photoThumb">
-              ${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" loading="lazy">` : ""}
-              <div class="photoUsedOverlay">Déjà utilisée</div>
-            </div>
-            <div class="photoBody">
-              <div class="photoTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
-              <div class="photoMeta">
-                Ajoutée par ${escapeHtml(r.uploadedBy || "Dora")}<br>
-                ${downloaded}
-              </div>
-              <div class="photoActions">
-                ${canDownload
-                  ? `<button class="primary small" type="button" data-photo-download="${escapeHtml(r.id)}">Télécharger</button>`
-                  : `<button class="secondary small photoDownloadDisabled" type="button" disabled>${used ? "Déjà téléchargée" : "Téléchargement Zerlezz"}</button>`
-                }
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-
+      lastPhotos = await pb.collection(COLLECTION).getFullList({ sort:"-created" });
+      renderPhotos(lastPhotos);
     }catch(error){
-      await ensurePhotosCollectionHint(error);
+      await showCollectionHint(error);
     }
+  }
+
+  function updatePreview(){
+    const input = document.getElementById("duoPhotoFile");
+    const preview = document.getElementById("photoUploadPreview");
+    const img = document.getElementById("photoUploadPreviewImg");
+    const name = document.getElementById("photoUploadPreviewName");
+    const meta = document.getElementById("photoUploadPreviewMeta");
+    const title = document.getElementById("duoPhotoTitle");
+    const file = input && input.files && input.files[0];
+
+    if(!file){
+      if(preview) preview.classList.remove("show");
+      return;
+    }
+
+    if(title && !title.value.trim()){
+      title.value = file.name.replace(/\.[^.]+$/, "");
+    }
+
+    if(name) name.textContent = file.name;
+    if(meta) meta.textContent = `${file.type || "image"} · ${fmtSize(file.size)}`;
+    if(img){
+      const reader = new FileReader();
+      reader.onload = ()=>{ img.src = reader.result; };
+      reader.readAsDataURL(file);
+    }
+    if(preview) preview.classList.add("show");
   }
 
   async function uploadPhoto(){
@@ -7921,17 +8166,13 @@ start();
     formData.append("used", "false");
     formData.append("image", file);
 
+    const btn = document.getElementById("duoPhotoUploadBtn");
     try{
-      const btn = document.getElementById("duoPhotoUploadBtn");
-      if(btn){
-        btn.disabled = true;
-        btn.textContent = "Publication...";
-      }
-
+      if(btn){ btn.disabled = true; btn.textContent = "Publication..."; }
       await pb.collection(COLLECTION).create(formData);
-
       fileInput.value = "";
       titleInput.value = "";
+      updatePreview();
       await loadPhotos();
 
       if(typeof window.sendWhatsAppAlert === "function"){
@@ -7945,11 +8186,7 @@ start();
       console.error(error);
       alert("Erreur upload photo : " + (error.message || error));
     }finally{
-      const btn = document.getElementById("duoPhotoUploadBtn");
-      if(btn){
-        btn.disabled = false;
-        btn.textContent = "Publier";
-      }
+      if(btn){ btn.disabled = false; btn.textContent = "Publier la photo"; }
     }
   }
 
@@ -7960,7 +8197,6 @@ start();
 
     try{
       const record = await pb.collection(COLLECTION).getOne(id);
-
       if(record.used || record.downloadedAt){
         await loadPhotos();
         return alert("Cette photo a déjà été téléchargée.");
@@ -7975,9 +8211,9 @@ start();
       a.remove();
 
       await pb.collection(COLLECTION).update(id, {
-        used: true,
-        downloadedBy: getCurrentName() || "Zerlezz",
-        downloadedAt: new Date().toISOString()
+        used:true,
+        downloadedBy:getCurrentName() || "Zerlezz",
+        downloadedAt:new Date().toISOString()
       });
 
       await loadPhotos();
@@ -7996,27 +8232,22 @@ start();
   }
 
   document.addEventListener("click", function(e){
-    const uploadBtn = e.target.closest("#duoPhotoUploadBtn");
-    if(uploadBtn) uploadPhoto();
-
-    const refreshBtn = e.target.closest("#duoPhotosRefreshBtn");
-    if(refreshBtn) loadPhotos();
+    if(e.target.closest("#duoPhotoUploadBtn")) uploadPhoto();
+    if(e.target.closest("#duoPhotosRefreshBtn")) loadPhotos();
 
     const dl = e.target.closest("[data-photo-download]");
     if(dl) downloadAndLock(dl.getAttribute("data-photo-download"));
 
-    const pageBtn = e.target.closest('[data-page="photos"]');
-    if(pageBtn) setTimeout(loadPhotos, 250);
+    if(e.target.closest('[data-page="photos"]')) setTimeout(loadPhotos, 250);
   });
 
   document.addEventListener("change", function(e){
-    if(e.target && e.target.id === "duoPhotoFile"){
-      const titleInput = document.getElementById("duoPhotoTitle");
-      const file = e.target.files && e.target.files[0];
-      if(file && titleInput && !titleInput.value.trim()){
-        titleInput.value = file.name.replace(/\.[^.]+$/, "");
-      }
-    }
+    if(e.target && e.target.id === "duoPhotoFile") updatePreview();
+    if(e.target && e.target.id === "photosFilterSelect") renderPhotos(lastPhotos);
+  });
+
+  document.addEventListener("input", function(e){
+    if(e.target && e.target.id === "photosSearchInput") renderPhotos(lastPhotos);
   });
 
   document.addEventListener("DOMContentLoaded", function(){
@@ -8027,8 +8258,6 @@ start();
   window.uploadDuoPhoto = uploadPhoto;
 })();
 </script>
-
-
 
 </body>
 </html>
