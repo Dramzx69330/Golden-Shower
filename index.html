@@ -2035,6 +2035,281 @@ tbody tr:hover td{background:#1b1f29!important}
   .controlEvent{grid-template-columns:1fr}
 }
 
+
+/* V46.1 — Contrôle++ design & actions */
+.controlCommand{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:20px;
+  margin-bottom:20px;
+}
+.controlHeroMain.v461{
+  min-height:220px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  overflow:hidden;
+  position:relative;
+}
+.controlHeroMain.v461:after{
+  content:"";
+  position:absolute;
+  right:-80px;
+  top:-80px;
+  width:260px;
+  height:260px;
+  border-radius:999px;
+  background:radial-gradient(circle,rgba(96,165,250,.25),transparent 68%);
+  pointer-events:none;
+}
+.controlHeroHeader{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+  position:relative;
+  z-index:1;
+}
+.controlHeroTitle h2{
+  font-size:34px;
+  margin:0 0 8px;
+  letter-spacing:-.05em;
+}
+.controlHeroTitle p{
+  max-width:720px;
+}
+.controlHeroMeta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.controlChip{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(15,23,42,.28);
+  color:#e5e7eb;
+  border-radius:999px;
+  padding:8px 10px;
+  font-size:12px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+.controlHeroNumbers{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+  margin-top:22px;
+  position:relative;
+  z-index:1;
+}
+.controlHeroMetric{
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(15,23,42,.34);
+  border-radius:16px;
+  padding:14px;
+  backdrop-filter:blur(10px);
+}
+.controlHeroMetric span{
+  display:block;
+  color:#b8c1d1;
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.controlHeroMetric strong{
+  display:block;
+  margin-top:9px;
+  font-size:25px;
+  line-height:1;
+  color:#fff;
+}
+.controlHeroMetric small{
+  display:block;
+  margin-top:7px;
+  color:#8fa0ba;
+  font-weight:800;
+}
+.controlPanel{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01)),var(--panel);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 20px 48px rgba(0,0,0,.22);
+}
+.controlPanelHead{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  margin-bottom:14px;
+}
+.controlPanelHead h2{margin:0;font-size:18px}
+.controlPanelHead p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.controlActionGrid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.controlActionBtn{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:14px;
+  padding:13px 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  cursor:pointer;
+  font-weight:1000;
+  min-height:58px;
+}
+.controlActionBtn:hover{
+  border-color:rgba(96,165,250,.55);
+  transform:translateY(-1px);
+}
+.controlActionBtn span{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:10px;
+  background:rgba(96,165,250,.13);
+  flex:0 0 auto;
+}
+.controlOpsGrid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:20px;
+  margin-top:20px;
+}
+.priorityStack,.healthStack,.sellerStack,.riskStack{
+  display:grid;
+  gap:10px;
+}
+.priorityItem{
+  border:1px solid var(--line);
+  background:var(--panel2);
+  border-radius:15px;
+  padding:13px 14px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+}
+.priorityItem.critical{border-color:rgba(239,68,68,.45);background:rgba(239,68,68,.08)}
+.priorityItem.warning{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.08)}
+.priorityItem.info{border-color:rgba(96,165,250,.38);background:rgba(96,165,250,.08)}
+.priorityTitle{
+  font-weight:1000;
+  margin-bottom:3px;
+}
+.priorityBody{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.35;
+}
+.priorityActions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.priorityActions button{
+  padding:7px 9px!important;
+  font-size:12px!important;
+  border-radius:999px!important;
+}
+.riskLine,.healthLine,.sellerLine{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  border-radius:13px;
+  padding:10px 11px;
+}
+.riskIcon,.healthDot{
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:rgba(96,165,250,.12);
+}
+.healthDot.ok{background:rgba(34,197,94,.13);color:#86efac}
+.healthDot.warn{background:rgba(245,158,11,.13);color:#fde68a}
+.healthDot.bad{background:rgba(239,68,68,.13);color:#fecaca}
+.riskTrack{
+  height:8px;
+  background:rgba(148,163,184,.16);
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:7px;
+}
+.riskFill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);
+}
+.riskMeta,.sellerMeta{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:900;
+}
+.sellerRank{
+  width:28px;height:28px;border-radius:999px;
+  display:grid;place-items:center;
+  background:rgba(245,158,11,.14);
+  color:#fde68a;
+  font-weight:1000;
+}
+.sellerName{font-weight:1000}
+.controlScannerPro{
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:16px;
+}
+.controlDrop{
+  border:1px dashed rgba(96,165,250,.48);
+  background:rgba(96,165,250,.08);
+  border-radius:16px;
+  padding:16px;
+  display:grid;
+  gap:12px;
+  min-height:180px;
+  align-content:center;
+}
+.controlDrop strong{font-size:18px}
+.controlDrop input{width:100%}
+.controlScanTextarea{
+  min-height:180px!important;
+}
+.controlEmpty{
+  border:1px dashed var(--line2);
+  background:rgba(148,163,184,.06);
+  color:var(--muted);
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+  font-weight:800;
+}
+@media(max-width:1150px){
+  .controlCommand,.controlOpsGrid,.controlScannerPro{grid-template-columns:1fr}
+  .controlHeroNumbers{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .controlHeroHeader{display:grid}
+  .controlHeroMeta{justify-content:flex-start}
+  .controlHeroNumbers,.controlActionGrid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -2214,50 +2489,141 @@ tbody tr:hover td{background:#1b1f29!important}
     </section>
 
 
-    <section id="control" class="page">
-      <div class="controlHero">
-        <div class="controlHeroMain">
-          <div class="controlPulse">Salle de contrôle active</div>
-          <h2>Centre d'opérations Duo</h2>
-          <p>Vue temps réel des commandes, utilisateurs, anomalies et bordereaux à surveiller.</p>
+    
+<section id="control" class="page">
+      <div class="controlCommand">
+        <div class="controlHeroMain v461">
+          <div class="controlHeroHeader">
+            <div class="controlHeroTitle">
+              <div class="controlPulse">Salle de contrôle active</div>
+              <h2>Tour de contrôle Duo</h2>
+              <p>Priorités, anomalies, santé système, vendeurs et scanner bordereau au même endroit.</p>
+            </div>
+            <div class="controlHeroMeta">
+              <span class="controlChip">⚡ Temps réel</span>
+              <span class="controlChip">📡 PocketBase</span>
+              <span class="controlChip">🟢 WhatsApp</span>
+            </div>
+          </div>
+          <div class="controlHeroNumbers">
+            <div class="controlHeroMetric"><span>En ligne</span><strong id="ccOnline">0</strong><small>utilisateurs actifs</small></div>
+            <div class="controlHeroMetric"><span>Aujourd'hui</span><strong id="ccOrdersToday">0</strong><small id="ccOrdersTodayAmount">0 €</small></div>
+            <div class="controlHeroMetric"><span>À envoyer</span><strong id="ccToSend">0</strong><small>statut A Send</small></div>
+            <div class="controlHeroMetric"><span>Risques</span><strong id="ccAnomalies">0</strong><small>à vérifier</small></div>
+          </div>
         </div>
-        <div class="card pad">
-          <h2>Résumé rapide</h2>
-          <div id="controlQuickSummary" class="list"></div>
+
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>⚡ Actions rapides</h2>
+              <p>Accès direct aux actions du jour.</p>
+            </div>
+          </div>
+          <div class="controlActionGrid">
+            <button class="controlActionBtn" type="button" onclick="goPage('dashboard'); setTimeout(()=>document.getElementById('orderForm')?.scrollIntoView({behavior:'smooth',block:'center'}),80)"><span>📦</span>Nouvelle commande</button>
+            <button class="controlActionBtn" type="button" onclick="goPage('comptes'); setTimeout(()=>document.getElementById('accountForm')?.scrollIntoView({behavior:'smooth',block:'center'}),80)"><span>👤</span>Nouveau compte</button>
+            <button class="controlActionBtn" type="button" onclick="goPage('chat')"><span>💬</span>Ouvrir chat</button>
+            <button class="controlActionBtn" type="button" onclick="document.getElementById('controlScanText')?.focus()"><span>📱</span>Scanner bordereau</button>
+          </div>
         </div>
       </div>
 
       <div class="controlGrid">
-        <div class="controlTile ok"><span>En ligne</span><strong id="ccOnline">0</strong><small>utilisateurs actifs</small></div>
-        <div class="controlTile info"><span>Commandes aujourd'hui</span><strong id="ccOrdersToday">0</strong><small id="ccOrdersTodayAmount">0 €</small></div>
-        <div class="controlTile warn"><span>À envoyer</span><strong id="ccToSend">0</strong><small>statut A Send</small></div>
-        <div class="controlTile bad"><span>Anomalies</span><strong id="ccAnomalies">0</strong><small>à vérifier</small></div>
+        <div class="controlTile ok"><span>WhatsApp</span><strong id="ccWhatsapp">—</strong><small id="ccWhatsappMeta">vérification...</small></div>
+        <div class="controlTile info"><span>PDF joints</span><strong id="ccPdfCount">0</strong><small>bordereaux présents</small></div>
+        <div class="controlTile warn"><span>Bloquées</span><strong id="ccBlocked">0</strong><small>Send depuis longtemps</small></div>
+        <div class="controlTile bad"><span>Critiques</span><strong id="ccCritical">0</strong><small>risque immédiat</small></div>
+      </div>
+
+      <div class="controlOpsGrid">
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>🚨 À traiter maintenant</h2>
+              <p>Les anomalies les plus importantes sont remontées en priorité.</p>
+            </div>
+            <span class="anomalyBadge" id="ccPriorityCount">0 ACTION</span>
+          </div>
+          <div id="controlPriorities" class="priorityStack"></div>
+        </div>
+
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>🛡️ Santé système</h2>
+              <p>État des services critiques.</p>
+            </div>
+          </div>
+          <div id="controlHealth" class="healthStack"></div>
+        </div>
+      </div>
+
+      <div class="controlOpsGrid">
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>📊 Radar des risques</h2>
+              <p>Bordereaux, suivis, comptes bannis, prix suspects.</p>
+            </div>
+          </div>
+          <div id="controlRiskRadar" class="riskStack"></div>
+        </div>
+
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>🏆 Top vendeurs aujourd'hui</h2>
+              <p>Performance du jour en volume et CA.</p>
+            </div>
+          </div>
+          <div id="controlTopSellers" class="sellerStack"></div>
+        </div>
       </div>
 
       <div class="grid two" style="margin-top:20px">
-        <div class="card pad">
-          <h2>🚨 Détection d'anomalies</h2>
-          <p class="muted">Bordereau manquant, suivi absent, compte banni utilisé, prix suspect ou commande bloquée.</p>
-          <div id="controlAnomalies" class="anomalyList"></div>
-        </div>
-        <div class="card pad">
-          <h2>📡 Activité live</h2>
-          <p class="muted">Dernières actions visibles dans Duo Update.</p>
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>📡 Activité live</h2>
+              <p>Dernières actions visibles dans Duo Update.</p>
+            </div>
+          </div>
           <div id="controlActivity" class="controlActivity"></div>
+        </div>
+
+        <div class="controlPanel">
+          <div class="controlPanelHead">
+            <div>
+              <h2>📋 Résumé automatique</h2>
+              <p>Lecture rapide de la situation actuelle.</p>
+            </div>
+          </div>
+          <div id="controlQuickSummary" class="list"></div>
         </div>
       </div>
 
-      <div class="card pad" style="margin-top:20px">
-        <h2>📱 Scanner bordereau intelligent</h2>
-        <p class="muted">Upload une photo/PDF ou colle le texte du bordereau. Duo tente de détecter automatiquement le tracking et le transporteur.</p>
-        <div class="scannerBox">
-          <div class="scannerActions">
-            <input id="controlScanFile" type="file" accept="image/*,application/pdf" onchange="scanBordereauFile(this.files?.[0])">
-            <button class="secondary" type="button" onclick="scanBordereauText()">Analyser le texte</button>
-            <button class="secondary" type="button" onclick="applyScannedTracking()">Appliquer au formulaire commande</button>
+      <div class="controlPanel" style="margin-top:20px">
+        <div class="controlPanelHead">
+          <div>
+            <h2>📱 Scanner bordereau intelligent</h2>
+            <p>Upload une photo/PDF ou colle le texte du bordereau. Duo tente de détecter le suivi, le transporteur et le poids.</p>
           </div>
-          <textarea id="controlScanText" placeholder="Colle ici le texte d'un bordereau si tu l'as copié depuis un PDF ou une image..."></textarea>
-          <div id="controlScanResult" class="scannerResult"></div>
+        </div>
+        <div class="controlScannerPro">
+          <div class="controlDrop">
+            <strong>📎 Déposer / choisir un fichier</strong>
+            <span class="uploadHint">Fonctionne surtout avec nom de fichier ou texte copié. Pour un PDF image, colle le texte extrait si besoin.</span>
+            <input id="controlScanFile" type="file" accept="image/*,application/pdf" onchange="scanBordereauFile(this.files?.[0])">
+            <div class="scannerActions">
+              <button class="secondary" type="button" onclick="scanBordereauText()">Analyser</button>
+              <button class="primary" type="button" onclick="applyScannedTracking()">Remplir le suivi</button>
+            </div>
+          </div>
+          <div>
+            <textarea id="controlScanText" class="controlScanTextarea" placeholder="Colle ici le texte d'un bordereau : numéro de suivi, transporteur, poids, date..."></textarea>
+            <div id="controlScanResult" class="scannerResult" style="margin-top:12px"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -4065,55 +4431,178 @@ function getControlAnomalies(){
   return anomalies;
 }
 
+
+function controlOrderLabel(order){
+  return `#${String(order.id || '').slice(0,6)} ${order.client || 'Sans client'} · ${order.vendeur || '—'} · ${euro(order.prix || 0)}`;
+}
+
+function controlOrderActionButtons(orderId){
+  return `
+    <div class="priorityActions">
+      <button class="secondary small" type="button" onclick="editOrder('${esc(orderId)}')">Ouvrir</button>
+      <button class="secondary small" type="button" onclick="goPage('dashboard')">Commandes</button>
+    </div>
+  `;
+}
+
+function getControlRiskCounts(anomalies){
+  return {
+    bordereau: anomalies.filter(a=>a.title.includes('Bordereau')).length,
+    suivi: anomalies.filter(a=>a.title.includes('Suivi')).length,
+    banni: anomalies.filter(a=>a.title.includes('banni')).length,
+    bloque: anomalies.filter(a=>a.title.includes('bloquée')).length,
+    prix: anomalies.filter(a=>a.title.includes('Prix')).length,
+    critical: anomalies.filter(a=>a.level==='critical').length
+  };
+}
+
+function controlTopSellers(todayStr){
+  const sellers = {};
+  (orders || []).forEach(o=>{
+    if(String(o.date || '').slice(0,10) !== todayStr) return;
+    const name = String(o.vendeur || 'Inconnu').trim() || 'Inconnu';
+    if(!sellers[name]) sellers[name] = {name, count:0, total:0};
+    sellers[name].count++;
+    sellers[name].total += Number(o.prix || 0);
+  });
+  return Object.values(sellers).sort((a,b)=>b.total-a.total || b.count-a.count).slice(0,5);
+}
+
+async function updateControlWhatsappHealth(){
+  const strong = $('ccWhatsapp');
+  const meta = $('ccWhatsappMeta');
+  if(!strong || !meta) return;
+  try{
+    const res = await fetch('https://dramzx692.duckdns.org/wa/status', {cache:'no-store'});
+    const data = await res.json();
+    strong.textContent = data.ready ? 'OK' : 'OFF';
+    meta.textContent = data.ready ? 'connecté et prêt' : 'bot non prêt';
+    strong.closest('.controlTile')?.classList.toggle('bad', !data.ready);
+    strong.closest('.controlTile')?.classList.toggle('ok', !!data.ready);
+  }catch(e){
+    strong.textContent = 'OFF';
+    meta.textContent = 'injoignable';
+    strong.closest('.controlTile')?.classList.add('bad');
+  }
+}
+
 function renderControlCenter(){
   if(!$('ccOnline')) return;
 
-  const online = (presenceUsers || []).filter(u => u.online !== false && (Date.now() - new Date(u.lastSeen || u.updated || Date.now()).getTime()) < 180000).length;
+  const now = Date.now();
+  const online = (presenceUsers || []).filter(u => u.online !== false && (now - new Date(u.lastSeen || u.updated || now).getTime()) < 180000).length;
   const todayStr = today();
   const ordersToday = (orders || []).filter(o => String(o.date || '').slice(0,10) === todayStr);
   const ordersTodayAmount = ordersToday.reduce((s,o)=>s+Number(o.prix||0),0);
   const toSend = (orders || []).filter(o => String(o.statut || '') === 'A Send').length;
+  const pdfCount = (orders || []).filter(o => !!(o.shippingLabel || o.shippingLabelUrl || o.bordereau || o.labelFile)).length;
   const anomalies = getControlAnomalies();
+  const risks = getControlRiskCounts(anomalies);
+  const blocked = risks.bloque;
 
   $('ccOnline').textContent = online;
   $('ccOrdersToday').textContent = ordersToday.length;
   $('ccOrdersTodayAmount').textContent = euro(ordersTodayAmount);
   $('ccToSend').textContent = toSend;
   $('ccAnomalies').textContent = anomalies.length;
+  if($('ccPdfCount')) $('ccPdfCount').textContent = pdfCount;
+  if($('ccBlocked')) $('ccBlocked').textContent = blocked;
+  if($('ccCritical')) $('ccCritical').textContent = risks.critical;
+  if($('ccPriorityCount')) $('ccPriorityCount').textContent = `${anomalies.length} ACTION${anomalies.length>1?'S':''}`;
 
-  if($('controlQuickSummary')){
-    $('controlQuickSummary').innerHTML = `
-      <div class="row"><span>📎 Bordereaux manquants</span><strong>${anomalies.filter(a=>a.title.includes('Bordereau')).length}</strong></div>
-      <div class="row"><span>🚚 Suivis absents</span><strong>${anomalies.filter(a=>a.title.includes('Suivi')).length}</strong></div>
-      <div class="row"><span>⛔ Critiques</span><strong>${anomalies.filter(a=>a.level==='critical').length}</strong></div>
-    `;
+  if($('controlPriorities')){
+    const priority = anomalies.slice().sort((a,b)=>{
+      const score = x => x.level === 'critical' ? 3 : x.level === 'warning' ? 2 : 1;
+      return score(b)-score(a);
+    }).slice(0,8);
+    $('controlPriorities').innerHTML = priority.map(a => `
+      <div class="priorityItem ${esc(a.level)}">
+        <div>
+          <div class="priorityTitle">${esc(a.title)}</div>
+          <div class="priorityBody">${esc(a.body)}</div>
+        </div>
+        ${controlOrderActionButtons(a.ref || '')}
+      </div>
+    `).join('') || '<div class="controlEmpty">Aucune priorité critique pour le moment ✅</div>';
   }
 
-  if($('controlAnomalies')){
-    $('controlAnomalies').innerHTML = anomalies.slice(0,12).map(a => `
-      <div class="anomalyItem ${esc(a.level)}">
+  if($('controlRiskRadar')){
+    const max = Math.max(1, risks.bordereau, risks.suivi, risks.banni, risks.bloque, risks.prix);
+    const rows = [
+      ['📎','Bordereaux manquants',risks.bordereau],
+      ['🚚','Suivis absents',risks.suivi],
+      ['⛔','Comptes bannis utilisés',risks.banni],
+      ['🕒','Commandes bloquées',risks.bloque],
+      ['💰','Prix suspects',risks.prix]
+    ];
+    $('controlRiskRadar').innerHTML = rows.map(([icon,label,count])=>`
+      <div class="riskLine">
+        <div class="riskIcon">${icon}</div>
         <div>
-          <strong>${esc(a.title)}</strong>
-          <p>${esc(a.body)}</p>
+          <div style="font-weight:1000">${esc(label)}</div>
+          <div class="riskTrack"><span class="riskFill" style="width:${Math.min(100, Math.round((count/max)*100))}%"></span></div>
         </div>
-        <span class="anomalyBadge">${a.level === 'critical' ? 'CRITIQUE' : a.level === 'warning' ? 'À VOIR' : 'INFO'}</span>
+        <div class="riskMeta">${count}</div>
       </div>
-    `).join('') || '<p class="muted">Aucune anomalie détectée pour le moment.</p>';
+    `).join('');
+  }
+
+  if($('controlHealth')){
+    const health = [
+      {icon:'🟢', cls:'ok', name:'PocketBase', meta:'données chargées', ok:(orders || accounts || messages)},
+      {icon: online ? '🟢' : '🟡', cls:online ? 'ok':'warn', name:'Présence live', meta:`${online} en ligne`},
+      {icon:'🟢', cls:'ok', name:'Interface', meta:'rendu actif'},
+      {icon:risks.critical ? '🔴':'🟢', cls:risks.critical ? 'bad':'ok', name:'Risque critique', meta:risks.critical ? `${risks.critical} critique(s)` : 'aucun'}
+    ];
+    $('controlHealth').innerHTML = health.map(h=>`
+      <div class="healthLine">
+        <div class="healthDot ${h.cls}">${h.icon}</div>
+        <div><strong>${esc(h.name)}</strong><div class="riskMeta">${esc(h.meta)}</div></div>
+        <span class="anomalyBadge">${h.cls === 'bad' ? 'ALERTE' : h.cls === 'warn' ? 'ATTENTION' : 'OK'}</span>
+      </div>
+    `).join('');
+  }
+
+  if($('controlTopSellers')){
+    const sellers = controlTopSellers(todayStr);
+    $('controlTopSellers').innerHTML = sellers.map((s,i)=>`
+      <div class="sellerLine">
+        <div class="sellerRank">#${i+1}</div>
+        <div>
+          <div class="sellerName">${esc(s.name)}</div>
+          <div class="sellerMeta">${s.count} commande${s.count>1?'s':''}</div>
+        </div>
+        <strong>${euro(s.total)}</strong>
+      </div>
+    `).join('') || '<div class="controlEmpty">Aucune commande aujourd’hui.</div>';
+  }
+
+  if($('controlQuickSummary')){
+    const mood = risks.critical ? '🚨 Attention critique' : anomalies.length ? '⚠️ Surveillance nécessaire' : '✅ Tout est propre';
+    $('controlQuickSummary').innerHTML = `
+      <div class="row"><span>État global</span><strong>${mood}</strong></div>
+      <div class="row"><span>📎 Bordereaux manquants</span><strong>${risks.bordereau}</strong></div>
+      <div class="row"><span>🚚 Suivis absents</span><strong>${risks.suivi}</strong></div>
+      <div class="row"><span>⛔ Critiques</span><strong>${risks.critical}</strong></div>
+      <div class="row"><span>💰 CA aujourd'hui</span><strong>${euro(ordersTodayAmount)}</strong></div>
+    `;
   }
 
   if($('controlActivity')){
     const live = [
       ...(activities || []).map(a => ({time:a.created || a.date || '', text:a.text || a.body || a.action || 'Activité'})),
-      ...(orders || []).slice(-5).map(o => ({time:o.created || o.date || '', text:`📦 Commande ${o.client || ''} · ${o.statut || ''} · ${euro(o.prix || 0)}`}))
-    ].filter(x=>x.text).sort((a,b)=>String(b.time).localeCompare(String(a.time))).slice(0,10);
+      ...(orders || []).slice(-8).map(o => ({time:o.created || o.date || '', text:`📦 ${o.client || 'Commande'} · ${o.vendeur || '—'} · ${o.statut || ''} · ${euro(o.prix || 0)}`}))
+    ].filter(x=>x.text).sort((a,b)=>String(b.time).localeCompare(String(a.time))).slice(0,12);
 
     $('controlActivity').innerHTML = live.map(x => `
       <div class="controlEvent">
-        <div class="controlEventTime">${esc(String(x.time || '').slice(11,16) || '—')}</div>
+        <div class="controlEventTime">${esc(String(x.time || '').slice(11,16) || String(x.time || '').slice(0,10) || '—')}</div>
         <div class="controlEventText">${esc(x.text)}</div>
       </div>
-    `).join('') || '<p class="muted">Aucune activité récente.</p>';
+    `).join('') || '<div class="controlEmpty">Aucune activité récente.</div>';
   }
+
+  updateControlWhatsappHealth();
 }
 
 function renderAll(){
@@ -4632,7 +5121,7 @@ function handleTypingInput(){
 
 
 function pageLabel(id){
-  const labels={dashboard:'Dashboard',clients:'Clients',comptes:'Comptes',chat:'Chat',stats:'Stats'};
+  const labels={dashboard:'Dashboard',control:'Contrôle',clients:'Clients',comptes:'Comptes',chat:'Chat',stats:'Stats'};
   return labels[id] || id || 'Dashboard';
 }
 
@@ -5484,7 +5973,14 @@ function goPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
   $(id).classList.add('active');
-  const titles={dashboard:['Dashboard','Vue globale de vos commandes confirmées et en cours.'],clients:['Clients','Nom, nombre de commandes et dépense totale.'],comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],stats:['Stats','Performance par vendeur, plateforme et produit.']};
+  const titles={
+    dashboard:['Dashboard','Vue globale de vos commandes confirmées et en cours.'],
+    control:['Contrôle','Tour de contrôle : priorités, risques, santé système et scanner bordereau.'],
+    clients:['Clients','Nom, nombre de commandes et dépense totale.'],
+    comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
+    chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
+    stats:['Stats','Performance par vendeur, plateforme et produit.']
+  };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
 }
