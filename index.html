@@ -2809,6 +2809,17 @@ tbody tr:hover td{background:#1b1f29!important}
   .photosGrid{grid-template-columns:1fr}
 }
 
+
+/* V47.1 — Présence Live : affiche uniquement les utilisateurs en ligne */
+.presenceUser:has(.presenceDot.offline),
+.presenceUser:has(.presenceDot.idle),
+.presenceUser.offline,
+.presenceUser.idle,
+.presenceUser[data-status="offline"],
+.presenceUser[data-status="idle"]{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -7693,5 +7704,55 @@ async function start(){
 }
 start();
 </script>
+
+<script>
+/* V47.1 — Nettoyage Présence Live : seulement en ligne */
+(function(){
+  function isOnlinePresenceCard(card){
+    const dot = card.querySelector(".presenceDot");
+    if(!dot) return false;
+
+    const cls = dot.className || "";
+    if(cls.includes("offline") || cls.includes("idle")) return false;
+
+    const text = (card.textContent || "").toLowerCase();
+    if(text.includes("hors ligne")) return false;
+    if(text.includes("offline")) return false;
+    if(text.includes("depuis")) return false;
+
+    return true;
+  }
+
+  function cleanLivePresence(){
+    document.querySelectorAll(".livePresenceList").forEach((list)=>{
+      const cards = Array.from(list.querySelectorAll(".presenceUser"));
+      cards.forEach((card)=>{
+        card.style.display = isOnlinePresenceCard(card) ? "" : "none";
+      });
+
+      const visible = cards.filter((card)=>card.style.display !== "none");
+      const box = list.closest(".livePresenceBox");
+      const counter = box && box.querySelector(".livePresenceTitle span, .livePresenceTitle strong");
+      if(counter){
+        counter.textContent = `${visible.length} EN LIGNE`;
+      }
+    });
+  }
+
+  cleanLivePresence();
+
+  const obs = new MutationObserver(cleanLivePresence);
+  obs.observe(document.documentElement, {
+    childList:true,
+    subtree:true,
+    characterData:true,
+    attributes:true,
+    attributeFilter:["class","data-status"]
+  });
+
+  setInterval(cleanLivePresence, 2500);
+})();
+</script>
+
 </body>
 </html>
