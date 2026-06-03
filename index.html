@@ -2832,15 +2832,6 @@ tbody tr:hover td{background:#1b1f29!important}
 
 
 
-/* V47.5 — Présence Live online only SANS FLASH
-   Par défaut, aucune carte présence n'est affichée.
-   Le JS ajoute .duo-presence-online uniquement aux cartes vraiment en ligne. */
-.livePresenceBox .presenceUser{
-  display:none!important;
-}
-.livePresenceBox .presenceUser.duo-presence-online{
-  display:flex!important;
-}
 
 </style>
 </head>
@@ -5761,21 +5752,27 @@ function setLiveAction(action){
 function renderPresence(){
   const now=Date.now();
   const typingNames=currentTypingNames();
+
+  // V47.6 — Source fix :
+  // On ne génère plus les utilisateurs offline dans le HTML.
+  // Avant, ils étaient rendus puis masqués par CSS/JS, ce qui causait le clignotement.
   const list=presenceUsers.map(u=>{
     const ts=u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : new Date(u.lastSeen || 0).getTime();
     const age=now-ts;
-    const online=u.online && age<45000;
+    const online=!!u.online && age<45000;
     const idle=online && age>22000;
     return {...u, age, online, idle, typing:typingNames.includes(normalizeName(u.sender))};
-  }).sort((a,b)=>(b.online-a.online) || String(a.sender).localeCompare(String(b.sender)));
+  })
+  .filter(u=>u.online)
+  .sort((a,b)=>String(a.sender||'').localeCompare(String(b.sender||'')));
 
-  const onlineCount=list.filter(u=>u.online).length;
+  const onlineCount=list.length;
   if($("presenceCount")) $("presenceCount").textContent = `${onlineCount} en ligne`;
 
   const html=list.map(u=>{
-    const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
+    const dotClass=u.idle ? 'idle' : '';
     const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
+    const status=u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`;
     const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
     return `<div class="presenceUser">
       <div class="presenceLeft">
@@ -5793,7 +5790,7 @@ function renderPresence(){
   if($("livePresenceList")) $("livePresenceList").innerHTML = html;
   if($("dashboardPresenceList")) $("dashboardPresenceList").innerHTML = html;
 
-  const actions=list.filter(u=>u.online && (u.action || u.typing)).map(u=>`
+  const actions=list.filter(u=>u.action || u.typing).map(u=>`
     <div class="row"><div><strong>${esc(u.sender)}</strong><div class="muted">${esc(u.typing ? '✍️ écrit actuellement' : u.action)}</div></div><span class="muted">${esc(u.pageLabel||pageLabel(u.page))}</span></div>
   `).join('');
   if($("dashboardLiveActions")) $("dashboardLiveActions").innerHTML = actions || '<p class="muted">Aucune action en direct.</p>';
@@ -8032,76 +8029,6 @@ start();
 </script>
 
 
-
-<script>
-/* V47.5 — Présence Live online only SANS FLASH */
-(function(){
-  function isOfflineCard(card){
-    var text = String(card.textContent || "").toLowerCase();
-    var dot = card.querySelector(".presenceDot");
-    var dotClass = dot ? String(dot.className || "").toLowerCase() : "";
-
-    return (
-      text.indexOf("hors ligne") !== -1 ||
-      text.indexOf("offline") !== -1 ||
-      text.indexOf("depuis") !== -1 ||
-      dotClass.indexOf("offline") !== -1 ||
-      dotClass.indexOf("idle") !== -1 ||
-      card.classList.contains("offline") ||
-      card.classList.contains("idle") ||
-      card.getAttribute("data-status") === "offline" ||
-      card.getAttribute("data-status") === "idle"
-    );
-  }
-
-  function refreshPresenceOnlineOnly(){
-    try{
-      document.querySelectorAll(".livePresenceBox").forEach(function(box){
-        var cards = Array.prototype.slice.call(box.querySelectorAll(".presenceUser"));
-        var online = 0;
-
-        cards.forEach(function(card){
-          if(isOfflineCard(card)){
-            card.classList.remove("duo-presence-online");
-          }else{
-            card.classList.add("duo-presence-online");
-            online++;
-          }
-        });
-
-        var title = box.querySelector(".livePresenceTitle");
-        if(title){
-          var nodes = Array.prototype.slice.call(title.querySelectorAll("span,strong,b"));
-          if(nodes.length){
-            nodes[nodes.length - 1].textContent = online + " EN LIGNE";
-          }
-        }
-      });
-    }catch(e){
-      console.warn("Presence filter ignored:", e);
-    }
-  }
-
-  window.refreshPresenceOnlineOnly = refreshPresenceOnlineOnly;
-
-  // Exécution immédiate dès que le script est lu
-  refreshPresenceOnlineOnly();
-
-  document.addEventListener("DOMContentLoaded", function(){
-    refreshPresenceOnlineOnly();
-    setTimeout(refreshPresenceOnlineOnly, 50);
-    setTimeout(refreshPresenceOnlineOnly, 250);
-    setTimeout(refreshPresenceOnlineOnly, 750);
-    setInterval(refreshPresenceOnlineOnly, 1500);
-  });
-
-  window.addEventListener("load", function(){
-    refreshPresenceOnlineOnly();
-    setTimeout(refreshPresenceOnlineOnly, 50);
-    setTimeout(refreshPresenceOnlineOnly, 500);
-  });
-})();
-</script>
 
 </body>
 </html>
