@@ -2830,6 +2830,12 @@ tbody tr:hover td{background:#1b1f29!important}
   display:none!important;
 }
 
+
+/* V47.4 — Présence Live : cache visuellement les cartes hors ligne */
+.livePresenceBox .presenceUser.duo-presence-hidden{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -7716,66 +7722,6 @@ start();
 </script>
 
 <script>
-/* V47.2 — Présence Live online only SAFE
-   Ne bloque pas le chargement : pas de MutationObserver global, pas de boucle lourde. */
-(function(){
-  function cleanPresenceOnlineOnly(){
-    try{
-      document.querySelectorAll(".livePresenceList").forEach(function(list){
-        var cards = Array.prototype.slice.call(list.querySelectorAll(".presenceUser"));
-        var onlineCount = 0;
-
-        cards.forEach(function(card){
-          var text = (card.textContent || "").toLowerCase();
-          var dot = card.querySelector(".presenceDot");
-          var cls = dot ? String(dot.className || "").toLowerCase() : "";
-
-          var offline =
-            text.indexOf("hors ligne") !== -1 ||
-            text.indexOf("offline") !== -1 ||
-            text.indexOf("depuis") !== -1 ||
-            cls.indexOf("offline") !== -1 ||
-            cls.indexOf("idle") !== -1;
-
-          if(offline){
-            card.style.display = "none";
-          }else{
-            card.style.display = "";
-            onlineCount++;
-          }
-        });
-
-        var box = list.closest(".livePresenceBox");
-        if(box){
-          var title = box.querySelector(".livePresenceTitle");
-          if(title){
-            var nodes = title.querySelectorAll("span,strong,b");
-            if(nodes.length){
-              nodes[nodes.length - 1].textContent = onlineCount + " EN LIGNE";
-            }
-          }
-        }
-      });
-    }catch(e){
-      console.warn("Presence online filter skipped:", e);
-    }
-  }
-
-  window.cleanPresenceOnlineOnly = cleanPresenceOnlineOnly;
-
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(cleanPresenceOnlineOnly, 1000);
-    setInterval(cleanPresenceOnlineOnly, 5000);
-  });
-
-  window.addEventListener("load", function(){
-    setTimeout(cleanPresenceOnlineOnly, 1000);
-  });
-})();
-</script>
-
-
-<script>
 /* V47.3 — Photos Dora -> Zerlezz
    Upload depuis la page Photos pour Dora.
    Téléchargement unique pour Zerlezz puis flou + bouton verrouillé.
@@ -8076,6 +8022,83 @@ start();
 
   window.loadDuoPhotos = loadPhotos;
   window.uploadDuoPhoto = uploadPhoto;
+})();
+</script>
+
+
+<script>
+/* V47.4 — Présence Live online only FORCE
+   Garde uniquement les cartes vraiment en ligne.
+   Ne touche pas PocketBase, seulement l'affichage. */
+(function(){
+  function isOfflineCard(card){
+    var text = String(card.textContent || "").toLowerCase();
+    var dot = card.querySelector(".presenceDot");
+    var dotClass = dot ? String(dot.className || "").toLowerCase() : "";
+
+    return (
+      text.indexOf("hors ligne") !== -1 ||
+      text.indexOf("offline") !== -1 ||
+      text.indexOf("depuis") !== -1 ||
+      dotClass.indexOf("offline") !== -1 ||
+      dotClass.indexOf("idle") !== -1 ||
+      card.classList.contains("offline") ||
+      card.classList.contains("idle") ||
+      card.getAttribute("data-status") === "offline" ||
+      card.getAttribute("data-status") === "idle"
+    );
+  }
+
+  function refreshPresenceOnlineOnly(){
+    try{
+      document.querySelectorAll(".livePresenceBox").forEach(function(box){
+        var cards = Array.prototype.slice.call(box.querySelectorAll(".presenceUser"));
+        var online = 0;
+
+        cards.forEach(function(card){
+          if(isOfflineCard(card)){
+            card.classList.add("duo-presence-hidden");
+          }else{
+            card.classList.remove("duo-presence-hidden");
+            online++;
+          }
+        });
+
+        var title = box.querySelector(".livePresenceTitle");
+        if(title){
+          var textNodes = Array.prototype.slice.call(title.querySelectorAll("span,strong,b"));
+          if(textNodes.length){
+            textNodes[textNodes.length - 1].textContent = online + " EN LIGNE";
+          }else{
+            title.setAttribute("data-online-count", online + " EN LIGNE");
+          }
+        }
+      });
+    }catch(e){
+      console.warn("Presence filter ignored:", e);
+    }
+  }
+
+  window.refreshPresenceOnlineOnly = refreshPresenceOnlineOnly;
+
+  document.addEventListener("DOMContentLoaded", function(){
+    refreshPresenceOnlineOnly();
+    setTimeout(refreshPresenceOnlineOnly, 500);
+    setTimeout(refreshPresenceOnlineOnly, 1500);
+    setTimeout(refreshPresenceOnlineOnly, 3000);
+    setInterval(refreshPresenceOnlineOnly, 3000);
+  });
+
+  window.addEventListener("load", function(){
+    refreshPresenceOnlineOnly();
+    setTimeout(refreshPresenceOnlineOnly, 1000);
+  });
+
+  document.addEventListener("click", function(e){
+    if(e.target.closest("[data-page]")){
+      setTimeout(refreshPresenceOnlineOnly, 400);
+    }
+  });
 })();
 </script>
 
