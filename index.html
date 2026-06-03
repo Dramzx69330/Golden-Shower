@@ -7844,22 +7844,20 @@ async function start(){
 start();
 </script>
 
+
 <script>
-/* V46.1.1 — Fix affichage bordereau dans le tableau */
-(function(){
-  function cleanPdfChips(){
-    document.querySelectorAll('a.pdfChip,.pdfChip').forEach((chip)=>{
-      const raw = (chip.textContent || '').trim();
-      if(!chip.getAttribute('title') && raw) chip.setAttribute('title', raw);
-      const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?\s*(?:Ko|KB|Mo|MB))/i);
-      const size = sizeMatch ? ' · ' + sizeMatch[1].replace('KB','Ko').replace('MB','Mo') : '';
-      chip.textContent = '📎 PDF' + size;
-    });
-  }
-  cleanPdfChips();
-  const obs = new MutationObserver(cleanPdfChips);
-  obs.observe(document.documentElement,{childList:true,subtree:true});
-})();
+/* V46.3.1 — affichage PDF sûr, sans MutationObserver */
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('a.pdfChip,.pdfChip').forEach(function(chip){
+    if (chip.dataset.pdfCleaned === '1') return;
+    const raw = (chip.textContent || '').trim();
+    if (!chip.getAttribute('title') && raw) chip.setAttribute('title', raw);
+    const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?\s*(?:Ko|KB|Mo|MB))/i);
+    const size = sizeMatch ? ' · ' + sizeMatch[1].replace('KB','Ko').replace('MB','Mo') : '';
+    chip.textContent = '📎 PDF' + size;
+    chip.dataset.pdfCleaned = '1';
+  });
+});
 </script>
 
 </body>
