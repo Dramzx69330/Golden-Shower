@@ -2831,9 +2831,15 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V47.4 — Présence Live : cache visuellement les cartes hors ligne */
-.livePresenceBox .presenceUser.duo-presence-hidden{
+
+/* V47.5 — Présence Live online only SANS FLASH
+   Par défaut, aucune carte présence n'est affichée.
+   Le JS ajoute .duo-presence-online uniquement aux cartes vraiment en ligne. */
+.livePresenceBox .presenceUser{
   display:none!important;
+}
+.livePresenceBox .presenceUser.duo-presence-online{
+  display:flex!important;
 }
 
 </style>
@@ -8026,10 +8032,9 @@ start();
 </script>
 
 
+
 <script>
-/* V47.4 — Présence Live online only FORCE
-   Garde uniquement les cartes vraiment en ligne.
-   Ne touche pas PocketBase, seulement l'affichage. */
+/* V47.5 — Présence Live online only SANS FLASH */
 (function(){
   function isOfflineCard(card){
     var text = String(card.textContent || "").toLowerCase();
@@ -8057,20 +8062,18 @@ start();
 
         cards.forEach(function(card){
           if(isOfflineCard(card)){
-            card.classList.add("duo-presence-hidden");
+            card.classList.remove("duo-presence-online");
           }else{
-            card.classList.remove("duo-presence-hidden");
+            card.classList.add("duo-presence-online");
             online++;
           }
         });
 
         var title = box.querySelector(".livePresenceTitle");
         if(title){
-          var textNodes = Array.prototype.slice.call(title.querySelectorAll("span,strong,b"));
-          if(textNodes.length){
-            textNodes[textNodes.length - 1].textContent = online + " EN LIGNE";
-          }else{
-            title.setAttribute("data-online-count", online + " EN LIGNE");
+          var nodes = Array.prototype.slice.call(title.querySelectorAll("span,strong,b"));
+          if(nodes.length){
+            nodes[nodes.length - 1].textContent = online + " EN LIGNE";
           }
         }
       });
@@ -8081,23 +8084,21 @@ start();
 
   window.refreshPresenceOnlineOnly = refreshPresenceOnlineOnly;
 
+  // Exécution immédiate dès que le script est lu
+  refreshPresenceOnlineOnly();
+
   document.addEventListener("DOMContentLoaded", function(){
     refreshPresenceOnlineOnly();
-    setTimeout(refreshPresenceOnlineOnly, 500);
-    setTimeout(refreshPresenceOnlineOnly, 1500);
-    setTimeout(refreshPresenceOnlineOnly, 3000);
-    setInterval(refreshPresenceOnlineOnly, 3000);
+    setTimeout(refreshPresenceOnlineOnly, 50);
+    setTimeout(refreshPresenceOnlineOnly, 250);
+    setTimeout(refreshPresenceOnlineOnly, 750);
+    setInterval(refreshPresenceOnlineOnly, 1500);
   });
 
   window.addEventListener("load", function(){
     refreshPresenceOnlineOnly();
-    setTimeout(refreshPresenceOnlineOnly, 1000);
-  });
-
-  document.addEventListener("click", function(e){
-    if(e.target.closest("[data-page]")){
-      setTimeout(refreshPresenceOnlineOnly, 400);
-    }
+    setTimeout(refreshPresenceOnlineOnly, 50);
+    setTimeout(refreshPresenceOnlineOnly, 500);
   });
 })();
 </script>
