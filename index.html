@@ -3012,7 +3012,7 @@ aside{
   flex-direction:column!important;
 }
 .nav{
-  flex:1 1 auto!important;
+  flex:0 0 auto!important;
 }
 .sidebarProfile{
   position:relative;
@@ -3128,6 +3128,29 @@ aside{
   .sidebarProfile{
     display:none!important;
   }
+}
+
+
+/* V48.1 — Fix sidebar profil : boutons menu non étirés */
+aside{
+  display:flex!important;
+  flex-direction:column!important;
+}
+
+.nav{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+}
+
+.nav button{
+  margin:0!important;
+  min-height:0!important;
+}
+
+.sidebarProfile{
+  margin-top:auto!important;
 }
 
 </style>
