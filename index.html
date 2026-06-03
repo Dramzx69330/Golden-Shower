@@ -3005,6 +3005,131 @@ tbody tr:hover td{background:#1b1f29!important}
   .photosGrid{grid-template-columns:1fr}
 }
 
+
+/* V48 — Profil sidebar bas gauche */
+aside{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.nav{
+  flex:1 1 auto!important;
+}
+.sidebarProfile{
+  position:relative;
+  margin-top:auto;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.sidebarProfileMain{
+  width:100%;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) 10px;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+.sidebarProfileMain:hover{
+  background:rgba(255,255,255,.075);
+  border-color:rgba(255,255,255,.16);
+}
+.sidebarAvatar{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#1d4ed8,#111827);
+  color:#fff;
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:.02em;
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+.sidebarProfileText{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.sidebarProfileText strong{
+  color:#fff;
+  font-size:14px;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sidebarProfileText small{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sidebarProfileStatus{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#6b7280;
+  box-shadow:none;
+}
+.sidebarProfileStatus.online{
+  background:#22c55e;
+  box-shadow:0 0 0 4px rgba(34,197,94,.13);
+}
+.sidebarProfileMenu{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:calc(100% + 10px);
+  display:none;
+  gap:6px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:#111318;
+  box-shadow:0 22px 70px rgba(0,0,0,.45);
+  z-index:15000;
+}
+.sidebarProfileMenu.open{
+  display:grid;
+}
+.sidebarProfileMenu button{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#f3f4f6;
+  text-align:left;
+  padding:10px 11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.sidebarProfileMenu button:hover{
+  background:#202633;
+}
+@media(max-width:1050px){
+  .sidebarProfile{
+    margin-top:12px;
+    padding-top:12px;
+  }
+  .sidebarProfileMenu{
+    position:static;
+    margin-top:8px;
+  }
+}
+@media(max-width:768px){
+  .sidebarProfile{
+    display:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3058,6 +3183,23 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="chat">Chat</button>
       <button data-page="stats">Stats</button>
     </div>
+
+    <div class="sidebarProfile" id="sidebarProfile">
+      <button class="sidebarProfileMain" id="sidebarProfileToggle" type="button" aria-expanded="false">
+        <span class="sidebarAvatar" id="sidebarProfileAvatar">--</span>
+        <span class="sidebarProfileText">
+          <strong id="sidebarProfileName">Non connecté</strong>
+          <small id="sidebarProfileRole">Profil</small>
+        </span>
+        <span class="sidebarProfileStatus" id="sidebarProfileStatus"></span>
+      </button>
+
+      <div class="sidebarProfileMenu" id="sidebarProfileMenu">
+        <button type="button" id="sidebarSwitchProfileBtn">🔄 Changer profil</button>
+        <button type="button" id="sidebarLogoutBtn">🚪 Déconnexion</button>
+      </div>
+    </div>
+
   </aside>
 
   <main>
