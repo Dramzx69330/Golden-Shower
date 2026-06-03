@@ -2310,6 +2310,379 @@ tbody tr:hover td{background:#1b1f29!important}
   .controlHeroNumbers,.controlActionGrid{grid-template-columns:1fr}
 }
 
+
+/* V46.1.1 — Fix proportions tableau commandes + bordereaux PDF */
+#ordersTable,
+table.ordersTable,
+.page table{
+  width:100%!important;
+  max-width:100%!important;
+}
+
+#ordersTable{
+  table-layout:fixed!important;
+}
+
+#ordersTable th,
+#ordersTable td{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  word-break:normal!important;
+}
+
+#ordersTable th:nth-child(1), #ordersTable td:nth-child(1){width:76px!important}
+#ordersTable th:nth-child(2), #ordersTable td:nth-child(2){width:88px!important}
+#ordersTable th:nth-child(3), #ordersTable td:nth-child(3){width:112px!important}
+#ordersTable th:nth-child(4), #ordersTable td:nth-child(4){width:100px!important}
+#ordersTable th:nth-child(5), #ordersTable td:nth-child(5){width:130px!important}
+#ordersTable th:nth-child(6), #ordersTable td:nth-child(6){width:88px!important}
+#ordersTable th:nth-child(7), #ordersTable td:nth-child(7){width:64px!important}
+#ordersTable th:nth-child(8), #ordersTable td:nth-child(8){width:90px!important}
+#ordersTable th:nth-child(9), #ordersTable td:nth-child(9){width:130px!important}
+#ordersTable th:nth-child(10), #ordersTable td:nth-child(10){width:160px!important}
+#ordersTable th:nth-child(11), #ordersTable td:nth-child(11){width:86px!important;text-align:right!important}
+#ordersTable th:nth-child(12), #ordersTable td:nth-child(12){width:92px!important;text-align:right!important}
+
+.pdfChip,
+#ordersTable .pdfChip,
+a.pdfChip{
+  max-width:150px!important;
+  width:auto!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  vertical-align:middle!important;
+  justify-content:flex-start!important;
+}
+
+#ordersTable .pdfChip{
+  display:inline-flex!important;
+}
+
+#ordersTable .pdfChip .pdfName,
+#ordersTable .pdfChip span{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+
+@media(max-width:1100px){
+  #ordersTable{
+    min-width:1080px!important;
+  }
+}
+
+
+/* V46.2 — Mobile iPhone only. Ne modifie pas le rendu PC. */
+@media (max-width: 768px) {
+  html, body {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  body {
+    background: #0b0d11 !important;
+  }
+
+  .app {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+  }
+
+  aside {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9000 !important;
+    height: auto !important;
+    width: 100% !important;
+    padding: 12px 10px !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--line) !important;
+    background: rgba(15, 17, 22, .96) !important;
+    backdrop-filter: blur(14px) !important;
+  }
+
+  aside .brand {
+    font-size: 15px !important;
+    margin-bottom: 2px !important;
+  }
+
+  aside .sub {
+    display: none !important;
+  }
+
+  .nav {
+    display: flex !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    padding: 8px 0 2px !important;
+    scrollbar-width: none !important;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .nav button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 10px 13px !important;
+    border-radius: 999px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 14px 10px 92px !important;
+    margin: 0 !important;
+  }
+
+  .top {
+    display: block !important;
+    margin-bottom: 14px !important;
+  }
+
+  h1 {
+    font-size: 28px !important;
+    line-height: 1.05 !important;
+    margin-bottom: 8px !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+
+  h3 {
+    font-size: 16px !important;
+  }
+
+  .globalSearchWrap {
+    max-width: 100% !important;
+    margin-top: 10px !important;
+  }
+
+  .globalSearch,
+  input,
+  select,
+  textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+
+  .themeSwitcher,
+  .livePresenceBox {
+    display: none !important;
+  }
+
+  .grid,
+  .cards,
+  .two,
+  .three,
+  .form,
+  .chatWrap,
+  .chartGrid,
+  .liveNowStrip,
+  .accountStatusDashboard {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+  }
+
+  .pad {
+    padding: 14px !important;
+  }
+
+  .metric span {
+    font-size: 11px !important;
+  }
+
+  .metric strong {
+    margin-top: 7px !important;
+    font-size: 25px !important;
+  }
+
+  .cards .card {
+    min-height: auto !important;
+  }
+
+  .accountStatusTile {
+    padding: 12px !important;
+  }
+
+  .accountStatusTile strong {
+    font-size: 24px !important;
+  }
+
+  .toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 9px !important;
+  }
+
+  button.primary,
+  button.secondary,
+  button.danger {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .liveNowCard,
+  .smartAlert,
+  .row,
+  .noteItem,
+  .taskItem {
+    width: 100% !important;
+  }
+
+  .smartAlert {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tableaux desktop masqués visuellement et transformés en scroll horizontal propre */
+  .card:has(table),
+  .tableWrap,
+  .ordersWrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  table {
+    min-width: 920px !important;
+    width: 920px !important;
+    table-layout: fixed !important;
+    font-size: 12px !important;
+  }
+
+  th, td {
+    padding: 10px 8px !important;
+  }
+
+  .pdfChip {
+    max-width: 110px !important;
+  }
+
+  /* Formulaire nouvelle commande : compact iPhone */
+  .form label {
+    font-size: 10px !important;
+    gap: 6px !important;
+  }
+
+  .form input,
+  .form select,
+  .form textarea {
+    padding: 11px 12px !important;
+    border-radius: 9px !important;
+  }
+
+  /* Chat widget adapté iPhone */
+  .floatingChatBtn {
+    right: 14px !important;
+    bottom: 18px !important;
+    width: 54px !important;
+    height: 54px !important;
+    font-size: 22px !important;
+  }
+
+  .messengerPanel {
+    right: 8px !important;
+    left: 8px !important;
+    bottom: 82px !important;
+    width: auto !important;
+    height: min(620px, calc(100vh - 110px)) !important;
+    border-radius: 15px !important;
+  }
+
+  .messengerComposer .line {
+    grid-template-columns: 1fr 42px 86px !important;
+  }
+
+  .messengerComposer input:nth-child(2) {
+    grid-column: 1 / -1 !important;
+  }
+
+  .toastStack {
+    right: 10px !important;
+    left: 10px !important;
+    bottom: 82px !important;
+    width: auto !important;
+  }
+
+  /* Présence dashboard top : cachée sur mobile pour éviter l'effet mini desktop */
+  .top .livePresenceBox,
+  .top .themeSwitcher,
+  .topRight,
+  .dashboardPresence,
+  .presenceFloating {
+    display: none !important;
+  }
+
+  /* Centre contrôle mobile */
+  .controlHero,
+  .controlGrid,
+  .controlActions,
+  .controlHealth,
+  .controlRadar {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Nettoie les gros espaces vides */
+  section,
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .clientModal,
+  .voiceModal,
+  .emergencyModal,
+  .threadPanel {
+    width: calc(100vw - 18px) !important;
+    max-width: calc(100vw - 18px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  h1 {
+    font-size: 25px !important;
+  }
+
+  .pad {
+    padding: 12px !important;
+  }
+
+  .metric strong {
+    font-size: 23px !important;
+  }
+
+  table {
+    min-width: 860px !important;
+    width: 860px !important;
+  }
+
+  th, td {
+    font-size: 11px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -7152,5 +7525,24 @@ async function start(){
 }
 start();
 </script>
+
+<script>
+/* V46.1.1 — Fix affichage bordereau dans le tableau */
+(function(){
+  function cleanPdfChips(){
+    document.querySelectorAll('a.pdfChip,.pdfChip').forEach((chip)=>{
+      const raw = (chip.textContent || '').trim();
+      if(!chip.getAttribute('title') && raw) chip.setAttribute('title', raw);
+      const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?\s*(?:Ko|KB|Mo|MB))/i);
+      const size = sizeMatch ? ' · ' + sizeMatch[1].replace('KB','Ko').replace('MB','Mo') : '';
+      chip.textContent = '📎 PDF' + size;
+    });
+  }
+  cleanPdfChips();
+  const obs = new MutationObserver(cleanPdfChips);
+  obs.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
