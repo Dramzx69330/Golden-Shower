@@ -2809,17 +2809,6 @@ tbody tr:hover td{background:#1b1f29!important}
   .photosGrid{grid-template-columns:1fr}
 }
 
-
-/* V47.1 — Présence Live : affiche uniquement les utilisateurs en ligne */
-.presenceUser:has(.presenceDot.offline),
-.presenceUser:has(.presenceDot.idle),
-.presenceUser.offline,
-.presenceUser.idle,
-.presenceUser[data-status="offline"],
-.presenceUser[data-status="idle"]{
-  display:none!important;
-}
-
 </style>
 </head>
 <body>
@@ -7706,51 +7695,61 @@ start();
 </script>
 
 <script>
-/* V47.1 — Nettoyage Présence Live : seulement en ligne */
+/* V47.2 — Présence Live online only SAFE
+   Ne bloque pas le chargement : pas de MutationObserver global, pas de boucle lourde. */
 (function(){
-  function isOnlinePresenceCard(card){
-    const dot = card.querySelector(".presenceDot");
-    if(!dot) return false;
+  function cleanPresenceOnlineOnly(){
+    try{
+      document.querySelectorAll(".livePresenceList").forEach(function(list){
+        var cards = Array.prototype.slice.call(list.querySelectorAll(".presenceUser"));
+        var onlineCount = 0;
 
-    const cls = dot.className || "";
-    if(cls.includes("offline") || cls.includes("idle")) return false;
+        cards.forEach(function(card){
+          var text = (card.textContent || "").toLowerCase();
+          var dot = card.querySelector(".presenceDot");
+          var cls = dot ? String(dot.className || "").toLowerCase() : "";
 
-    const text = (card.textContent || "").toLowerCase();
-    if(text.includes("hors ligne")) return false;
-    if(text.includes("offline")) return false;
-    if(text.includes("depuis")) return false;
+          var offline =
+            text.indexOf("hors ligne") !== -1 ||
+            text.indexOf("offline") !== -1 ||
+            text.indexOf("depuis") !== -1 ||
+            cls.indexOf("offline") !== -1 ||
+            cls.indexOf("idle") !== -1;
 
-    return true;
-  }
+          if(offline){
+            card.style.display = "none";
+          }else{
+            card.style.display = "";
+            onlineCount++;
+          }
+        });
 
-  function cleanLivePresence(){
-    document.querySelectorAll(".livePresenceList").forEach((list)=>{
-      const cards = Array.from(list.querySelectorAll(".presenceUser"));
-      cards.forEach((card)=>{
-        card.style.display = isOnlinePresenceCard(card) ? "" : "none";
+        var box = list.closest(".livePresenceBox");
+        if(box){
+          var title = box.querySelector(".livePresenceTitle");
+          if(title){
+            var nodes = title.querySelectorAll("span,strong,b");
+            if(nodes.length){
+              nodes[nodes.length - 1].textContent = onlineCount + " EN LIGNE";
+            }
+          }
+        }
       });
-
-      const visible = cards.filter((card)=>card.style.display !== "none");
-      const box = list.closest(".livePresenceBox");
-      const counter = box && box.querySelector(".livePresenceTitle span, .livePresenceTitle strong");
-      if(counter){
-        counter.textContent = `${visible.length} EN LIGNE`;
-      }
-    });
+    }catch(e){
+      console.warn("Presence online filter skipped:", e);
+    }
   }
 
-  cleanLivePresence();
+  window.cleanPresenceOnlineOnly = cleanPresenceOnlineOnly;
 
-  const obs = new MutationObserver(cleanLivePresence);
-  obs.observe(document.documentElement, {
-    childList:true,
-    subtree:true,
-    characterData:true,
-    attributes:true,
-    attributeFilter:["class","data-status"]
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(cleanPresenceOnlineOnly, 1000);
+    setInterval(cleanPresenceOnlineOnly, 5000);
   });
 
-  setInterval(cleanLivePresence, 2500);
+  window.addEventListener("load", function(){
+    setTimeout(cleanPresenceOnlineOnly, 1000);
+  });
 })();
 </script>
 
