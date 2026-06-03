@@ -2809,6 +2809,27 @@ tbody tr:hover td{background:#1b1f29!important}
   .photosGrid{grid-template-columns:1fr}
 }
 
+
+/* V47.3 — Photos upload Dora clair */
+.photoUploadLocked{
+  border:1px solid rgba(245,158,11,.35);
+  background:rgba(245,158,11,.08);
+  color:var(--text);
+  border-radius:12px;
+  padding:12px 14px;
+  line-height:1.45;
+}
+.photoUploadLocked strong{color:#fbbf24}
+#photoUploadPanel.is-hidden-for-user .form{
+  display:none!important;
+}
+#photoUploadPanel.is-hidden-for-user .photoUploadLocked{
+  display:block!important;
+}
+#photoUploadPanel:not(.is-hidden-for-user) .photoUploadLocked{
+  display:none!important;
+}
+
 </style>
 </head>
 <body>
@@ -7750,6 +7771,311 @@ start();
   window.addEventListener("load", function(){
     setTimeout(cleanPresenceOnlineOnly, 1000);
   });
+})();
+</script>
+
+
+<script>
+/* V47.3 — Photos Dora -> Zerlezz
+   Upload depuis la page Photos pour Dora.
+   Téléchargement unique pour Zerlezz puis flou + bouton verrouillé.
+
+   PocketBase collection "photos" :
+   - title text
+   - image file
+   - uploadedBy text
+   - downloadedBy text
+   - downloadedAt date
+   - used bool
+*/
+(function(){
+  const COLLECTION = "photos";
+
+  function getPB(){
+    return window.pb || window.pocketbase || window.PB || null;
+  }
+
+  function normalize(value){
+    return String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  function getCurrentIdentity(){
+    const pb = getPB();
+    const model = pb && pb.authStore && pb.authStore.model ? pb.authStore.model : {};
+    const values = [
+      window.currentUser,
+      window.currentUsername,
+      window.userName,
+      window.duoUser,
+      window.duoUsername,
+      localStorage.getItem("duoUser"),
+      localStorage.getItem("duoUsername"),
+      localStorage.getItem("currentUser"),
+      localStorage.getItem("currentUsername"),
+      model.name,
+      model.username,
+      model.email
+    ].filter(Boolean);
+
+    return {
+      raw: values.join(" "),
+      model
+    };
+  }
+
+  function getCurrentName(){
+    const id = getCurrentIdentity();
+    return String(
+      id.model.name ||
+      id.model.username ||
+      window.currentUser ||
+      window.currentUsername ||
+      localStorage.getItem("duoUser") ||
+      localStorage.getItem("duoUsername") ||
+      id.model.email ||
+      ""
+    ).trim();
+  }
+
+  function isDora(){
+    const id = normalize(getCurrentIdentity().raw);
+    return id.includes("dora") || id.includes("dora@");
+  }
+
+  function isZerlezz(){
+    const id = normalize(getCurrentIdentity().raw);
+    return id.includes("zerlezz") || id.includes("zerle") || id.includes("zerlezz@");
+  }
+
+  function escapeHtml(value){
+    return String(value || "").replace(/[&<>"']/g, (m)=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function fmtDate(value){
+    if(!value) return "-";
+    try { return new Date(value).toLocaleString("fr-FR"); }
+    catch(e){ return "-"; }
+  }
+
+  function updateUploadVisibility(){
+    const panel = document.getElementById("photoUploadPanel");
+    if(!panel) return;
+
+    if(isDora()){
+      panel.classList.remove("is-hidden-for-user");
+    }else{
+      panel.classList.add("is-hidden-for-user");
+    }
+  }
+
+  async function ensurePhotosCollectionHint(error){
+    console.warn("Photos PocketBase:", error);
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+    grid.innerHTML = `
+      <div class="photoInfoBox" style="grid-column:1/-1">
+        <strong>Collection PocketBase manquante ou règles API à vérifier.</strong><br><br>
+        Crée une collection <strong>photos</strong> avec ces champs :<br>
+        <code>title text</code><br>
+        <code>image file</code><br>
+        <code>uploadedBy text</code><br>
+        <code>downloadedBy text</code><br>
+        <code>downloadedAt date</code><br>
+        <code>used bool</code><br><br>
+        Règles API conseillées :<br>
+        <code>@request.auth.id != ""</code>
+      </div>
+    `;
+  }
+
+  async function loadPhotos(){
+    updateUploadVisibility();
+
+    const pb = getPB();
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+
+    if(!pb || !pb.collection){
+      grid.innerHTML = '<p class="muted">PocketBase pas encore prêt...</p>';
+      return;
+    }
+
+    try{
+      const records = await pb.collection(COLLECTION).getFullList({
+        sort: "-created"
+      });
+
+      if(!records.length){
+        grid.innerHTML = '<p class="muted">Aucune photo pour le moment.</p>';
+        return;
+      }
+
+      grid.innerHTML = records.map((r)=>{
+        const fileName = r.image;
+        const url = fileName ? pb.files.getUrl(r, fileName) : "";
+        const used = !!r.used || !!r.downloadedAt;
+        const canDownload = isZerlezz() && !used && url;
+        const title = r.title || "Photo";
+        const downloaded = r.downloadedBy
+          ? `Téléchargée par ${escapeHtml(r.downloadedBy)} · ${escapeHtml(fmtDate(r.downloadedAt))}`
+          : "Disponible";
+
+        return `
+          <article class="photoCard ${used ? "used" : ""}" data-photo-id="${escapeHtml(r.id)}">
+            <div class="photoThumb">
+              ${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" loading="lazy">` : ""}
+              <div class="photoUsedOverlay">Déjà utilisée</div>
+            </div>
+            <div class="photoBody">
+              <div class="photoTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+              <div class="photoMeta">
+                Ajoutée par ${escapeHtml(r.uploadedBy || "Dora")}<br>
+                ${downloaded}
+              </div>
+              <div class="photoActions">
+                ${canDownload
+                  ? `<button class="primary small" type="button" data-photo-download="${escapeHtml(r.id)}">Télécharger</button>`
+                  : `<button class="secondary small photoDownloadDisabled" type="button" disabled>${used ? "Déjà téléchargée" : "Téléchargement Zerlezz"}</button>`
+                }
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+    }catch(error){
+      await ensurePhotosCollectionHint(error);
+    }
+  }
+
+  async function uploadPhoto(){
+    const pb = getPB();
+    if(!pb || !pb.collection) return alert("PocketBase pas prêt.");
+    if(!isDora()) return alert("Upload réservé au compte Dora.");
+
+    const fileInput = document.getElementById("duoPhotoFile");
+    const titleInput = document.getElementById("duoPhotoTitle");
+    const file = fileInput && fileInput.files && fileInput.files[0];
+
+    if(!file) return alert("Choisis une photo.");
+    if(!file.type || !file.type.startsWith("image/")) return alert("Le fichier doit être une image.");
+
+    const formData = new FormData();
+    formData.append("title", (titleInput.value || file.name || "Photo").trim());
+    formData.append("uploadedBy", getCurrentName() || "Dora");
+    formData.append("used", "false");
+    formData.append("image", file);
+
+    try{
+      const btn = document.getElementById("duoPhotoUploadBtn");
+      if(btn){
+        btn.disabled = true;
+        btn.textContent = "Publication...";
+      }
+
+      await pb.collection(COLLECTION).create(formData);
+
+      fileInput.value = "";
+      titleInput.value = "";
+      await loadPhotos();
+
+      if(typeof window.sendWhatsAppAlert === "function"){
+        window.sendWhatsAppAlert({
+          type:"photo_create",
+          title:"Nouvelle photo ajoutée",
+          body:`${getCurrentName() || "Dora"} a ajouté une photo : ${formData.get("title")}`
+        });
+      }
+    }catch(error){
+      console.error(error);
+      alert("Erreur upload photo : " + (error.message || error));
+    }finally{
+      const btn = document.getElementById("duoPhotoUploadBtn");
+      if(btn){
+        btn.disabled = false;
+        btn.textContent = "Publier";
+      }
+    }
+  }
+
+  async function downloadAndLock(id){
+    const pb = getPB();
+    if(!pb || !pb.collection) return alert("PocketBase pas prêt.");
+    if(!isZerlezz()) return alert("Téléchargement réservé au compte Zerlezz.");
+
+    try{
+      const record = await pb.collection(COLLECTION).getOne(id);
+
+      if(record.used || record.downloadedAt){
+        await loadPhotos();
+        return alert("Cette photo a déjà été téléchargée.");
+      }
+
+      const url = pb.files.getUrl(record, record.image);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = record.image || "photo.jpg";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      await pb.collection(COLLECTION).update(id, {
+        used: true,
+        downloadedBy: getCurrentName() || "Zerlezz",
+        downloadedAt: new Date().toISOString()
+      });
+
+      await loadPhotos();
+
+      if(typeof window.sendWhatsAppAlert === "function"){
+        window.sendWhatsAppAlert({
+          type:"photo_download",
+          title:"Photo téléchargée",
+          body:`${getCurrentName() || "Zerlezz"} a téléchargé et verrouillé : ${record.title || record.image || "photo"}`
+        });
+      }
+    }catch(error){
+      console.error(error);
+      alert("Erreur téléchargement photo : " + (error.message || error));
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    const uploadBtn = e.target.closest("#duoPhotoUploadBtn");
+    if(uploadBtn) uploadPhoto();
+
+    const refreshBtn = e.target.closest("#duoPhotosRefreshBtn");
+    if(refreshBtn) loadPhotos();
+
+    const dl = e.target.closest("[data-photo-download]");
+    if(dl) downloadAndLock(dl.getAttribute("data-photo-download"));
+
+    const pageBtn = e.target.closest('[data-page="photos"]');
+    if(pageBtn) setTimeout(loadPhotos, 250);
+  });
+
+  document.addEventListener("change", function(e){
+    if(e.target && e.target.id === "duoPhotoFile"){
+      const titleInput = document.getElementById("duoPhotoTitle");
+      const file = e.target.files && e.target.files[0];
+      if(file && titleInput && !titleInput.value.trim()){
+        titleInput.value = file.name.replace(/\.[^.]+$/, "");
+      }
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(loadPhotos, 900);
+  });
+
+  window.loadDuoPhotos = loadPhotos;
+  window.uploadDuoPhoto = uploadPhoto;
 })();
 </script>
 
