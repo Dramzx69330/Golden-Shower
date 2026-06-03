@@ -2655,6 +2655,43 @@ tbody tr:hover td{background:#1b1f29!important}
   }
 }
 
+
+/* V46.6 — Fix scrollbar PC tableau commandes */
+@media (min-width: 769px){
+
+  .card:has(table){
+    overflow-x:hidden !important;
+  }
+
+  table{
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .pdfChip,
+  a.pdfChip{
+    max-width:110px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  th:nth-child(10),
+  td:nth-child(10){
+    width:130px !important;
+  }
+
+  th:nth-child(11),
+  td:nth-child(11){
+    width:80px !important;
+  }
+
+  th:nth-child(12),
+  td:nth-child(12){
+    width:90px !important;
+  }
+}
+
 </style>
 </head>
 <body>
