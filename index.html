@@ -1879,6 +1879,141 @@ tbody tr:hover td{background:#1b1f29!important}
   .duoLoginActions button{width:100%}
 }
 
+
+/* V44.3 — Présence Live propre */
+.livePresenceBox{
+  border-radius:16px!important;
+  padding:14px!important;
+  background:linear-gradient(180deg,rgba(23,25,31,.96),rgba(14,16,22,.96))!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.28)!important;
+}
+.livePresenceTitle{
+  padding:0 2px 8px!important;
+  border-bottom:1px solid rgba(255,255,255,.08)!important;
+  color:#cbd5e1!important;
+}
+.livePresenceTitle strong,
+#presenceCount{
+  color:#f8fafc!important;
+  font-weight:1000!important;
+}
+.livePresenceList{
+  gap:10px!important;
+  margin-top:10px!important;
+}
+.presenceUser{
+  position:relative;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding:12px 12px!important;
+  border-radius:14px!important;
+  background:rgba(15,18,27,.82)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 10px 24px rgba(0,0,0,.18)!important;
+  overflow:hidden!important;
+}
+.presenceUser::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:10px;
+  bottom:10px;
+  width:3px;
+  border-radius:999px;
+  background:#64748b;
+}
+.presenceUser.is-online{
+  border-color:rgba(34,197,94,.35)!important;
+  background:linear-gradient(90deg,rgba(34,197,94,.09),rgba(15,18,27,.88))!important;
+}
+.presenceUser.is-online::before{background:#22c55e}
+.presenceUser.is-idle{
+  border-color:rgba(245,158,11,.34)!important;
+  background:linear-gradient(90deg,rgba(245,158,11,.08),rgba(15,18,27,.88))!important;
+}
+.presenceUser.is-idle::before{background:#f59e0b}
+.presenceUser.is-offline{
+  opacity:.68!important;
+}
+.presenceLeft{
+  min-width:0!important;
+  flex:1!important;
+}
+.presenceAvatar{
+  width:38px!important;
+  height:38px!important;
+  border-radius:13px!important;
+  background:linear-gradient(135deg,#1d4ed8,#0f172a)!important;
+  border:1px solid rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  font-size:12px!important;
+  letter-spacing:.02em!important;
+  box-shadow:0 10px 20px rgba(0,0,0,.22)!important;
+}
+.presenceName{
+  color:#fff!important;
+  font-size:15px!important;
+  line-height:1.1!important;
+}
+.presenceMeta{
+  color:#aeb6c5!important;
+  font-size:12px!important;
+  margin-top:4px!important;
+}
+.presenceTyping{
+  color:#93c5fd!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  margin-top:4px!important;
+}
+.presenceRight{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+  flex:0 0 auto;
+}
+.presenceStatusText{
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#94a3b8;
+}
+.presenceUser.is-online .presenceStatusText{color:#86efac}
+.presenceUser.is-idle .presenceStatusText{color:#fcd34d}
+.presenceDot{
+  width:10px!important;
+  height:10px!important;
+  border-radius:999px!important;
+  background:#22c55e!important;
+  box-shadow:0 0 0 5px rgba(34,197,94,.13)!important;
+}
+.presenceDot.idle{
+  background:#f59e0b!important;
+  box-shadow:0 0 0 5px rgba(245,158,11,.13)!important;
+}
+.presenceDot.offline{
+  background:#64748b!important;
+  box-shadow:none!important;
+}
+.presenceEmpty{
+  border:1px dashed rgba(255,255,255,.14);
+  border-radius:14px;
+  padding:14px;
+  color:#94a3b8;
+  text-align:center;
+  font-weight:800;
+}
+@media(max-width:700px){
+  .livePresenceBox{width:100%!important}
+  .presenceUser{padding:11px!important}
+  .presenceAvatar{width:34px!important;height:34px!important;border-radius:12px!important}
+}
+
 </style>
 </head>
 <body>
@@ -4274,43 +4409,103 @@ function setLiveAction(action){
 }
 
 function renderPresence(){
-  const now=Date.now();
-  const typingNames=currentTypingNames();
-  const list=presenceUsers.map(u=>{
-    const ts=u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : new Date(u.lastSeen || 0).getTime();
-    const age=now-ts;
-    const online=u.online && age<45000;
-    const idle=online && age>22000;
-    return {...u, age, online, idle, typing:typingNames.includes(normalizeName(u.sender))};
-  }).sort((a,b)=>(b.online-a.online) || String(a.sender).localeCompare(String(b.sender)));
+  const now = Date.now();
+  const typingNames = currentTypingNames();
 
-  const onlineCount=list.filter(u=>u.online).length;
+  const byUser = new Map();
+  (Array.isArray(presenceUsers) ? presenceUsers : []).forEach(u => {
+    const name = normalizeName(u.sender || u.user || u.name || "Anonyme");
+    if(!name) return;
+
+    const ts = u.lastSeen?.toDate
+      ? u.lastSeen.toDate().getTime()
+      : new Date(u.lastSeen || u.updated || u.created || 0).getTime();
+
+    const age = Number.isFinite(ts) ? now - ts : Infinity;
+
+    // On évite les vieux fantômes très anciens dans le panneau.
+    if(age > 1000 * 60 * 180 && !u.online) return;
+
+    const prev = byUser.get(name);
+    const prevTs = prev?.__ts || 0;
+    if(!prev || ts >= prevTs){
+      byUser.set(name, {...u, __ts:ts, __age:age});
+    }
+  });
+
+  const list = [...byUser.values()].map(u => {
+    const age = u.__age;
+    const online = Boolean(u.online) && age < 45000;
+    const idle = online && age > 22000;
+    const sender = u.sender || u.user || u.name || "Anonyme";
+    return {
+      ...u,
+      sender,
+      age,
+      online,
+      idle,
+      typing: typingNames.includes(normalizeName(sender))
+    };
+  }).sort((a,b) => {
+    if(a.online !== b.online) return b.online - a.online;
+    if(a.idle !== b.idle) return a.idle - b.idle;
+    return String(a.sender).localeCompare(String(b.sender));
+  });
+
+  const onlineCount = list.filter(u => u.online).length;
   if($("presenceCount")) $("presenceCount").textContent = `${onlineCount} en ligne`;
 
-  const html=list.map(u=>{
-    const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
-    const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
-    const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
-    return `<div class="presenceUser">
+  const html = list.map(u => {
+    const dotClass = u.online ? (u.idle ? "idle" : "") : "offline";
+    const cardClass = u.online ? (u.idle ? "is-idle" : "is-online") : "is-offline";
+    const initials = String(u.sender || "?").trim().slice(0,2).toUpperCase();
+
+    const page = esc(u.pageLabel || pageLabel(u.page) || "Dashboard");
+    const ageMin = u.age && isFinite(u.age) ? Math.max(1, Math.round(u.age / 60000)) : null;
+
+    const statusText = u.online
+      ? (u.idle ? "AFK" : "ONLINE")
+      : "OFFLINE";
+
+    const meta = u.online
+      ? (u.typing ? "✍️ écrit actuellement" : `👀 regarde ${page}`)
+      : (ageMin ? `hors ligne depuis ${ageMin} min` : "hors ligne");
+
+    const action = u.action
+      ? `<div class="presenceTyping">${esc(u.action)}</div>`
+      : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : "");
+
+    return `<div class="presenceUser ${cardClass}">
       <div class="presenceLeft">
         <div class="presenceAvatar">${esc(initials)}</div>
         <div style="min-width:0">
-          <div class="presenceName">${esc(u.sender||'Anonyme')}</div>
-          <div class="presenceMeta">${status}</div>
+          <div class="presenceName">${esc(u.sender || "Anonyme")}</div>
+          <div class="presenceMeta">${meta}</div>
           ${action}
         </div>
       </div>
-      <span class="presenceDot ${dotClass}"></span>
+      <div class="presenceRight">
+        <span class="presenceDot ${dotClass}"></span>
+        <span class="presenceStatusText">${statusText}</span>
+      </div>
     </div>`;
-  }).join('') || '<p class="muted">Aucun associé connecté.</p>';
+  }).join("") || '<div class="presenceEmpty">Aucun utilisateur connecté.</div>';
 
   if($("livePresenceList")) $("livePresenceList").innerHTML = html;
   if($("dashboardPresenceList")) $("dashboardPresenceList").innerHTML = html;
 
-  const actions=list.filter(u=>u.online && (u.action || u.typing)).map(u=>`
-    <div class="row"><div><strong>${esc(u.sender)}</strong><div class="muted">${esc(u.typing ? '✍️ écrit actuellement' : u.action)}</div></div><span class="muted">${esc(u.pageLabel||pageLabel(u.page))}</span></div>
-  `).join('');
+  const actions = list
+    .filter(u => u.online && (u.action || u.typing))
+    .map(u => `
+      <div class="row">
+        <div>
+          <strong>${esc(u.sender)}</strong>
+          <div class="muted">${esc(u.typing ? "✍️ écrit actuellement" : u.action)}</div>
+        </div>
+        <span class="muted">${esc(u.pageLabel || pageLabel(u.page))}</span>
+      </div>
+    `).join("");
+
   if($("dashboardLiveActions")) $("dashboardLiveActions").innerHTML = actions || '<p class="muted">Aucune action en direct.</p>';
 }
 
