@@ -1896,6 +1896,145 @@ tbody tr:hover td{background:#1b1f29!important}
   .duoLoginActions button{width:100%}
 }
 
+
+/* V46 — Centre de contrôle / anomalies / scanner bordereau */
+.controlHero{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:20px;
+  margin-bottom:20px;
+}
+.controlHeroMain{
+  border-radius:18px;
+  padding:24px;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(96,165,250,.20), transparent 34%),
+    linear-gradient(135deg, rgba(37,99,235,.18), rgba(17,24,39,.42)),
+    var(--panel);
+  border:1px solid rgba(96,165,250,.24);
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+.controlHeroMain h2{font-size:28px;margin:0 0 8px}
+.controlHeroMain p{margin:0;color:var(--muted)}
+.controlPulse{
+  display:inline-flex;
+  align-items:center;
+  gap:9px;
+  border:1px solid rgba(34,197,94,.35);
+  background:rgba(34,197,94,.10);
+  color:#bbf7d0;
+  border-radius:999px;
+  padding:8px 11px;
+  font-weight:900;
+  font-size:12px;
+  margin-bottom:14px;
+}
+.controlPulse::before{
+  content:"";
+  width:9px;height:9px;border-radius:999px;background:#22c55e;
+  box-shadow:0 0 0 6px rgba(34,197,94,.12);
+}
+.controlGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+}
+.controlTile{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),var(--panel2);
+  border-radius:15px;
+  padding:16px;
+  min-height:112px;
+  display:grid;
+  align-content:space-between;
+  gap:10px;
+}
+.controlTile span{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.controlTile strong{
+  font-size:28px;
+  line-height:1;
+  color:var(--text);
+}
+.controlTile small{color:var(--muted);font-weight:800}
+.controlTile.ok{border-color:rgba(34,197,94,.34)}
+.controlTile.warn{border-color:rgba(245,158,11,.42)}
+.controlTile.bad{border-color:rgba(239,68,68,.45)}
+.controlTile.info{border-color:rgba(96,165,250,.38)}
+.anomalyList,.controlActivity{display:grid;gap:10px}
+.anomalyItem{
+  border:1px solid var(--line);
+  border-left:4px solid #f59e0b;
+  background:var(--panel2);
+  border-radius:13px;
+  padding:12px 13px;
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  align-items:flex-start;
+}
+.anomalyItem.critical{border-left-color:#ef4444;background:rgba(239,68,68,.08)}
+.anomalyItem.warning{border-left-color:#f59e0b;background:rgba(245,158,11,.08)}
+.anomalyItem.info{border-left-color:#60a5fa;background:rgba(96,165,250,.08)}
+.anomalyItem strong{display:block;margin-bottom:4px}
+.anomalyItem p{margin:0;color:var(--muted);font-size:13px;line-height:1.35}
+.anomalyBadge{
+  border:1px solid var(--line2);
+  border-radius:999px;
+  padding:5px 8px;
+  font-size:11px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+.anomalyItem.critical .anomalyBadge{color:#fecaca;border-color:rgba(239,68,68,.40)}
+.anomalyItem.warning .anomalyBadge{color:#fde68a;border-color:rgba(245,158,11,.45)}
+.controlEvent{
+  display:grid;
+  grid-template-columns:58px 1fr;
+  gap:12px;
+  align-items:flex-start;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  border-radius:13px;
+  padding:11px 12px;
+}
+.controlEventTime{font-size:12px;color:var(--muted);font-weight:900}
+.controlEventText{font-size:14px;line-height:1.35}
+.scannerBox{
+  border:1px dashed rgba(96,165,250,.55);
+  background:rgba(96,165,250,.08);
+  border-radius:14px;
+  padding:14px;
+  display:grid;
+  gap:10px;
+}
+.scannerBox label{margin:0}
+.scannerActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.scannerResult{
+  display:none;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  border-radius:12px;
+  padding:11px 12px;
+  font-size:13px;
+  line-height:1.45;
+}
+.scannerResult.show{display:block}
+.scannerResult strong{display:block;margin-bottom:5px}
+@media(max-width:1050px){
+  .controlHero{grid-template-columns:1fr}
+  .controlGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .controlGrid{grid-template-columns:1fr}
+  .controlEvent{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -1942,6 +2081,7 @@ tbody tr:hover td{background:#1b1f29!important}
     <div class="sub">Gestion propre des commandes Vinted / Leboncoin, comptes et chat direct.</div>
     <div class="nav">
       <button class="active" data-page="dashboard">Dashboard</button>
+      <button data-page="control">Contrôle</button>
       <button data-page="clients">Clients</button>
       <button data-page="comptes">Comptes</button>
       <button data-page="chat">Chat</button>
@@ -2029,6 +2169,17 @@ tbody tr:hover td{background:#1b1f29!important}
             <label>Date d'envoi<input id="shippedAt" type="date"></label>
             <label>Suivi<input id="tracking" placeholder="Numéro de suivi"></label>
             <label class="full">Note<input id="note" placeholder="Note interne"></label>
+            <div class="scannerBox full">
+              <strong>📱 Scanner bordereau intelligent</strong>
+              <span class="uploadHint">Ajoute une photo/PDF ou colle du texte : Duo détecte le numéro de suivi et le transporteur.</span>
+              <div class="scannerActions">
+                <input id="inlineScanFile" type="file" accept="image/*,application/pdf" onchange="scanBordereauFile(this.files?.[0], true)">
+                <button class="secondary small" type="button" onclick="scanBordereauText(true)">Analyser</button>
+                <button class="secondary small" type="button" onclick="applyScannedTracking()">Remplir suivi</button>
+              </div>
+              <textarea id="inlineScanText" placeholder="Texte du bordereau ou numéro de suivi..."></textarea>
+              <div id="inlineScanResult" class="scannerResult"></div>
+            </div>
             <label class="full">Bordereau d'envoi PDF
               <input id="shippingLabelFile" type="file" accept="application/pdf">
               <span id="shippingLabelCurrent" class="uploadHint">Aucun bordereau joint.</span>
@@ -2059,6 +2210,55 @@ tbody tr:hover td{background:#1b1f29!important}
           <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Suivi</th><th>Bordereau</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
           <tbody id="ordersTbody"></tbody>
         </table>
+      </div>
+    </section>
+
+
+    <section id="control" class="page">
+      <div class="controlHero">
+        <div class="controlHeroMain">
+          <div class="controlPulse">Salle de contrôle active</div>
+          <h2>Centre d'opérations Duo</h2>
+          <p>Vue temps réel des commandes, utilisateurs, anomalies et bordereaux à surveiller.</p>
+        </div>
+        <div class="card pad">
+          <h2>Résumé rapide</h2>
+          <div id="controlQuickSummary" class="list"></div>
+        </div>
+      </div>
+
+      <div class="controlGrid">
+        <div class="controlTile ok"><span>En ligne</span><strong id="ccOnline">0</strong><small>utilisateurs actifs</small></div>
+        <div class="controlTile info"><span>Commandes aujourd'hui</span><strong id="ccOrdersToday">0</strong><small id="ccOrdersTodayAmount">0 €</small></div>
+        <div class="controlTile warn"><span>À envoyer</span><strong id="ccToSend">0</strong><small>statut A Send</small></div>
+        <div class="controlTile bad"><span>Anomalies</span><strong id="ccAnomalies">0</strong><small>à vérifier</small></div>
+      </div>
+
+      <div class="grid two" style="margin-top:20px">
+        <div class="card pad">
+          <h2>🚨 Détection d'anomalies</h2>
+          <p class="muted">Bordereau manquant, suivi absent, compte banni utilisé, prix suspect ou commande bloquée.</p>
+          <div id="controlAnomalies" class="anomalyList"></div>
+        </div>
+        <div class="card pad">
+          <h2>📡 Activité live</h2>
+          <p class="muted">Dernières actions visibles dans Duo Update.</p>
+          <div id="controlActivity" class="controlActivity"></div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:20px">
+        <h2>📱 Scanner bordereau intelligent</h2>
+        <p class="muted">Upload une photo/PDF ou colle le texte du bordereau. Duo tente de détecter automatiquement le tracking et le transporteur.</p>
+        <div class="scannerBox">
+          <div class="scannerActions">
+            <input id="controlScanFile" type="file" accept="image/*,application/pdf" onchange="scanBordereauFile(this.files?.[0])">
+            <button class="secondary" type="button" onclick="scanBordereauText()">Analyser le texte</button>
+            <button class="secondary" type="button" onclick="applyScannedTracking()">Appliquer au formulaire commande</button>
+          </div>
+          <textarea id="controlScanText" placeholder="Colle ici le texte d'un bordereau si tu l'as copié depuis un PDF ou une image..."></textarea>
+          <div id="controlScanResult" class="scannerResult"></div>
+        </div>
       </div>
     </section>
 
@@ -3709,8 +3909,215 @@ function badge(s){
   return `<span class="pill ${cls}">${esc(v||'—')}</span>`;
 }
 
+
+/* V46 — Salle de contrôle / anomalies / scanner */
+let lastScanResult = null;
+
+function parseBordereauText(raw=''){
+  const text = String(raw || '').replace(/\s+/g,' ').trim();
+  const upper = text.toUpperCase();
+
+  const carriers = [
+    ['Mondial Relay', /MONDIAL\s*RELAY|LOCKER|POINT\s*RELAIS/i],
+    ['La Poste / Colissimo', /COLISSIMO|LA\s*POSTE|CHRONOPOST/i],
+    ['Chronopost', /CHRONOPOST/i],
+    ['UPS', /\bUPS\b/i],
+    ['DHL', /\bDHL\b/i],
+    ['Relais Colis', /RELAIS\s*COLIS/i],
+    ['InPost', /\bINPOST\b/i],
+    ['Vinted', /\bVINTED\b/i]
+  ];
+
+  const carrier = (carriers.find(([,rx]) => rx.test(text)) || ['Inconnu'])[0];
+
+  const patterns = [
+    /\b[A-Z]{2}\d{9}[A-Z]{2}\b/g,
+    /\b\d{8,16}\b/g,
+    /\b[A-Z0-9]{10,24}\b/g,
+    /\b(?:XM|MR|LP|CB|6A|8N|1Z)[A-Z0-9]{8,24}\b/g
+  ];
+
+  const candidates = [];
+  for(const rx of patterns){
+    const found = upper.match(rx) || [];
+    found.forEach(v => {
+      const clean = v.replace(/[^A-Z0-9]/g,'');
+      if(clean.length >= 8 && clean.length <= 28 && !candidates.includes(clean)){
+        candidates.push(clean);
+      }
+    });
+  }
+
+  const tracking = candidates.find(v => /[A-Z]/.test(v) && /\d/.test(v)) || candidates[0] || '';
+  const weightMatch = text.match(/(\d+(?:[,.]\d+)?)\s*(kg|g)\b/i);
+  const weight = weightMatch ? `${weightMatch[1].replace(',', '.')} ${weightMatch[2]}` : '';
+
+  return { tracking, carrier, weight, raw:text };
+}
+
+function renderScanResult(targetId, result){
+  const box = $(targetId);
+  if(!box) return;
+  lastScanResult = result;
+  box.classList.add('show');
+  box.innerHTML = `
+    <strong>Résultat scanner</strong>
+    <div>📮 Suivi : <b>${esc(result.tracking || 'Non détecté')}</b></div>
+    <div>🚚 Transporteur : <b>${esc(result.carrier || 'Inconnu')}</b></div>
+    ${result.weight ? `<div>⚖️ Poids détecté : <b>${esc(result.weight)}</b></div>` : ''}
+    <div class="muted" style="margin-top:6px">Astuce : si le suivi n'est pas détecté, colle le texte du PDF dans la zone puis clique Analyser.</div>
+  `;
+}
+
+window.scanBordereauFile = async (file, inline=false) => {
+  if(!file) return;
+  const target = inline ? 'inlineScanResult' : 'controlScanResult';
+  const inputTextId = inline ? 'inlineScanText' : 'controlScanText';
+  const fileInfo = `${file.name || ''} ${file.type || ''}`;
+  const result = parseBordereauText(fileInfo);
+  if($(inputTextId) && !$(inputTextId).value){
+    $(inputTextId).value = file.name || '';
+  }
+  renderScanResult(target, result);
+};
+
+window.scanBordereauText = (inline=false) => {
+  const source = inline ? $('inlineScanText')?.value : $('controlScanText')?.value;
+  const target = inline ? 'inlineScanResult' : 'controlScanResult';
+  const result = parseBordereauText(source || '');
+  renderScanResult(target, result);
+};
+
+window.applyScannedTracking = () => {
+  if(!lastScanResult || !lastScanResult.tracking){
+    alert("Aucun numéro de suivi détecté.");
+    return;
+  }
+  if($('tracking')) $('tracking').value = lastScanResult.tracking;
+  if(lastScanResult.carrier && $('note')){
+    const current = $('note').value || '';
+    const extra = `Transporteur détecté : ${lastScanResult.carrier}`;
+    if(!current.includes(extra)) $('note').value = current ? `${current} · ${extra}` : extra;
+  }
+  alert("Suivi ajouté au formulaire commande.");
+};
+
+function getOrderDateValue(order){
+  return order?.date || order?.created || order?.createdAt || '';
+}
+
+function getControlAnomalies(){
+  const anomalies = [];
+  const accountById = Object.fromEntries((accounts || []).map(a => [a.id, a]));
+
+  (orders || []).forEach(order => {
+    const status = String(order.statut || '').toLowerCase();
+    const age = daysBetween(getOrderDateValue(order));
+    const label = `${order.client || 'Client inconnu'} · ${order.produit || 'Commande'} · ${euro(order.prix || 0)}`;
+    const account = accountById[order.accountId];
+
+    if(!hasShippingLabel(order) && !status.includes('confirm') && status !== 'annulé' && age >= 1){
+      anomalies.push({
+        level:'warning',
+        title:'Bordereau manquant',
+        body:`${label} — créée il y a ${age} jour(s), aucun PDF joint.`,
+        ref:order.id
+      });
+    }
+
+    if(status === 'send' && !String(order.tracking || '').trim()){
+      anomalies.push({
+        level:'warning',
+        title:'Suivi absent',
+        body:`${label} — statut Send mais aucun numéro de suivi.`,
+        ref:order.id
+      });
+    }
+
+    if(account && String(account.status || account.statut || '').toLowerCase().includes('banni')){
+      anomalies.push({
+        level:'critical',
+        title:'Compte banni utilisé',
+        body:`${label} — compte ${account.plateforme || ''} ${account.name || ''} marqué banni.`,
+        ref:order.id
+      });
+    }
+
+    if(status === 'send' && age >= 5){
+      anomalies.push({
+        level:'warning',
+        title:'Commande bloquée',
+        body:`${label} — en Send depuis ${age} jour(s).`,
+        ref:order.id
+      });
+    }
+
+    if(Number(order.prix || 0) >= 3000){
+      anomalies.push({
+        level:'info',
+        title:'Prix élevé',
+        body:`${label} — montant supérieur ou égal à 3000€.`,
+        ref:order.id
+      });
+    }
+  });
+
+  return anomalies;
+}
+
+function renderControlCenter(){
+  if(!$('ccOnline')) return;
+
+  const online = (presenceUsers || []).filter(u => u.online !== false && (Date.now() - new Date(u.lastSeen || u.updated || Date.now()).getTime()) < 180000).length;
+  const todayStr = today();
+  const ordersToday = (orders || []).filter(o => String(o.date || '').slice(0,10) === todayStr);
+  const ordersTodayAmount = ordersToday.reduce((s,o)=>s+Number(o.prix||0),0);
+  const toSend = (orders || []).filter(o => String(o.statut || '') === 'A Send').length;
+  const anomalies = getControlAnomalies();
+
+  $('ccOnline').textContent = online;
+  $('ccOrdersToday').textContent = ordersToday.length;
+  $('ccOrdersTodayAmount').textContent = euro(ordersTodayAmount);
+  $('ccToSend').textContent = toSend;
+  $('ccAnomalies').textContent = anomalies.length;
+
+  if($('controlQuickSummary')){
+    $('controlQuickSummary').innerHTML = `
+      <div class="row"><span>📎 Bordereaux manquants</span><strong>${anomalies.filter(a=>a.title.includes('Bordereau')).length}</strong></div>
+      <div class="row"><span>🚚 Suivis absents</span><strong>${anomalies.filter(a=>a.title.includes('Suivi')).length}</strong></div>
+      <div class="row"><span>⛔ Critiques</span><strong>${anomalies.filter(a=>a.level==='critical').length}</strong></div>
+    `;
+  }
+
+  if($('controlAnomalies')){
+    $('controlAnomalies').innerHTML = anomalies.slice(0,12).map(a => `
+      <div class="anomalyItem ${esc(a.level)}">
+        <div>
+          <strong>${esc(a.title)}</strong>
+          <p>${esc(a.body)}</p>
+        </div>
+        <span class="anomalyBadge">${a.level === 'critical' ? 'CRITIQUE' : a.level === 'warning' ? 'À VOIR' : 'INFO'}</span>
+      </div>
+    `).join('') || '<p class="muted">Aucune anomalie détectée pour le moment.</p>';
+  }
+
+  if($('controlActivity')){
+    const live = [
+      ...(activities || []).map(a => ({time:a.created || a.date || '', text:a.text || a.body || a.action || 'Activité'})),
+      ...(orders || []).slice(-5).map(o => ({time:o.created || o.date || '', text:`📦 Commande ${o.client || ''} · ${o.statut || ''} · ${euro(o.prix || 0)}`}))
+    ].filter(x=>x.text).sort((a,b)=>String(b.time).localeCompare(String(a.time))).slice(0,10);
+
+    $('controlActivity').innerHTML = live.map(x => `
+      <div class="controlEvent">
+        <div class="controlEventTime">${esc(String(x.time || '').slice(11,16) || '—')}</div>
+        <div class="controlEventText">${esc(x.text)}</div>
+      </div>
+    `).join('') || '<p class="muted">Aucune activité récente.</p>';
+  }
+}
+
 function renderAll(){
-  renderDashboard(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence();
+  renderDashboard(); renderControlCenter(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence();
 }
 
 function renderDashboard(){
