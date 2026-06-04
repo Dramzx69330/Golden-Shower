@@ -2310,6 +2310,114 @@ tbody tr:hover td{background:#1b1f29!important}
   .controlHeroNumbers,.controlActionGrid{grid-template-columns:1fr}
 }
 
+
+/* V50.2 — Restore carte profil visible en bas à gauche */
+@media (min-width:1051px){
+  aside{
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:100vh!important;
+    height:100vh!important;
+  }
+
+  aside .nav{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+    flex:0 0 auto!important;
+  }
+
+  .sidebarProfile{
+    display:block!important;
+    position:relative!important;
+    margin-top:auto!important;
+    padding-top:14px!important;
+    border-top:1px solid rgba(255,255,255,.08)!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  .sidebarProfileMain{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:38px minmax(0,1fr) 10px!important;
+    align-items:center!important;
+    gap:10px!important;
+    padding:10px!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    border-radius:14px!important;
+    background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))!important;
+    color:var(--text)!important;
+    cursor:pointer!important;
+    text-align:left!important;
+  }
+
+  .sidebarProfileMain:hover{
+    background:rgba(255,255,255,.075)!important;
+    border-color:rgba(255,255,255,.20)!important;
+  }
+
+  .sidebarAvatar{
+    width:38px!important;
+    height:38px!important;
+    border-radius:13px!important;
+    display:grid!important;
+    place-items:center!important;
+    background:linear-gradient(135deg,#1d4ed8,#111827)!important;
+    color:#fff!important;
+    font-size:13px!important;
+    font-weight:1000!important;
+    box-shadow:0 0 0 4px rgba(37,99,235,.12)!important;
+  }
+
+  .sidebarProfileText{
+    min-width:0!important;
+    display:grid!important;
+    gap:2px!important;
+  }
+
+  .sidebarProfileText strong{
+    color:#fff!important;
+    font-size:14px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .sidebarProfileText small{
+    color:#93c5fd!important;
+    font-size:11px!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  .sidebarProfileStatus{
+    width:9px!important;
+    height:9px!important;
+    border-radius:999px!important;
+    background:#6b7280!important;
+    box-shadow:none!important;
+  }
+
+  .sidebarProfileStatus.online{
+    background:#22c55e!important;
+    box-shadow:0 0 0 4px rgba(34,197,94,.13)!important;
+  }
+
+  .sidebarProfileMenu{
+    display:none!important;
+  }
+}
+
+@media (max-width:1050px){
+  .sidebarProfile{
+    display:none!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2362,6 +2470,18 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="chat">Chat</button>
       <button data-page="stats">Stats</button>
     </div>
+
+    <div class="sidebarProfile" id="sidebarProfile">
+      <button class="sidebarProfileMain" id="sidebarProfileToggle" type="button" aria-expanded="false">
+        <span class="sidebarAvatar" id="sidebarProfileAvatar">--</span>
+        <span class="sidebarProfileText">
+          <strong id="sidebarProfileName">Non connecté</strong>
+          <small id="sidebarProfileRole">Profil</small>
+        </span>
+        <span class="sidebarProfileStatus" id="sidebarProfileStatus"></span>
+      </button>
+    </div>
+
   </aside>
 
   <main>
@@ -7222,6 +7342,129 @@ start();
   });
 
   window.openProfilPageHard = openProfilPageHard;
+})();
+</script>
+
+
+<script>
+/* V50.2 — Restore profil + clic ouvre page Profil */
+(function(){
+  function $(id){ return document.getElementById(id); }
+
+  function getPB(){
+    try{
+      if(window.pb) return window.pb;
+      if(typeof pb !== "undefined") return pb;
+    }catch(_){}
+    return null;
+  }
+
+  function getAuthRecord(){
+    try{
+      if(typeof authUser === "function"){
+        const u = authUser();
+        if(u) return u;
+      }
+    }catch(_){}
+    const p = getPB();
+    return p?.authStore?.record || p?.authStore?.model || null;
+  }
+
+  function detectName(){
+    const u = getAuthRecord();
+    const values = [
+      u?.name,
+      u?.username,
+      u?.email,
+      sessionStorage.getItem("duoSenderSession"),
+      sessionStorage.getItem("duoPocketBaseLogin"),
+      sessionStorage.getItem("duoPocketBaseEmail"),
+      localStorage.getItem("duoSender"),
+      localStorage.getItem("duoPocketBaseLastLogin"),
+      localStorage.getItem("duoPocketBaseLastEmail")
+    ].filter(Boolean).map(v => String(v).trim());
+
+    const raw = values.join(" ").toLowerCase();
+    if(raw.includes("dora")) return "Dora";
+    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
+
+    const first = values.find(Boolean);
+    return first ? (first.includes("@") ? first.split("@")[0] : first) : "";
+  }
+
+  function avatar(name){
+    if(name === "Dora") return "DO";
+    if(name === "Zerlezz") return "ZE";
+    return name ? name.slice(0,2).toUpperCase() : "--";
+  }
+
+  function role(name){
+    if(name === "Dora") return "Administrateur";
+    if(name === "Zerlezz") return "Vendeur";
+    return "Profil";
+  }
+
+  function refreshSidebarProfile(){
+    const name = detectName();
+    const connected = !!name || !!getPB()?.authStore?.isValid;
+
+    const finalName = connected ? (name || "Connecté") : "Non connecté";
+
+    const nameEl = $("sidebarProfileName");
+    const roleEl = $("sidebarProfileRole");
+    const avatarEl = $("sidebarProfileAvatar");
+    const statusEl = $("sidebarProfileStatus");
+
+    if(nameEl) nameEl.textContent = finalName;
+    if(roleEl) roleEl.textContent = connected ? role(finalName) : "Profil";
+    if(avatarEl) avatarEl.textContent = connected ? avatar(finalName) : "--";
+    if(statusEl) statusEl.classList.toggle("online", connected);
+
+    if(connected && (finalName === "Dora" || finalName === "Zerlezz")){
+      sessionStorage.setItem("duoSenderSession", finalName);
+      localStorage.setItem("duoSender", finalName);
+    }
+  }
+
+  function openProfilPage(){
+    const menu = $("sidebarProfileMenu");
+    if(menu) menu.classList.remove("open");
+
+    if(typeof goProfilePage === "function"){
+      goProfilePage();
+    }else if(typeof goPage === "function"){
+      goPage("profil");
+      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 80);
+    }else{
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      $("profil")?.classList.add("active");
+      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 80);
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    const card = e.target.closest("#sidebarProfileToggle, .sidebarProfileMain, #sidebarProfile");
+    if(!card) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    openProfilPage();
+  }, true);
+
+  document.addEventListener("DOMContentLoaded", function(){
+    refreshSidebarProfile();
+    setTimeout(refreshSidebarProfile, 300);
+    setTimeout(refreshSidebarProfile, 1000);
+    setInterval(refreshSidebarProfile, 3000);
+  });
+
+  window.addEventListener("load", function(){
+    refreshSidebarProfile();
+    setTimeout(refreshSidebarProfile, 600);
+  });
+
+  window.updateSidebarProfile = refreshSidebarProfile;
 })();
 </script>
 
