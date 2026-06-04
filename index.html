@@ -3172,6 +3172,19 @@ aside{
   }
 }
 
+
+/* V49 — Login 2 profils seulement */
+.duoLoginAllowed{
+  border:1px solid rgba(96,165,250,.28);
+  background:rgba(96,165,250,.08);
+  color:#dbeafe;
+  border-radius:11px;
+  padding:10px 12px;
+  font-size:12px;
+  line-height:1.45;
+  font-weight:800;
+}
+
 </style>
 </head>
 <body>
@@ -3185,8 +3198,8 @@ aside{
     </div>
     <div class="duoLoginBody">
       <div class="duoQuickUsers">
-        <button type="button" data-login-preset="dora">Dora</button>
-        <button type="button" data-login-preset="zerlezz">Zerlezz</button>
+        <button type="button" data-login-preset="Dora">Dora</button>
+        <button type="button" data-login-preset="Zerlezz">Zerlezz</button>
       </div>
       <label class="duoLoginField">
         <span>Pseudo ou email</span>
@@ -3963,16 +3976,62 @@ function syncSenderInputsFromAuth(){
   });
 }
 
+/* V49 — Login limité à 2 profils */
+const DUO_ALLOWED_USERS = {
+  dora: { username: "Dora", email: "dora@live.fr", password: "Dora69200", label: "Dora" },
+  zerlezz: { username: "Zerlezz", email: "Zerlezz@live.fr", password: "Zerlezz69", label: "Zerlezz" }
+};
+
+function normalizeDuoLogin(value){
+  return String(value || "").trim().toLowerCase();
+}
+
+function getDuoLoginProfile(login){
+  const key = normalizeDuoLogin(login);
+  if(key === "dora" || key === "do" || key === "dora@live.fr") return DUO_ALLOWED_USERS.dora;
+  if(key === "zerlezz" || key === "ze" || key === "zerlezz@live.fr") return DUO_ALLOWED_USERS.zerlezz;
+  return null;
+}
+
+
+function applyDuoProfileIdentity(login){
+  const profile = getDuoLoginProfile(login) || currentDuoProfile();
+  if(!profile) return;
+  sessionStorage.setItem("duoSenderSession", profile.username);
+  localStorage.setItem("duoSender", profile.username);
+  ["senderName","miniSenderName","threadSenderName"].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = profile.username;
+  });
+}
+
 function resolveLoginIdentifier(login){
-  const value = String(login || "").trim();
-  const key = value.toLowerCase();
-  const aliases = {
-    "dora": "dora@live.fr",
-    "do": "dora@live.fr",
-    "zerlezz": "Zerlezz@live.fr",
-    "ze": "Zerlezz@live.fr"
-  };
-  return aliases[key] || value;
+  const profile = getDuoLoginProfile(login);
+  return profile ? profile.email : "";
+}
+
+function isAllowedDuoPassword(login, password){
+  const profile = getDuoLoginProfile(login);
+  return !!profile && String(password || "") === profile.password;
+}
+
+function currentDuoProfile(){
+  const user = authUser?.();
+  const raw = [
+    user?.name,
+    user?.username,
+    user?.email,
+    sessionStorage.getItem("duoPocketBaseLogin"),
+    localStorage.getItem("duoSender")
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  if(raw.includes("dora")) return DUO_ALLOWED_USERS.dora;
+  if(raw.includes("zerlezz") || raw.includes("zerle")) return DUO_ALLOWED_USERS.zerlezz;
+  return null;
+}
+
+function currentDuoUsername(){
+  return currentDuoProfile()?.username || authUserName?.() || "";
 }
 
 
@@ -4058,6 +4117,16 @@ function showDuoLoginModal(){
       }
 
       try{
+        const profile = getDuoLoginProfile(login);
+        if(!profile){
+          duoSetLoginError("Compte non autorisé. Utilise uniquement Dora ou Zerlezz.");
+          return;
+        }
+        if(!isAllowedDuoPassword(login, password)){
+          duoSetLoginError("Mot de passe incorrect pour " + profile.username + ".");
+          return;
+        }
+
         const identifier = resolveLoginIdentifier(login);
         const auth = await pb.collection("users").authWithPassword(identifier, password);
 
@@ -4082,6 +4151,7 @@ function showDuoLoginModal(){
         overlay.setAttribute("aria-hidden", "true");
         cleanup();
         syncSenderInputsFromAuth();
+        applyDuoProfileIdentity(login);
         resolve(true);
       }catch(error){
         console.error("Connexion PocketBase impossible", error);
@@ -4105,6 +4175,8 @@ async function tryRememberedLogin(){
   const saved = duoSavedLogin();
   if(!saved.login || !saved.password) return false;
   try{
+    const profile = getDuoLoginProfile(saved.login);
+    if(!profile || !isAllowedDuoPassword(saved.login, saved.password)) return false;
     const identifier = resolveLoginIdentifier(saved.login);
     const auth = await pb.collection("users").authWithPassword(identifier, saved.password);
     sessionStorage.setItem("duoPocketBaseLogin", saved.login);
@@ -4115,6 +4187,7 @@ async function tryRememberedLogin(){
       localStorage.setItem("duoSender", auth.record.name);
     }
     syncSenderInputsFromAuth();
+    applyDuoProfileIdentity(saved.login);
     return true;
   }catch(error){
     console.warn("Remember me invalide, ouverture du login.", error);
@@ -4132,6 +4205,8 @@ async function ensurePbAuth(){
   const sessionPassword = sessionStorage.getItem("duoPocketBasePassword") || "";
   if(sessionLogin && sessionPassword){
     try{
+      const profile = getDuoLoginProfile(sessionLogin);
+      if(!profile || !isAllowedDuoPassword(sessionLogin, sessionPassword)) throw new Error("Session profil non autorisée");
       const identifier = resolveLoginIdentifier(sessionLogin);
       const auth = await pb.collection("users").authWithPassword(identifier, sessionPassword);
       if(auth?.record?.name){
@@ -4139,6 +4214,7 @@ async function ensurePbAuth(){
         localStorage.setItem("duoSender", auth.record.name);
       }
       syncSenderInputsFromAuth();
+      applyDuoProfileIdentity(sessionLogin);
       return true;
     }catch(error){
       console.warn("Session login invalide, ouverture du login.", error);
@@ -8441,6 +8517,63 @@ start();
 
   window.loadDuoPhotos = loadPhotos;
   window.uploadDuoPhoto = uploadPhoto;
+})();
+</script>
+
+
+<script>
+/* V49 — Détection profil Dora/Zerlezz */
+(function(){
+  function detectedDuoProfileName(){
+    try{
+      if(typeof currentDuoProfile === "function"){
+        const p = currentDuoProfile();
+        if(p?.username) return p.username;
+      }
+    }catch(_){}
+
+    const user = (typeof authUser === "function" ? authUser() : null) || {};
+    const raw = [
+      user.name,
+      user.username,
+      user.email,
+      sessionStorage.getItem("duoPocketBaseLogin"),
+      sessionStorage.getItem("duoSenderSession"),
+      localStorage.getItem("duoSender")
+    ].filter(Boolean).join(" ").toLowerCase();
+
+    if(raw.includes("dora")) return "Dora";
+    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
+    return "";
+  }
+
+  window.detectedDuoProfileName = detectedDuoProfileName;
+
+  function applyDetectedProfile(){
+    const name = detectedDuoProfileName();
+    if(!name) return;
+
+    sessionStorage.setItem("duoSenderSession", name);
+    localStorage.setItem("duoSender", name);
+
+    ["senderName","miniSenderName","threadSenderName"].forEach(function(id){
+      const el = document.getElementById(id);
+      if(el) el.value = name;
+    });
+
+    if(typeof updateSidebarProfile === "function"){
+      updateSidebarProfile();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(applyDetectedProfile, 500);
+    setTimeout(applyDetectedProfile, 1500);
+  });
+
+  window.addEventListener("load", function(){
+    setTimeout(applyDetectedProfile, 500);
+  });
 })();
 </script>
 
