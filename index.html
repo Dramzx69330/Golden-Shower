@@ -2436,6 +2436,17 @@ tbody tr:hover td{background:#1b1f29!important}
 @media(max-width:1050px){.profileGrid{grid-template-columns:1fr}}
 @media(max-width:760px){.profileHero{display:grid}.profileInfoGrid{grid-template-columns:1fr}.profileBigAvatar{width:62px;height:62px;border-radius:18px;font-size:20px}}
 
+
+/* V50.5 — Avatar profil modifiable */
+.profileAvatarUpload{border:0!important;cursor:pointer!important;position:relative!important;overflow:hidden!important;padding:0!important}
+.profileAvatarUpload span{position:relative;z-index:1}
+.profileAvatarUpload img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.profileAvatarUpload.hasImage span{display:none}
+.profileAvatarUpload em{position:absolute;left:0;right:0;bottom:0;z-index:2;display:block;padding:5px 4px;font-size:10px;font-style:normal;font-weight:1000;text-align:center;color:#fff;background:rgba(0,0,0,.58);opacity:0;transition:opacity .16s ease}
+.profileAvatarUpload:hover em{opacity:1}
+.sidebarAvatar{overflow:hidden!important;position:relative!important}
+.sidebarAvatar img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;border-radius:inherit!important}
+
 </style>
 </head>
 <body>
@@ -2933,7 +2944,12 @@ tbody tr:hover td{background:#1b1f29!important}
         <div class="profilePageShell">
           <div class="profileHero card pad">
             <div class="profileHeroLeft">
-              <div class="profileBigAvatar" id="profilePageAvatar">--</div>
+              <button class="profileBigAvatar profileAvatarUpload" id="profilePageAvatarBtn" type="button" title="Changer la photo de profil">
+                <span id="profilePageAvatar">--</span>
+                <img id="profilePageAvatarImg" alt="" style="display:none">
+                <em>Changer</em>
+              </button>
+              <input type="file" id="profileAvatarFile" accept="image/*" style="display:none">
               <div>
                 <h2 id="profilePageName">Profil</h2>
                 <p class="muted" id="profilePageRole">Informations du compte connecté</p>
@@ -7398,6 +7414,123 @@ start();
   document.addEventListener("DOMContentLoaded",function(){refreshSidebarProfile();setTimeout(refreshSidebarProfile,500);setTimeout(refreshSidebarProfile,1500);setInterval(refreshSidebarProfile,3000);});
   window.addEventListener("load",refreshSidebarProfile);
   window.renderProfilePage=renderProfilePage;window.goProfilePage=openProfilePageOnly;window.updateSidebarProfile=refreshSidebarProfile;
+})();
+</script>
+
+
+<script>
+/* V50.5 — Avatar profil modifiable */
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function getPB(){ try{ if(window.pb) return window.pb; if(typeof pb !== "undefined") return pb; }catch(_){} return null; }
+  function getAuthRecord(){
+    try{ if(typeof authUser === "function"){ const u = authUser(); if(u) return u; } }catch(_){}
+    const p = getPB();
+    return p?.authStore?.record || p?.authStore?.model || null;
+  }
+  function detectName(){
+    const u = getAuthRecord();
+    const values = [u?.name,u?.username,u?.email,sessionStorage.getItem("duoSenderSession"),sessionStorage.getItem("duoPocketBaseLogin"),sessionStorage.getItem("duoPocketBaseEmail"),localStorage.getItem("duoSender")].filter(Boolean).map(v=>String(v).trim());
+    const raw = values.join(" ").toLowerCase();
+    if(raw.includes("dora")) return "Dora";
+    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
+    const first = values.find(Boolean);
+    return first ? (first.includes("@") ? first.split("@")[0] : first) : "";
+  }
+  function initials(name){ if(name==="Dora") return "DO"; if(name==="Zerlezz") return "ZE"; return name ? name.slice(0,2).toUpperCase() : "--"; }
+  function getAvatarUrl(){
+    const pb = getPB();
+    const user = getAuthRecord();
+    if(!pb || !user || !user.avatar) return "";
+    try{ return pb.files.getUrl(user, user.avatar, { thumb:"160x160" }); }
+    catch(_){ try{ return pb.files.getUrl(user, user.avatar); }catch(__){ return ""; } }
+  }
+  function renderAvatarEverywhere(){
+    const name = detectName();
+    const url = getAvatarUrl();
+    const pageBtn = $("profilePageAvatarBtn");
+    const pageText = $("profilePageAvatar");
+    const pageImg = $("profilePageAvatarImg");
+    const sidebarAvatar = $("sidebarProfileAvatar");
+
+    if(pageText) pageText.textContent = initials(name);
+    if(pageImg){
+      if(url){
+        pageImg.src = url;
+        pageImg.style.display = "";
+        pageBtn?.classList.add("hasImage");
+      }else{
+        pageImg.removeAttribute("src");
+        pageImg.style.display = "none";
+        pageBtn?.classList.remove("hasImage");
+      }
+    }
+    if(sidebarAvatar){
+      if(url) sidebarAvatar.innerHTML = '<img src="'+url+'" alt="">';
+      else sidebarAvatar.textContent = initials(name);
+    }
+  }
+  async function uploadAvatar(file){
+    const pb = getPB();
+    const user = getAuthRecord();
+    if(!pb || !user?.id){ alert("PocketBase n'est pas connecté."); return; }
+    if(!file) return;
+    if(!file.type || !file.type.startsWith("image/")){ alert("Choisis une image."); return; }
+    if(file.size > 5*1024*1024){ alert("Image trop lourde. Maximum 5 Mo."); return; }
+
+    const form = new FormData();
+    form.append("avatar", file);
+    const btn = $("profilePageAvatarBtn");
+    try{
+      if(btn) btn.style.opacity = ".55";
+      const updated = await pb.collection("users").update(user.id, form);
+      try{ if(pb.authStore?.save && pb.authStore?.token) pb.authStore.save(pb.authStore.token, updated); }catch(_){}
+      renderAvatarEverywhere();
+      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 100);
+      if(typeof updateSidebarProfile === "function") setTimeout(updateSidebarProfile, 100);
+    }catch(error){
+      console.error("Erreur avatar:", error);
+      alert("Erreur changement photo : " + (error.message || error));
+    }finally{
+      if(btn) btn.style.opacity = "";
+      const input = $("profileAvatarFile");
+      if(input) input.value = "";
+    }
+  }
+  document.addEventListener("click", function(e){
+    if(e.target.closest("#profilePageAvatarBtn")){
+      e.preventDefault();
+      e.stopPropagation();
+      $("profileAvatarFile")?.click();
+    }
+  }, true);
+  document.addEventListener("change", function(e){
+    if(e.target && e.target.id === "profileAvatarFile") uploadAvatar(e.target.files && e.target.files[0]);
+  });
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(renderAvatarEverywhere, 600);
+    setTimeout(renderAvatarEverywhere, 1600);
+    setInterval(renderAvatarEverywhere, 4000);
+  });
+  window.addEventListener("load", function(){ setTimeout(renderAvatarEverywhere, 500); });
+
+  const oldRender = window.renderProfilePage;
+  if(typeof oldRender === "function"){
+    window.renderProfilePage = async function(){
+      const result = await oldRender.apply(this, arguments);
+      renderAvatarEverywhere();
+      return result;
+    };
+  }
+  const oldUpdate = window.updateSidebarProfile;
+  if(typeof oldUpdate === "function"){
+    window.updateSidebarProfile = function(){
+      const result = oldUpdate.apply(this, arguments);
+      renderAvatarEverywhere();
+      return result;
+    };
+  }
+  window.renderAvatarEverywhere = renderAvatarEverywhere;
 })();
 </script>
 
