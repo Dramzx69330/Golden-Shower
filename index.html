@@ -2311,79 +2311,39 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V46.1.1 — Fix proportions tableau commandes + bordereaux PDF */
-#ordersTable,
-table.ordersTable,
-.page table{
-  width:100%!important;
-  max-width:100%!important;
-}
+/* V46.5 — Desktop préservé + Mobile only propre */
 
-#ordersTable{
-  table-layout:fixed!important;
-}
+/* Desktop/tablette large : empêche uniquement le débordement du tableau commandes */
+@media (min-width: 769px) {
+  .card:has(table) {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+  }
 
-#ordersTable th,
-#ordersTable td{
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  word-break:normal!important;
-}
+  table {
+    max-width: 100% !important;
+  }
 
-#ordersTable th:nth-child(1), #ordersTable td:nth-child(1){width:76px!important}
-#ordersTable th:nth-child(2), #ordersTable td:nth-child(2){width:88px!important}
-#ordersTable th:nth-child(3), #ordersTable td:nth-child(3){width:112px!important}
-#ordersTable th:nth-child(4), #ordersTable td:nth-child(4){width:100px!important}
-#ordersTable th:nth-child(5), #ordersTable td:nth-child(5){width:130px!important}
-#ordersTable th:nth-child(6), #ordersTable td:nth-child(6){width:88px!important}
-#ordersTable th:nth-child(7), #ordersTable td:nth-child(7){width:64px!important}
-#ordersTable th:nth-child(8), #ordersTable td:nth-child(8){width:90px!important}
-#ordersTable th:nth-child(9), #ordersTable td:nth-child(9){width:130px!important}
-#ordersTable th:nth-child(10), #ordersTable td:nth-child(10){width:160px!important}
-#ordersTable th:nth-child(11), #ordersTable td:nth-child(11){width:86px!important;text-align:right!important}
-#ordersTable th:nth-child(12), #ordersTable td:nth-child(12){width:92px!important;text-align:right!important}
-
-.pdfChip,
-#ordersTable .pdfChip,
-a.pdfChip{
-  max-width:150px!important;
-  width:auto!important;
-  min-width:0!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-  vertical-align:middle!important;
-  justify-content:flex-start!important;
-}
-
-#ordersTable .pdfChip{
-  display:inline-flex!important;
-}
-
-#ordersTable .pdfChip .pdfName,
-#ordersTable .pdfChip span{
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
-  white-space:nowrap!important;
-}
-
-@media(max-width:1100px){
-  #ordersTable{
-    min-width:1080px!important;
+  .pdfChip {
+    max-width: 190px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 }
 
-
-/* V46.2 — Mobile iPhone only. Ne modifie pas le rendu PC. */
+/* Mobile uniquement : ne s'applique pas au PC */
 @media (max-width: 768px) {
-  html, body {
+  html,
+  body {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
+    -webkit-text-size-adjust: 100% !important;
   }
 
   body {
-    background: #0b0d11 !important;
+    background: #090b0f !important;
   }
 
   .app {
@@ -2395,19 +2355,21 @@ a.pdfChip{
   aside {
     position: sticky !important;
     top: 0 !important;
-    z-index: 9000 !important;
-    height: auto !important;
+    z-index: 5000 !important;
     width: 100% !important;
-    padding: 12px 10px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 10px 10px 8px !important;
     border-right: 0 !important;
     border-bottom: 1px solid var(--line) !important;
-    background: rgba(15, 17, 22, .96) !important;
-    backdrop-filter: blur(14px) !important;
+    background: rgba(15, 17, 22, .97) !important;
+    backdrop-filter: blur(12px) !important;
   }
 
   aside .brand {
     font-size: 15px !important;
-    margin-bottom: 2px !important;
+    line-height: 1.1 !important;
+    margin: 0 0 2px !important;
   }
 
   aside .sub {
@@ -2416,9 +2378,12 @@ a.pdfChip{
 
   .nav {
     display: flex !important;
+    grid-template-columns: none !important;
     gap: 8px !important;
     overflow-x: auto !important;
-    padding: 8px 0 2px !important;
+    overflow-y: hidden !important;
+    padding: 8px 0 0 !important;
+    -webkit-overflow-scrolling: touch !important;
     scrollbar-width: none !important;
   }
 
@@ -2429,17 +2394,25 @@ a.pdfChip{
   .nav button {
     flex: 0 0 auto !important;
     width: auto !important;
-    padding: 10px 13px !important;
+    min-width: 94px !important;
+    padding: 10px 12px !important;
     border-radius: 999px !important;
     font-size: 12px !important;
+    line-height: 1 !important;
+    text-align: center !important;
     white-space: nowrap !important;
   }
 
   main {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 14px 10px 92px !important;
     margin: 0 !important;
+    padding: 16px 10px 90px !important;
+  }
+
+  .page {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .top {
@@ -2448,332 +2421,14 @@ a.pdfChip{
   }
 
   h1 {
-    font-size: 28px !important;
+    font-size: 30px !important;
     line-height: 1.05 !important;
     margin-bottom: 8px !important;
   }
 
   h2 {
-    font-size: 20px !important;
-  }
-
-  h3 {
-    font-size: 16px !important;
-  }
-
-  .globalSearchWrap {
-    max-width: 100% !important;
-    margin-top: 10px !important;
-  }
-
-  .globalSearch,
-  input,
-  select,
-  textarea {
-    width: 100% !important;
-    min-width: 0 !important;
-    font-size: 16px !important;
-  }
-
-  .themeSwitcher,
-  .livePresenceBox {
-    display: none !important;
-  }
-
-  .grid,
-  .cards,
-  .two,
-  .three,
-  .form,
-  .chatWrap,
-  .chartGrid,
-  .liveNowStrip,
-  .accountStatusDashboard {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .card {
-    width: 100% !important;
-    max-width: 100% !important;
-    border-radius: 12px !important;
-    box-shadow: none !important;
-  }
-
-  .pad {
-    padding: 14px !important;
-  }
-
-  .metric span {
-    font-size: 11px !important;
-  }
-
-  .metric strong {
-    margin-top: 7px !important;
-    font-size: 25px !important;
-  }
-
-  .cards .card {
-    min-height: auto !important;
-  }
-
-  .accountStatusTile {
-    padding: 12px !important;
-  }
-
-  .accountStatusTile strong {
-    font-size: 24px !important;
-  }
-
-  .toolbar {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 9px !important;
-  }
-
-  button.primary,
-  button.secondary,
-  button.danger {
-    width: 100% !important;
-    min-height: 44px !important;
-  }
-
-  .liveNowCard,
-  .smartAlert,
-  .row,
-  .noteItem,
-  .taskItem {
-    width: 100% !important;
-  }
-
-  .smartAlert {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Tableaux desktop masqués visuellement et transformés en scroll horizontal propre */
-  .card:has(table),
-  .tableWrap,
-  .ordersWrap {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  table {
-    min-width: 920px !important;
-    width: 920px !important;
-    table-layout: fixed !important;
-    font-size: 12px !important;
-  }
-
-  th, td {
-    padding: 10px 8px !important;
-  }
-
-  .pdfChip {
-    max-width: 110px !important;
-  }
-
-  /* Formulaire nouvelle commande : compact iPhone */
-  .form label {
-    font-size: 10px !important;
-    gap: 6px !important;
-  }
-
-  .form input,
-  .form select,
-  .form textarea {
-    padding: 11px 12px !important;
-    border-radius: 9px !important;
-  }
-
-  /* Chat widget adapté iPhone */
-  .floatingChatBtn {
-    right: 14px !important;
-    bottom: 18px !important;
-    width: 54px !important;
-    height: 54px !important;
     font-size: 22px !important;
-  }
-
-  .messengerPanel {
-    right: 8px !important;
-    left: 8px !important;
-    bottom: 82px !important;
-    width: auto !important;
-    height: min(620px, calc(100vh - 110px)) !important;
-    border-radius: 15px !important;
-  }
-
-  .messengerComposer .line {
-    grid-template-columns: 1fr 42px 86px !important;
-  }
-
-  .messengerComposer input:nth-child(2) {
-    grid-column: 1 / -1 !important;
-  }
-
-  .toastStack {
-    right: 10px !important;
-    left: 10px !important;
-    bottom: 82px !important;
-    width: auto !important;
-  }
-
-  /* Présence dashboard top : cachée sur mobile pour éviter l'effet mini desktop */
-  .top .livePresenceBox,
-  .top .themeSwitcher,
-  .topRight,
-  .dashboardPresence,
-  .presenceFloating {
-    display: none !important;
-  }
-
-  /* Centre contrôle mobile */
-  .controlHero,
-  .controlGrid,
-  .controlActions,
-  .controlHealth,
-  .controlRadar {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Nettoie les gros espaces vides */
-  section,
-  .page {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .clientModal,
-  .voiceModal,
-  .emergencyModal,
-  .threadPanel {
-    width: calc(100vw - 18px) !important;
-    max-width: calc(100vw - 18px) !important;
-  }
-}
-
-@media (max-width: 480px) {
-  main {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
-  h1 {
-    font-size: 25px !important;
-  }
-
-  .pad {
-    padding: 12px !important;
-  }
-
-  .metric strong {
-    font-size: 23px !important;
-  }
-
-  table {
-    min-width: 860px !important;
-    width: 860px !important;
-  }
-
-  th, td {
-    font-size: 11px !important;
-  }
-}
-
-
-/* V46.3 — vrai mode iPhone, PC inchangé */
-@media (max-width: 768px) {
-  html, body {
-    overflow-x: hidden !important;
-    background: #080a0d !important;
-    -webkit-text-size-adjust: 100% !important;
-  }
-
-  body {
-    font-size: 14px !important;
-  }
-
-  .app {
-    display: block !important;
-    min-height: 100vh !important;
-  }
-
-  /* Menu en bas type app mobile */
-  aside {
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    top: auto !important;
-    z-index: 9999 !important;
-    width: 100% !important;
-    height: 66px !important;
-    padding: 7px 8px calc(7px + env(safe-area-inset-bottom)) !important;
-    background: rgba(13, 15, 20, .96) !important;
-    border-top: 1px solid rgba(255,255,255,.10) !important;
-    border-right: 0 !important;
-    border-bottom: 0 !important;
-    backdrop-filter: blur(18px) !important;
-  }
-
-  aside .brand,
-  aside .sub {
-    display: none !important;
-  }
-
-  .nav {
-    display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: 6px !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    height: 100% !important;
-  }
-
-  .nav button {
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 50px !important;
-    padding: 6px 4px !important;
-    border-radius: 13px !important;
-    font-size: 11px !important;
-    line-height: 1.1 !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-
-  main {
-    padding: 18px 12px calc(96px + env(safe-area-inset-bottom)) !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-  }
-
-  .page {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .top {
-    display: block !important;
-    margin: 0 0 14px !important;
-  }
-
-  h1 {
-    font-size: 31px !important;
-    line-height: 1 !important;
-    margin: 0 0 10px !important;
-    letter-spacing: -0.05em !important;
-  }
-
-  h2 {
-    font-size: 22px !important;
-    line-height: 1.1 !important;
+    line-height: 1.15 !important;
   }
 
   h3 {
@@ -2786,44 +2441,36 @@ a.pdfChip{
   }
 
   .globalSearchWrap {
-    width: 100% !important;
     max-width: 100% !important;
-    margin: 14px 0 0 !important;
+    width: 100% !important;
+    margin-top: 12px !important;
   }
 
-  .globalSearch {
-    height: 48px !important;
-    font-size: 15px !important;
-    border-radius: 13px !important;
-    padding: 0 14px !important;
+  .globalSearch,
+  input,
+  select,
+  textarea {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
   }
 
   .top .livePresenceBox,
-  .livePresenceBox,
-  .themeSwitcher {
+  .top .themeSwitcher {
     display: none !important;
   }
 
   .sync {
-    margin-top: 12px !important;
-    display: inline-flex !important;
-    font-size: 13px !important;
+    margin-top: 10px !important;
   }
 
-  .top button,
-  .top .secondary,
-  .top .primary {
-    width: auto !important;
+  .top button.secondary,
+  .top button.primary {
+    width: 100% !important;
+    margin-top: 8px !important;
   }
 
-  .top > div:last-child {
-    margin-top: 12px !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* Dashboard compact */
   .grid,
   .two,
   .three,
@@ -2832,42 +2479,39 @@ a.pdfChip{
   .chartGrid,
   .liveNowStrip,
   .accountStatusDashboard {
+    display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 12px !important;
   }
 
   .cards {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr !important;
     gap: 10px !important;
   }
 
   .card {
-    border-radius: 16px !important;
-    box-shadow: none !important;
+    width: 100% !important;
     max-width: 100% !important;
+    border-radius: 14px !important;
     overflow: hidden !important;
+    box-shadow: none !important;
   }
 
   .pad {
-    padding: 16px !important;
-  }
-
-  .metric {
-    min-height: 92px !important;
+    padding: 15px !important;
   }
 
   .metric span {
-    font-size: 10px !important;
-    letter-spacing: .12em !important;
+    font-size: 11px !important;
+    letter-spacing: .10em !important;
   }
 
   .metric strong {
-    font-size: 27px !important;
-    margin-top: 10px !important;
+    font-size: 28px !important;
+    margin-top: 8px !important;
   }
 
-  /* Etat comptes moins énorme */
   .accountStatusDashboard {
     gap: 8px !important;
   }
@@ -2877,78 +2521,78 @@ a.pdfChip{
     border-radius: 12px !important;
   }
 
-  .accountStatusTile span {
-    font-size: 10px !important;
-  }
-
   .accountStatusTile strong {
-    font-size: 22px !important;
+    font-size: 23px !important;
   }
 
   .accountStatusAlert,
   .smartAlert {
+    padding: 11px 12px !important;
     font-size: 13px !important;
-    padding: 12px !important;
-    border-radius: 12px !important;
-  }
-
-  /* Formulaire nouvelle commande lisible */
-  .form {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
+    line-height: 1.35 !important;
   }
 
   .form label {
     font-size: 10px !important;
-    letter-spacing: .10em !important;
+    letter-spacing: .09em !important;
+    gap: 6px !important;
   }
 
-  input, select, textarea {
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
+  input,
+  select,
+  textarea {
     min-height: 44px !important;
     padding: 11px 12px !important;
-    font-size: 16px !important;
-    border-radius: 11px !important;
+    border-radius: 10px !important;
   }
 
   textarea {
-    min-height: 90px !important;
+    min-height: 88px !important;
   }
 
   button.primary,
   button.secondary,
   button.danger {
     min-height: 44px !important;
-    border-radius: 11px !important;
+    border-radius: 10px !important;
   }
 
-  /* Tableaux : scroll horizontal propre uniquement sur mobile */
+  .toolbar {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Tableau commandes sur mobile : scroll horizontal propre, pas appliqué au PC */
   .card:has(table) {
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
 
   table {
-    width: 980px !important;
-    min-width: 980px !important;
+    min-width: 940px !important;
+    width: 940px !important;
     table-layout: fixed !important;
     font-size: 12px !important;
   }
 
-  th, td {
+  th,
+  td {
     padding: 10px 8px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .pdfChip {
-    max-width: 120px !important;
+    max-width: 125px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
   }
 
-  /* Chat flottant pas devant les formulaires */
   .floatingChatBtn {
     right: 14px !important;
-    bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+    bottom: 18px !important;
     width: 52px !important;
     height: 52px !important;
     font-size: 21px !important;
@@ -2957,16 +2601,25 @@ a.pdfChip{
   .messengerPanel {
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+    bottom: 82px !important;
     width: auto !important;
-    height: min(620px, calc(100vh - 170px)) !important;
+    height: min(620px, calc(100vh - 110px)) !important;
+    border-radius: 15px !important;
   }
 
   .toastStack {
     left: 10px !important;
     right: 10px !important;
-    bottom: calc(138px + env(safe-area-inset-bottom)) !important;
+    bottom: 82px !important;
     width: auto !important;
+  }
+
+  .messengerComposer .line {
+    grid-template-columns: 1fr 42px 88px !important;
+  }
+
+  .messengerComposer input:nth-child(2) {
+    grid-column: 1 / -1 !important;
   }
 
   .clientModal,
@@ -2980,30 +2633,507 @@ a.pdfChip{
 
 @media (max-width: 430px) {
   main {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-  }
-
-  .cards {
-    grid-template-columns: 1fr !important;
-  }
-
-  .metric {
-    min-height: 86px !important;
-  }
-
-  .pad {
-    padding: 15px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
 
   h1 {
     font-size: 28px !important;
   }
+
+  .pad {
+    padding: 14px !important;
+  }
+
+  .metric strong {
+    font-size: 26px !important;
+  }
+
+  table {
+    min-width: 900px !important;
+    width: 900px !important;
+  }
 }
 
 
-/* V49.2 — Profil sidebar connecté PocketBase, PC uniquement */
-@media (min-width:1051px){
+/* V46.6 — Fix scrollbar PC tableau commandes */
+@media (min-width: 769px){
+
+  .card:has(table){
+    overflow-x:hidden !important;
+  }
+
+  table{
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .pdfChip,
+  a.pdfChip{
+    max-width:110px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  th:nth-child(10),
+  td:nth-child(10){
+    width:130px !important;
+  }
+
+  th:nth-child(11),
+  td:nth-child(11){
+    width:80px !important;
+  }
+
+  th:nth-child(12),
+  td:nth-child(12){
+    width:90px !important;
+  }
+}
+
+
+
+/* V47.7 — Page Photos premium */
+.photosShell{
+  display:grid;
+  gap:18px;
+}
+.photosHero{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  padding:24px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(245,158,11,.18), transparent 32%),
+    radial-gradient(circle at 90% 10%, rgba(96,165,250,.13), transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+  box-shadow:0 24px 70px rgba(0,0,0,.28);
+}
+.photosHeroTop{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:flex-start;
+}
+.photosHero h1{
+  margin:0 0 8px!important;
+}
+.photosHero p{
+  max-width:720px;
+  margin:0;
+  color:var(--muted);
+  line-height:1.55;
+}
+.photosStats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  min-width:340px;
+}
+.photosStat{
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.16);
+  border-radius:14px;
+  padding:13px 14px;
+}
+.photosStat span{
+  display:block;
+  font-size:10px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.11em;
+  color:var(--muted);
+}
+.photosStat strong{
+  display:block;
+  margin-top:7px;
+  font-size:24px;
+  color:#fff;
+}
+.photosToolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.photosToolbarLeft{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.photosSearch{
+  min-width:280px!important;
+  max-width:360px!important;
+}
+.photosUploadCard{
+  border:1px solid rgba(245,158,11,.26)!important;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(245,158,11,.12), transparent 34%),
+    linear-gradient(180deg,#181b22,#15171d)!important;
+}
+.photosUploadCard.locked{
+  border-color:rgba(148,163,184,.18)!important;
+  opacity:.92;
+}
+.photoDrop{
+  border:1px dashed rgba(245,158,11,.50);
+  background:rgba(245,158,11,.06);
+  border-radius:16px;
+  padding:18px;
+  display:grid;
+  gap:12px;
+}
+.photoDrop.locked{
+  border-color:rgba(148,163,184,.22);
+  background:rgba(148,163,184,.055);
+}
+.photoDropHeader{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+.photoDropIcon{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:rgba(245,158,11,.18);
+  border:1px solid rgba(245,158,11,.28);
+  font-size:23px;
+}
+.photoDropTitle strong{
+  display:block;
+  color:#fff;
+  font-size:17px;
+}
+.photoDropTitle span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+  margin-top:3px;
+}
+.photoUploadPreview{
+  display:none;
+  align-items:center;
+  gap:12px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(0,0,0,.16);
+  border-radius:14px;
+  padding:10px;
+}
+.photoUploadPreview.show{display:flex}
+.photoUploadPreview img{
+  width:74px;
+  height:74px;
+  object-fit:cover;
+  border-radius:12px;
+  background:#0b0e14;
+}
+.photoUploadPreview div{
+  min-width:0;
+}
+.photoUploadPreview strong{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.photoUploadPreview span{
+  display:block;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:12px;
+}
+.photosUploadGrid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:end;
+}
+.photosUploadGrid label{
+  display:grid;
+  gap:7px;
+  font-size:11px;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+  color:var(--muted);
+}
+.photosLockedBox{
+  border:1px solid rgba(245,158,11,.32);
+  background:rgba(245,158,11,.08);
+  color:var(--text);
+  border-radius:14px;
+  padding:14px 15px;
+  line-height:1.45;
+}
+.photosLockedBox strong{color:#fbbf24}
+.photosGrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+.photoCard{
+  position:relative;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:18px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+  box-shadow:0 18px 45px rgba(0,0,0,.22);
+}
+.photoCard.available{
+  border-color:rgba(34,197,94,.22);
+}
+.photoCard.used{
+  border-color:rgba(148,163,184,.16);
+}
+.photoThumb{
+  position:relative;
+  aspect-ratio:1/1;
+  background:#0b0e14;
+}
+.photoThumb img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  transition:filter .18s ease, transform .18s ease, opacity .18s ease;
+}
+.photoCard:not(.used):hover .photoThumb img{
+  transform:scale(1.035);
+}
+.photoCard.used .photoThumb img{
+  filter:blur(10px) grayscale(.35);
+  transform:scale(1.05);
+  opacity:.58;
+}
+.photoBadge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:1000;
+  backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.34);
+  color:#fff;
+}
+.photoBadge.available{color:#bbf7d0}
+.photoBadge.used{color:#e5e7eb}
+.photoUsedOverlay{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:rgba(0,0,0,.40);
+  color:#fff;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:12px;
+}
+.photoCard.used .photoUsedOverlay{display:flex}
+.photoBody{
+  padding:14px;
+  display:grid;
+  gap:10px;
+}
+.photoTitle{
+  color:#fff;
+  font-weight:1000;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.photoMeta{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.45;
+}
+.photoActions{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+.photoActions button,
+.photoActions a{
+  width:100%;
+  justify-content:center;
+  text-align:center;
+  text-decoration:none;
+}
+.photoDownloadDisabled{
+  opacity:.55!important;
+  cursor:not-allowed!important;
+  pointer-events:none!important;
+}
+.photosEmpty{
+  grid-column:1/-1;
+  border:1px dashed rgba(255,255,255,.16);
+  border-radius:16px;
+  padding:26px;
+  text-align:center;
+  color:var(--muted);
+  background:rgba(255,255,255,.025);
+}
+@media(max-width:1180px){
+  .photosGrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photosHeroTop{display:grid}
+  .photosStats{min-width:0}
+}
+@media(max-width:768px){
+  .photosHero{padding:18px}
+  .photosStats{grid-template-columns:1fr}
+  .photosToolbar{display:grid}
+  .photosSearch{min-width:0!important;max-width:100%!important}
+  .photosGrid{grid-template-columns:1fr 1fr;gap:10px}
+  .photosUploadGrid{grid-template-columns:1fr}
+}
+@media(max-width:430px){
+  .photosGrid{grid-template-columns:1fr}
+}
+
+
+/* V48 — Profil sidebar bas gauche */
+aside{
+  display:flex!important;
+  flex-direction:column!important;
+}
+.nav{
+  flex:0 0 auto!important;
+}
+.sidebarProfile{
+  position:relative;
+  margin-top:auto;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.sidebarProfileMain{
+  width:100%;
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) 10px;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
+  color:var(--text);
+  cursor:pointer;
+  text-align:left;
+}
+.sidebarProfileMain:hover{
+  background:rgba(255,255,255,.075);
+  border-color:rgba(255,255,255,.16);
+}
+.sidebarAvatar{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#1d4ed8,#111827);
+  color:#fff;
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:.02em;
+  box-shadow:0 0 0 4px rgba(37,99,235,.12);
+}
+.sidebarProfileText{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.sidebarProfileText strong{
+  color:#fff;
+  font-size:14px;
+  line-height:1.1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sidebarProfileText small{
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.sidebarProfileStatus{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#6b7280;
+  box-shadow:none;
+}
+.sidebarProfileStatus.online{
+  background:#22c55e;
+  box-shadow:0 0 0 4px rgba(34,197,94,.13);
+}
+.sidebarProfileMenu{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:calc(100% + 10px);
+  display:none;
+  gap:6px;
+  padding:8px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:#111318;
+  box-shadow:0 22px 70px rgba(0,0,0,.45);
+  z-index:15000;
+}
+.sidebarProfileMenu.open{
+  display:grid;
+}
+.sidebarProfileMenu button{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:#f3f4f6;
+  text-align:left;
+  padding:10px 11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.sidebarProfileMenu button:hover{
+  background:#202633;
+}
+@media(max-width:1050px){
+  .sidebarProfile{
+    margin-top:12px;
+    padding-top:12px;
+  }
+  .sidebarProfileMenu{
+    position:static;
+    margin-top:8px;
+  }
+}
+@media(max-width:768px){
+  .sidebarProfile{
+    display:none!important;
+  }
+}
+
+
+
+/* V48.2 — Fix sidebar profil PC uniquement, mobile inchangé */
+@media (min-width: 1051px){
   aside{
     display:flex!important;
     flex-direction:column!important;
@@ -3022,121 +3152,21 @@ a.pdfChip{
   }
 
   .sidebarProfile{
-    position:relative;
     margin-top:auto!important;
-    padding-top:14px;
-    border-top:1px solid rgba(255,255,255,.08);
-  }
-
-  .sidebarProfileMain{
-    width:100%;
-    display:grid;
-    grid-template-columns:38px minmax(0,1fr) 10px;
-    align-items:center;
-    gap:10px;
-    padding:10px;
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:14px;
-    background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025));
-    color:var(--text);
-    cursor:pointer;
-    text-align:left;
-  }
-
-  .sidebarProfileMain:hover{
-    background:rgba(255,255,255,.075);
-    border-color:rgba(255,255,255,.16);
-  }
-
-  .sidebarAvatar{
-    width:38px;
-    height:38px;
-    border-radius:13px;
-    display:grid;
-    place-items:center;
-    background:linear-gradient(135deg,#1d4ed8,#111827);
-    color:#fff;
-    font-size:13px;
-    font-weight:1000;
-    letter-spacing:.02em;
-    box-shadow:0 0 0 4px rgba(37,99,235,.12);
-  }
-
-  .sidebarProfileText{
-    min-width:0;
-    display:grid;
-    gap:2px;
-  }
-
-  .sidebarProfileText strong{
-    color:#fff;
-    font-size:14px;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .sidebarProfileText small{
-    color:var(--muted);
-    font-size:11px;
-    font-weight:800;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .sidebarProfileStatus{
-    width:9px;
-    height:9px;
-    border-radius:999px;
-    background:#6b7280;
-    box-shadow:none;
-  }
-
-  .sidebarProfileStatus.online{
-    background:#22c55e;
-    box-shadow:0 0 0 4px rgba(34,197,94,.13);
-  }
-
-  .sidebarProfileMenu{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:calc(100% + 10px);
-    display:none;
-    gap:6px;
-    padding:8px;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:14px;
-    background:#111318;
-    box-shadow:0 22px 70px rgba(0,0,0,.45);
-    z-index:15000;
-  }
-
-  .sidebarProfileMenu.open{
-    display:grid;
-  }
-
-  .sidebarProfileMenu button{
-    width:100%;
-    border:0;
-    border-radius:10px;
-    background:transparent;
-    color:#f3f4f6;
-    text-align:left;
-    padding:10px 11px;
-    font-weight:900;
-    cursor:pointer;
-  }
-
-  .sidebarProfileMenu button:hover{
-    background:#202633;
   }
 }
 
-/* Mobile inchangé */
-@media (max-width:1050px){
+/* Sur téléphone/tablette, on laisse le responsive d'origine gérer le menu */
+@media (max-width: 1050px){
+  aside{
+    display:block!important;
+  }
+
+  aside .nav{
+    display:grid!important;
+    flex:none!important;
+  }
+
   .sidebarProfile{
     display:none!important;
   }
@@ -3188,6 +3218,7 @@ a.pdfChip{
     <div class="sub">Gestion propre des commandes Vinted / Leboncoin, comptes et chat direct.</div>
     <div class="nav">
       <button class="active" data-page="dashboard">Dashboard</button>
+        <button data-page="photos">Photos</button>
       <button data-page="control">Contrôle</button>
       <button data-page="clients">Clients</button>
       <button data-page="comptes">Comptes</button>
@@ -3206,8 +3237,8 @@ a.pdfChip{
       </button>
 
       <div class="sidebarProfileMenu" id="sidebarProfileMenu">
-        <button type="button" id="sidebarSwitchProfileBtn">🔄 Changer profil</button>
-        <button type="button" id="sidebarLogoutBtn">🚪 Déconnexion</button>
+        <button type="button" id="sidebarSwitchProfileBtn" data-sidebar-action="switch">🔄 Changer profil</button>
+        <button type="button" id="sidebarLogoutBtn" data-sidebar-action="logout">🚪 Déconnexion</button>
       </div>
     </div>
 
@@ -3628,7 +3659,86 @@ a.pdfChip{
         <div id="activity" class="activity list"></div>
       </div>
     </section>
-  </main>
+
+      <section class="page" id="photos">
+        <div class="photosShell">
+          <div class="photosHero">
+            <div class="photosHeroTop">
+              <div>
+                <h1>Photos</h1>
+                <p>Galerie privée pour les photos d’or et de lingotins. Dora publie les photos depuis cette page. Zerlezz peut les télécharger une seule fois : après téléchargement, la photo reste visible mais devient floutée et verrouillée.</p>
+              </div>
+              <div class="photosStats">
+                <div class="photosStat"><span>Total</span><strong id="photosTotalStat">0</strong></div>
+                <div class="photosStat"><span>Disponibles</span><strong id="photosAvailableStat">0</strong></div>
+                <div class="photosStat"><span>Utilisées</span><strong id="photosUsedStat">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card pad photosUploadCard" id="photoUploadPanel">
+            <h2>Publier une photo</h2>
+            <div class="photoDrop" id="photoDropZone">
+              <div class="photoDropHeader">
+                <div class="photoDropIcon">🥇</div>
+                <div class="photoDropTitle">
+                  <strong>Upload réservé à Dora</strong>
+                  <span>Ajoute une photo d’or, lingotin, preuve ou visuel à partager avec Zerlezz.</span>
+                </div>
+              </div>
+
+              <div class="photoUploadPreview" id="photoUploadPreview">
+                <img id="photoUploadPreviewImg" alt="">
+                <div>
+                  <strong id="photoUploadPreviewName">Photo sélectionnée</strong>
+                  <span id="photoUploadPreviewMeta">Prête à publier</span>
+                </div>
+              </div>
+
+              <div class="photosUploadGrid">
+                <label>
+                  PHOTO
+                  <input type="file" id="duoPhotoFile" accept="image/*">
+                </label>
+                <label>
+                  NOM / NOTE
+                  <input type="text" id="duoPhotoTitle" placeholder="Ex : Lingotin 10g, Perth Mint...">
+                </label>
+                <button class="primary" id="duoPhotoUploadBtn" type="button">Publier la photo</button>
+              </div>
+
+              <div class="photosLockedBox" id="photosLockedBox" style="display:none">
+                <strong>Upload verrouillé.</strong><br>
+                Connecte-toi avec le compte <strong>Dora</strong> pour publier des photos depuis cette page.
+              </div>
+            </div>
+          </div>
+
+          <div class="card pad">
+            <div class="photosToolbar">
+              <div>
+                <h2 style="margin:0">Galerie</h2>
+                <p class="muted" style="margin:6px 0 0">Les photos utilisées restent visibles mais ne peuvent plus être téléchargées.</p>
+              </div>
+              <div class="photosToolbarLeft">
+                <input class="photosSearch" id="photosSearchInput" type="search" placeholder="Rechercher une photo...">
+                <select id="photosFilterSelect">
+                  <option value="all">Toutes</option>
+                  <option value="available">Disponibles</option>
+                  <option value="used">Utilisées</option>
+                </select>
+                <button class="secondary small" id="duoPhotosRefreshBtn" type="button">Actualiser</button>
+              </div>
+            </div>
+            <div class="photosGrid" id="duoPhotosGrid" style="margin-top:16px">
+              <div class="photosEmpty">Chargement des photos...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+    </main>
 </div>
 
 
@@ -6036,21 +6146,27 @@ function setLiveAction(action){
 function renderPresence(){
   const now=Date.now();
   const typingNames=currentTypingNames();
+
+  // V47.6 — Source fix :
+  // On ne génère plus les utilisateurs offline dans le HTML.
+  // Avant, ils étaient rendus puis masqués par CSS/JS, ce qui causait le clignotement.
   const list=presenceUsers.map(u=>{
     const ts=u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : new Date(u.lastSeen || 0).getTime();
     const age=now-ts;
-    const online=u.online && age<45000;
+    const online=!!u.online && age<45000;
     const idle=online && age>22000;
     return {...u, age, online, idle, typing:typingNames.includes(normalizeName(u.sender))};
-  }).sort((a,b)=>(b.online-a.online) || String(a.sender).localeCompare(String(b.sender)));
+  })
+  .filter(u=>u.online)
+  .sort((a,b)=>String(a.sender||'').localeCompare(String(b.sender||'')));
 
-  const onlineCount=list.filter(u=>u.online).length;
+  const onlineCount=list.length;
   if($("presenceCount")) $("presenceCount").textContent = `${onlineCount} en ligne`;
 
   const html=list.map(u=>{
-    const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
+    const dotClass=u.idle ? 'idle' : '';
     const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
+    const status=u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`;
     const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
     return `<div class="presenceUser">
       <div class="presenceLeft">
@@ -6068,7 +6184,7 @@ function renderPresence(){
   if($("livePresenceList")) $("livePresenceList").innerHTML = html;
   if($("dashboardPresenceList")) $("dashboardPresenceList").innerHTML = html;
 
-  const actions=list.filter(u=>u.online && (u.action || u.typing)).map(u=>`
+  const actions=list.filter(u=>u.action || u.typing).map(u=>`
     <div class="row"><div><strong>${esc(u.sender)}</strong><div class="muted">${esc(u.typing ? '✍️ écrit actuellement' : u.action)}</div></div><span class="muted">${esc(u.pageLabel||pageLabel(u.page))}</span></div>
   `).join('');
   if($("dashboardLiveActions")) $("dashboardLiveActions").innerHTML = actions || '<p class="muted">Aucune action en direct.</p>';
@@ -6817,9 +6933,10 @@ function goPage(id){
     clients:['Clients','Nom, nombre de commandes et dépense totale.'],
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
-    stats:['Stats','Performance par vendeur, plateforme et produit.']
+    stats:['Stats','Performance par vendeur, plateforme et produit.'],
+    photos:['Photos','Galerie privée Dora → Zerlezz : publication, téléchargement unique et verrouillage automatique.']
   };
-  $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
+  const pageMeta = titles[id] || [id.charAt(0).toUpperCase()+id.slice(1), ""]; $("pageTitle").textContent=pageMeta[0]; $("pageDesc").textContent=pageMeta[1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
 }
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>goPage(b.dataset.page)));
@@ -8004,28 +8121,336 @@ start();
 
 
 <script>
-/* V46.3.1 — affichage PDF sûr, sans MutationObserver */
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('a.pdfChip,.pdfChip').forEach(function(chip){
-    if (chip.dataset.pdfCleaned === '1') return;
-    const raw = (chip.textContent || '').trim();
-    if (!chip.getAttribute('title') && raw) chip.setAttribute('title', raw);
-    const sizeMatch = raw.match(/(\d+(?:[.,]\d+)?\s*(?:Ko|KB|Mo|MB))/i);
-    const size = sizeMatch ? ' · ' + sizeMatch[1].replace('KB','Ko').replace('MB','Mo') : '';
-    chip.textContent = '📎 PDF' + size;
-    chip.dataset.pdfCleaned = '1';
+/* V47.7 — Photos Dora premium */
+(function(){
+  const COLLECTION = "photos";
+  let lastPhotos = [];
+
+  function getPB(){ return window.pb || window.pocketbase || window.PB || null; }
+
+  function normalize(value){
+    return String(value || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+  }
+
+  function getCurrentIdentity(){
+    const pb = getPB();
+    const model = pb && pb.authStore && pb.authStore.model ? pb.authStore.model : {};
+    const values = [
+      window.currentUser, window.currentUsername, window.userName, window.duoUser, window.duoUsername,
+      localStorage.getItem("duoUser"), localStorage.getItem("duoUsername"),
+      localStorage.getItem("currentUser"), localStorage.getItem("currentUsername"),
+      model.name, model.username, model.email
+    ].filter(Boolean);
+    return { raw: values.join(" "), model };
+  }
+
+  function getCurrentName(){
+    const id = getCurrentIdentity();
+    return String(
+      id.model.name || id.model.username || window.currentUser || window.currentUsername ||
+      localStorage.getItem("duoUser") || localStorage.getItem("duoUsername") || id.model.email || ""
+    ).trim();
+  }
+
+  function isDora(){
+    const id = normalize(getCurrentIdentity().raw);
+    return id.includes("dora");
+  }
+
+  function isZerlezz(){
+    const id = normalize(getCurrentIdentity().raw);
+    return id.includes("zerlezz") || id.includes("zerle");
+  }
+
+  function escapeHtml(value){
+    return String(value || "").replace(/[&<>"']/g, (m)=>({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+  }
+
+  function fmtDate(value){
+    if(!value) return "-";
+    try{return new Date(value).toLocaleString("fr-FR")}
+    catch(e){return "-"}
+  }
+
+  function fmtSize(bytes){
+    if(!bytes) return "";
+    const n = Number(bytes);
+    if(!n) return "";
+    if(n < 1024*1024) return Math.round(n/1024) + " Ko";
+    return (n/(1024*1024)).toFixed(1).replace(".",",") + " Mo";
+  }
+
+  function setStats(records){
+    const total = records.length;
+    const used = records.filter(r=>!!r.used || !!r.downloadedAt).length;
+    const available = total - used;
+    const a = document.getElementById("photosTotalStat");
+    const b = document.getElementById("photosAvailableStat");
+    const c = document.getElementById("photosUsedStat");
+    if(a) a.textContent = total;
+    if(b) b.textContent = available;
+    if(c) c.textContent = used;
+  }
+
+  function updateUploadVisibility(){
+    const panel = document.getElementById("photoUploadPanel");
+    const locked = document.getElementById("photosLockedBox");
+    const uploadGrid = panel && panel.querySelector(".photosUploadGrid");
+    const drop = document.getElementById("photoDropZone");
+    const canUpload = isDora();
+
+    if(panel) panel.classList.toggle("locked", !canUpload);
+    if(drop) drop.classList.toggle("locked", !canUpload);
+    if(locked) locked.style.display = canUpload ? "none" : "";
+    if(uploadGrid) uploadGrid.style.display = canUpload ? "grid" : "none";
+  }
+
+  function applyClientFilters(records){
+    const search = normalize(document.getElementById("photosSearchInput")?.value || "");
+    const filter = document.getElementById("photosFilterSelect")?.value || "all";
+
+    return records.filter((r)=>{
+      const used = !!r.used || !!r.downloadedAt;
+      if(filter === "available" && used) return false;
+      if(filter === "used" && !used) return false;
+
+      if(search){
+        const haystack = normalize([r.title, r.uploadedBy, r.downloadedBy, r.image].join(" "));
+        if(!haystack.includes(search)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderPhotos(records){
+    const pb = getPB();
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+
+    setStats(lastPhotos);
+    const filtered = applyClientFilters(records);
+
+    if(!filtered.length){
+      grid.innerHTML = '<div class="photosEmpty">Aucune photo à afficher.</div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map((r)=>{
+      const fileName = r.image;
+      const url = fileName && pb ? pb.files.getUrl(r, fileName) : "";
+      const used = !!r.used || !!r.downloadedAt;
+      const canDownload = isZerlezz() && !used && url;
+      const title = r.title || "Photo";
+      const meta = used
+        ? `Téléchargée par ${escapeHtml(r.downloadedBy || "-")} · ${escapeHtml(fmtDate(r.downloadedAt))}`
+        : "Disponible pour Zerlezz";
+      const size = r.image ? (r.imageSize || "") : "";
+
+      return `
+        <article class="photoCard ${used ? "used" : "available"}" data-photo-id="${escapeHtml(r.id)}">
+          <div class="photoThumb">
+            ${url ? `<img src="${escapeHtml(url)}" alt="${escapeHtml(title)}" loading="lazy">` : ""}
+            <div class="photoBadge ${used ? "used" : "available"}">${used ? "🔒 Utilisée" : "🟢 Disponible"}</div>
+            <div class="photoUsedOverlay">Déjà téléchargée</div>
+          </div>
+          <div class="photoBody">
+            <div class="photoTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+            <div class="photoMeta">
+              Ajoutée par ${escapeHtml(r.uploadedBy || "Dora")}<br>
+              ${meta}${size ? "<br>" + escapeHtml(fmtSize(size)) : ""}
+            </div>
+            <div class="photoActions">
+              ${canDownload
+                ? `<button class="primary small" type="button" data-photo-download="${escapeHtml(r.id)}">Télécharger</button>`
+                : `<button class="secondary small photoDownloadDisabled" type="button" disabled>${used ? "Verrouillée" : "Téléchargement Zerlezz"}</button>`
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  async function showCollectionHint(error){
+    console.warn("Photos PocketBase:", error);
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+    grid.innerHTML = `
+      <div class="photosEmpty">
+        <strong>Collection PocketBase photos à configurer.</strong><br><br>
+        Champs : <code>title text</code>, <code>image file</code>, <code>uploadedBy text</code>,
+        <code>downloadedBy text</code>, <code>downloadedAt date</code>, <code>used bool</code>.<br><br>
+        Règle API : <code>@request.auth.id != ""</code>
+      </div>
+    `;
+  }
+
+  async function loadPhotos(){
+    updateUploadVisibility();
+    const pb = getPB();
+    const grid = document.getElementById("duoPhotosGrid");
+    if(!grid) return;
+    if(!pb || !pb.collection){
+      grid.innerHTML = '<div class="photosEmpty">PocketBase pas encore prêt...</div>';
+      return;
+    }
+
+    try{
+      lastPhotos = await pb.collection(COLLECTION).getFullList({ sort:"-created" });
+      renderPhotos(lastPhotos);
+    }catch(error){
+      await showCollectionHint(error);
+    }
+  }
+
+  function updatePreview(){
+    const input = document.getElementById("duoPhotoFile");
+    const preview = document.getElementById("photoUploadPreview");
+    const img = document.getElementById("photoUploadPreviewImg");
+    const name = document.getElementById("photoUploadPreviewName");
+    const meta = document.getElementById("photoUploadPreviewMeta");
+    const title = document.getElementById("duoPhotoTitle");
+    const file = input && input.files && input.files[0];
+
+    if(!file){
+      if(preview) preview.classList.remove("show");
+      return;
+    }
+
+    if(title && !title.value.trim()){
+      title.value = file.name.replace(/\.[^.]+$/, "");
+    }
+
+    if(name) name.textContent = file.name;
+    if(meta) meta.textContent = `${file.type || "image"} · ${fmtSize(file.size)}`;
+    if(img){
+      const reader = new FileReader();
+      reader.onload = ()=>{ img.src = reader.result; };
+      reader.readAsDataURL(file);
+    }
+    if(preview) preview.classList.add("show");
+  }
+
+  async function uploadPhoto(){
+    const pb = getPB();
+    if(!pb || !pb.collection) return alert("PocketBase pas prêt.");
+    if(!isDora()) return alert("Upload réservé au compte Dora.");
+
+    const fileInput = document.getElementById("duoPhotoFile");
+    const titleInput = document.getElementById("duoPhotoTitle");
+    const file = fileInput && fileInput.files && fileInput.files[0];
+
+    if(!file) return alert("Choisis une photo.");
+    if(!file.type || !file.type.startsWith("image/")) return alert("Le fichier doit être une image.");
+
+    const formData = new FormData();
+    formData.append("title", (titleInput.value || file.name || "Photo").trim());
+    formData.append("uploadedBy", getCurrentName() || "Dora");
+    formData.append("used", "false");
+    formData.append("image", file);
+
+    const btn = document.getElementById("duoPhotoUploadBtn");
+    try{
+      if(btn){ btn.disabled = true; btn.textContent = "Publication..."; }
+      await pb.collection(COLLECTION).create(formData);
+      fileInput.value = "";
+      titleInput.value = "";
+      updatePreview();
+      await loadPhotos();
+
+      if(typeof window.sendWhatsAppAlert === "function"){
+        window.sendWhatsAppAlert({
+          type:"photo_create",
+          title:"Nouvelle photo ajoutée",
+          body:`${getCurrentName() || "Dora"} a ajouté une photo : ${formData.get("title")}`
+        });
+      }
+    }catch(error){
+      console.error(error);
+      alert("Erreur upload photo : " + (error.message || error));
+    }finally{
+      if(btn){ btn.disabled = false; btn.textContent = "Publier la photo"; }
+    }
+  }
+
+  async function downloadAndLock(id){
+    const pb = getPB();
+    if(!pb || !pb.collection) return alert("PocketBase pas prêt.");
+    if(!isZerlezz()) return alert("Téléchargement réservé au compte Zerlezz.");
+
+    try{
+      const record = await pb.collection(COLLECTION).getOne(id);
+      if(record.used || record.downloadedAt){
+        await loadPhotos();
+        return alert("Cette photo a déjà été téléchargée.");
+      }
+
+      const url = pb.files.getUrl(record, record.image);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = record.image || "photo.jpg";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      await pb.collection(COLLECTION).update(id, {
+        used:true,
+        downloadedBy:getCurrentName() || "Zerlezz",
+        downloadedAt:new Date().toISOString()
+      });
+
+      await loadPhotos();
+
+      if(typeof window.sendWhatsAppAlert === "function"){
+        window.sendWhatsAppAlert({
+          type:"photo_download",
+          title:"Photo téléchargée",
+          body:`${getCurrentName() || "Zerlezz"} a téléchargé et verrouillé : ${record.title || record.image || "photo"}`
+        });
+      }
+    }catch(error){
+      console.error(error);
+      alert("Erreur téléchargement photo : " + (error.message || error));
+    }
+  }
+
+  document.addEventListener("click", function(e){
+    if(e.target.closest("#duoPhotoUploadBtn")) uploadPhoto();
+    if(e.target.closest("#duoPhotosRefreshBtn")) loadPhotos();
+
+    const dl = e.target.closest("[data-photo-download]");
+    if(dl) downloadAndLock(dl.getAttribute("data-photo-download"));
+
+    if(e.target.closest('[data-page="photos"]')) setTimeout(loadPhotos, 250);
   });
-});
+
+  document.addEventListener("change", function(e){
+    if(e.target && e.target.id === "duoPhotoFile") updatePreview();
+    if(e.target && e.target.id === "photosFilterSelect") renderPhotos(lastPhotos);
+  });
+
+  document.addEventListener("input", function(e){
+    if(e.target && e.target.id === "photosSearchInput") renderPhotos(lastPhotos);
+  });
+
+  document.addEventListener("DOMContentLoaded", function(){
+    setTimeout(loadPhotos, 900);
+  });
+
+  window.loadDuoPhotos = loadPhotos;
+  window.uploadDuoPhoto = uploadPhoto;
+})();
 </script>
 
 
-
 <script>
-/* V49.3 — Fix profil sidebar : lit le vrai compte connecté */
+/* V48.3 — Profil sidebar actions fix */
 (function(){
-  function $(id){ return document.getElementById(id); }
+  function byId(id){ return document.getElementById(id); }
 
-  function getPB(){
+  function getPb(){
     try{
       if(window.pb) return window.pb;
       if(typeof pb !== "undefined") return pb;
@@ -8033,193 +8458,175 @@ document.addEventListener('DOMContentLoaded', function(){
     return null;
   }
 
-  function getAuthRecord(){
+  function getAuthUserSafe(){
     try{
-      if(typeof authUser === "function"){
-        const u = authUser();
-        if(u) return u;
-      }
+      if(typeof authUser === "function") return authUser();
     }catch(_){}
-
-    const p = getPB();
+    const p = getPb();
     return p?.authStore?.record || p?.authStore?.model || null;
   }
 
-  function detectFromPresence(){
-    const cards = Array.from(document.querySelectorAll(".presenceUser"));
-    for(const card of cards){
-      const text = (card.textContent || "").trim();
-      if(/hors ligne|offline|depuis/i.test(text)) continue;
-
-      const nameNode = card.querySelector(".presenceName");
-      const name = (nameNode?.textContent || "").trim();
-
-      if(/^dora$/i.test(name)) return "Dora";
-      if(/^zerlezz$/i.test(name) || /^zerle/i.test(name)) return "Zerlezz";
-    }
-    return "";
+  function getUserName(){
+    try{
+      if(typeof authUserName === "function" && authUserName()) return authUserName();
+    }catch(_){}
+    const user = getAuthUserSafe();
+    return user?.name || user?.username || user?.email?.split("@")[0] || localStorage.getItem("duoSender") || "Non connecté";
   }
 
-  function detectProfileName(){
-    const user = getAuthRecord();
-
-    const candidates = [
-      user?.name,
-      user?.username,
-      user?.email,
-      sessionStorage.getItem("duoSenderSession"),
-      sessionStorage.getItem("duoPocketBaseLogin"),
-      sessionStorage.getItem("duoPocketBaseEmail"),
-      localStorage.getItem("duoSender"),
-      localStorage.getItem("duoPocketBaseLastLogin"),
-      localStorage.getItem("duoPocketBaseLastEmail"),
-      detectFromPresence()
-    ].filter(Boolean).map(v => String(v).trim());
-
-    const raw = candidates.join(" ").toLowerCase();
-
-    if(raw.includes("dora")) return "Dora";
-    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
-
-    const first = candidates.find(Boolean);
-    if(first && first.includes("@")) return first.split("@")[0];
-    return first || "";
+  function getUserEmail(){
+    const user = getAuthUserSafe();
+    return user?.email || sessionStorage.getItem("duoPocketBaseEmail") || localStorage.getItem("duoPocketBaseLastEmail") || "";
   }
 
-  function isReallyConnected(){
-    const p = getPB();
-    if(p?.authStore?.isValid) return true;
-    if(getAuthRecord()) return true;
-
-    const name = detectProfileName();
-    return name === "Dora" || name === "Zerlezz";
+  function initials(name){
+    const clean = String(name || "").trim();
+    if(!clean || clean === "Non connecté") return "--";
+    const parts = clean.split(/[\s._-]+/).filter(Boolean);
+    if(parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return clean.slice(0,2).toUpperCase();
   }
 
-  function roleFor(name){
-    if(name === "Dora") return "Administrateur";
-    if(name === "Zerlezz") return "Vendeur";
-    return "Profil";
+  function roleForName(name){
+    const n = String(name || "").toLowerCase();
+    if(n.includes("dora")) return "Administrateur";
+    if(n.includes("zerle")) return "Vendeur";
+    if(n.includes("anonyme")) return "Invité";
+    return getUserEmail() || "Profil";
   }
 
-  function avatarFor(name){
-    if(name === "Dora") return "DO";
-    if(name === "Zerlezz") return "ZE";
-    return name ? name.slice(0,2).toUpperCase() : "--";
-  }
+  function updateSidebarProfile(){
+    const p = getPb();
+    const connected = !!p?.authStore?.isValid;
+    const name = connected ? getUserName() : "Non connecté";
 
-  function forceSidebarProfile(){
-    const connected = isReallyConnected();
-    const name = connected ? (detectProfileName() || "Connecté") : "Non connecté";
-
-    const nameEl = $("sidebarProfileName");
-    const roleEl = $("sidebarProfileRole");
-    const avatarEl = $("sidebarProfileAvatar");
-    const statusEl = $("sidebarProfileStatus");
+    const nameEl = byId("sidebarProfileName");
+    const roleEl = byId("sidebarProfileRole");
+    const avatarEl = byId("sidebarProfileAvatar");
+    const statusEl = byId("sidebarProfileStatus");
 
     if(nameEl) nameEl.textContent = name;
-    if(roleEl) roleEl.textContent = connected ? roleFor(name) : "Profil";
-    if(avatarEl) avatarEl.textContent = connected ? avatarFor(name) : "--";
+    if(roleEl) roleEl.textContent = connected ? roleForName(name) : "Clique pour te connecter";
+    if(avatarEl) avatarEl.textContent = initials(name);
     if(statusEl) statusEl.classList.toggle("online", connected);
-
-    if(connected && (name === "Dora" || name === "Zerlezz")){
-      sessionStorage.setItem("duoSenderSession", name);
-      localStorage.setItem("duoSender", name);
-
-      ["senderName","miniSenderName","threadSenderName"].forEach(id=>{
-        const input = $(id);
-        if(input) input.value = name;
-      });
-    }
   }
 
   function closeProfileMenu(){
-    $("sidebarProfileMenu")?.classList.remove("open");
-    $("sidebarProfileToggle")?.setAttribute("aria-expanded","false");
+    byId("sidebarProfileMenu")?.classList.remove("open");
+    byId("sidebarProfileToggle")?.setAttribute("aria-expanded","false");
   }
 
   function toggleProfileMenu(){
-    const menu = $("sidebarProfileMenu");
+    const menu = byId("sidebarProfileMenu");
+    const toggle = byId("sidebarProfileToggle");
     if(!menu) return;
     const open = !menu.classList.contains("open");
     menu.classList.toggle("open", open);
-    $("sidebarProfileToggle")?.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle?.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
-  async function clearSession(keepRemember){
-    try{ getPB()?.authStore?.clear(); }catch(_){}
-    ["duoPocketBaseLogin","duoPocketBaseEmail","duoPocketBasePassword","duoSenderSession"].forEach(k=>{
-      sessionStorage.removeItem(k);
-    });
-    if(!keepRemember){
+  async function clearDuoSession(removeRemember){
+    try{ getPb()?.authStore?.clear(); }catch(_){}
+
+    ["duoPocketBaseLogin","duoPocketBaseEmail","duoPocketBasePassword","duoSenderSession"]
+      .forEach(k=>sessionStorage.removeItem(k));
+
+    if(removeRemember){
       localStorage.removeItem("duoRememberLogin");
-      localStorage.removeItem("duoSender");
     }
   }
 
-  async function openLogin(){
-    closeProfileMenu();
-    await clearSession(true);
-    forceSidebarProfile();
-
+  async function openLoginModal(){
     try{
       if(typeof showDuoLoginModal === "function"){
         await showDuoLoginModal();
       }else if(typeof ensurePbAuth === "function"){
         await ensurePbAuth();
+      }else{
+        alert("Module de connexion introuvable.");
       }
     }catch(e){
       console.warn("Login annulé ou impossible", e);
     }
 
     try{ if(typeof syncSenderInputsFromAuth === "function") syncSenderInputsFromAuth(); }catch(_){}
-    forceSidebarProfile();
-    setTimeout(forceSidebarProfile, 400);
-    setTimeout(forceSidebarProfile, 1200);
+    try{ if(typeof renderAll === "function") renderAll(); }catch(_){}
+    try{
+      if(typeof updatePresence === "function" && typeof pageLabel === "function"){
+        const page = window.currentPageId || "dashboard";
+        updatePresence({page, pageLabel:pageLabel(page)});
+      }
+    }catch(_){}
+    updateSidebarProfile();
   }
 
-  async function logout(){
+  async function switchProfile(){
     closeProfileMenu();
-    await clearSession(false);
-    forceSidebarProfile();
-    setTimeout(openLogin, 150);
+    await clearDuoSession(false);
+
+    const loginInput = byId("duoLoginInput");
+    const passwordInput = byId("duoPasswordInput");
+    if(loginInput) loginInput.value = "";
+    if(passwordInput) passwordInput.value = "";
+
+    updateSidebarProfile();
+    await openLoginModal();
+  }
+
+  async function logoutProfile(){
+    closeProfileMenu();
+    await clearDuoSession(true);
+    updateSidebarProfile();
+
+    const loginInput = byId("duoLoginInput");
+    const passwordInput = byId("duoPasswordInput");
+    const rememberInput = byId("duoRememberInput");
+    if(loginInput) loginInput.value = "";
+    if(passwordInput) passwordInput.value = "";
+    if(rememberInput) rememberInput.checked = false;
+
+    await openLoginModal();
   }
 
   document.addEventListener("click", function(e){
-    if(e.target.closest("#sidebarProfileToggle")){
+    const toggle = e.target.closest("#sidebarProfileToggle");
+    if(toggle){
+      e.preventDefault();
+      e.stopPropagation();
       toggleProfileMenu();
       return;
     }
 
-    if(e.target.closest("#sidebarSwitchProfileBtn")){
-      openLogin();
+    const switchBtn = e.target.closest("#sidebarSwitchProfileBtn,[data-sidebar-action='switch']");
+    if(switchBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      switchProfile();
       return;
     }
 
-    if(e.target.closest("#sidebarLogoutBtn")){
-      logout();
+    const logoutBtn = e.target.closest("#sidebarLogoutBtn,[data-sidebar-action='logout']");
+    if(logoutBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      logoutProfile();
       return;
     }
 
     if(!e.target.closest("#sidebarProfile")){
       closeProfileMenu();
     }
-  });
+  }, true);
 
   document.addEventListener("DOMContentLoaded", function(){
-    forceSidebarProfile();
-    setTimeout(forceSidebarProfile, 300);
-    setTimeout(forceSidebarProfile, 1000);
-    setTimeout(forceSidebarProfile, 2500);
-    setInterval(forceSidebarProfile, 3000);
+    updateSidebarProfile();
+    setTimeout(updateSidebarProfile, 700);
+    setInterval(updateSidebarProfile, 5000);
   });
 
-  window.addEventListener("load", function(){
-    forceSidebarProfile();
-    setTimeout(forceSidebarProfile, 600);
-  });
-
-  window.updateSidebarProfile = forceSidebarProfile;
-  window.forceSidebarProfile = forceSidebarProfile;
+  window.updateSidebarProfile = updateSidebarProfile;
+  window.duoSwitchProfile = switchProfile;
+  window.duoLogout = logoutProfile;
 })();
 </script>
 
