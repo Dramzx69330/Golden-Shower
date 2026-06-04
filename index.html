@@ -137,6 +137,38 @@
       background:var(--panel2)!important;
       border-color:var(--line)!important;
     }
+    @media(max-width:760px){
+      #photos{margin-top:0}
+      body:has(#photos.active) .top{display:grid;gap:12px;margin-bottom:16px}
+      body:has(#photos.active) .top > div:last-child{display:none}
+      .photoHero{grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+      .photoPanel,.photoRulePanel,.photoGalleryShell{padding:16px;border-radius:9px}
+      .photoPanel h2,.photoRulePanel h2,.photoGalleryHead h2{font-size:18px;margin-bottom:8px}
+      .photoGate{padding:10px 12px;font-size:13px;line-height:1.35}
+      .photoComposer{gap:10px}
+      .photoComposer input{padding:11px 12px;font-size:13px}
+      .photoRulePanel{gap:12px}
+      .photoRule{display:grid;grid-template-columns:1fr;gap:4px;align-items:start;padding:10px 12px}
+      .photoRule span{text-align:left;font-size:12px}
+      .photoGalleryHead{display:grid;grid-template-columns:1fr auto;align-items:start;margin-bottom:12px}
+      .photoGalleryHead p{font-size:13px;line-height:1.35}
+      .photoGrid{grid-template-columns:1fr;gap:12px}
+      .photoCard{border-radius:9px}
+      .photoCard:hover{transform:none}
+      .photoCard:hover img{transform:none}
+      .photoCard img{aspect-ratio:1 / 1;object-fit:cover}
+      .photoBody{padding:12px;gap:7px}
+      .photoActions{display:grid;grid-template-columns:1fr;gap:8px;justify-content:stretch}
+      .photoActions button{width:100%;min-height:38px}
+      .photoUsedBadge{font-size:20px}
+    }
+    @media(max-width:420px){
+      .photoPanel,.photoRulePanel,.photoGalleryShell{padding:14px}
+      .photoGalleryHead{grid-template-columns:1fr;gap:8px}
+      .photoGalleryHead .pill{justify-self:start}
+      .photoCard img{aspect-ratio:4 / 5}
+      .photoSideBadge{left:8px;top:8px;font-size:10px;padding:4px 8px}
+    }
 
     .checkLine{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
     .checkLine input{min-width:auto}
@@ -2506,6 +2538,137 @@ tbody tr:hover td{background:#1b1f29!important}
 .profileJsonBox{margin:0;max-height:420px;overflow:auto;border:1px solid rgba(255,255,255,.08);background:#0b0e14;color:#dbeafe;border-radius:14px;padding:16px;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 @media(max-width:1050px){.profileGrid{grid-template-columns:1fr}}
 @media(max-width:760px){.profileHero{display:grid}.profileInfoGrid{grid-template-columns:1fr}.profileBigAvatar{width:62px;height:62px;border-radius:18px;font-size:20px}}
+
+/* Responsive global telephone */
+@media(max-width:760px){
+  html,body{max-width:100%;overflow-x:hidden}
+  .app{display:block;min-height:100vh}
+  aside{
+    position:sticky!important;
+    top:0;
+    z-index:9000;
+    height:auto!important;
+    padding:14px 12px!important;
+    border-right:0!important;
+    border-bottom:1px solid var(--line)!important;
+  }
+  .brand{font-size:18px;margin-bottom:2px}
+  .sub{font-size:12px;margin-bottom:12px;line-height:1.35}
+  .nav{
+    display:flex!important;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    scrollbar-width:thin;
+  }
+  .nav button{
+    flex:0 0 auto;
+    width:auto!important;
+    min-width:96px;
+    padding:10px 12px!important;
+    text-align:center!important;
+    white-space:nowrap;
+    border-radius:8px!important;
+  }
+  .sidebarProfile{margin-top:10px!important}
+  main{padding:18px 12px 86px!important;max-width:100%!important;overflow:hidden}
+  .top{display:grid!important;grid-template-columns:1fr;gap:14px;margin-bottom:18px!important}
+  .top > div{min-width:0}
+  h1{font-size:30px!important;line-height:1.05}
+  h2{font-size:19px!important;line-height:1.15}
+  h3{font-size:16px!important}
+  .globalSearchWrap{max-width:100%;margin-top:12px}
+  .globalSearchWrap input,.globalSearch{width:100%;min-width:0}
+  #livePresenceBox{width:100%;min-width:0}
+  .themeSwitcher select{width:100%;min-width:0}
+  .grid,.cards,.two,.three{grid-template-columns:1fr!important}
+  .card,.controlPanel,.liveNowCard,.photoPanel,.photoRulePanel,.photoGalleryShell{
+    max-width:100%;
+    min-width:0;
+    border-radius:9px!important;
+  }
+  .pad,.controlPanel,.liveNowCard{padding:16px!important}
+  .metric strong{font-size:28px}
+  .toolbar{
+    display:grid!important;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  input,select,textarea,button{
+    max-width:100%;
+  }
+  .toolbar input,.toolbar select,.form input,.form select,.form textarea,.miniForm input,.miniForm button{
+    width:100%;
+    min-width:0;
+  }
+  .form{grid-template-columns:1fr!important}
+  .checkLine{align-items:flex-start}
+  .card:has(table){
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  table{
+    min-width:760px;
+    font-size:13px!important;
+  }
+  th,td{padding:11px 10px!important}
+  .ordersTableScroll table{min-width:980px}
+  .ordersTableScroll th:nth-child(10),.ordersTableScroll td:nth-child(10){width:86px}
+  .ordersTableScroll th:nth-child(12),.ordersTableScroll td:nth-child(12){width:112px}
+  .chatWrap{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    gap:14px!important;
+  }
+  .messages{min-height:360px!important;max-height:62vh;padding:14px!important}
+  .msg{max-width:92%!important}
+  .chatControls{display:grid!important;grid-template-columns:1fr;gap:8px}
+  .chatControls input,.chatControls select,.chatControls button,.chatControls label{width:100%;min-width:0}
+  .chatSide{max-height:none;overflow:visible}
+  .controlHeroNumbers,.controlGrid,.controlActionGrid,.controlOpsGrid,.controlCommand,.controlScannerPro{
+    grid-template-columns:1fr!important;
+  }
+  .controlHeroMain,.controlPanel{min-width:0}
+  .clientMetrics,.profileInfoGrid,.profileGrid,.chartGrid{grid-template-columns:1fr!important}
+  .chartRow{grid-template-columns:64px 1fr 70px!important;gap:8px}
+  .messengerPanel{
+    right:10px!important;
+    left:10px!important;
+    bottom:86px!important;
+    width:auto!important;
+    height:min(620px,calc(100vh - 112px))!important;
+    border-radius:12px!important;
+  }
+  .floatingChatBtn{right:16px!important;bottom:16px!important;width:54px!important;height:54px!important}
+  .modalBackdrop,.threadBackdrop,.emergencyBackdrop,.voiceCallBackdrop,.callHistoryBackdrop{
+    padding:10px!important;
+  }
+  .clientModal,.threadPanel,.emergencyModal,.voiceCallModal,.callHistoryModal{
+    width:100%!important;
+    max-width:100%!important;
+    max-height:calc(100vh - 20px)!important;
+    border-radius:12px!important;
+  }
+}
+
+@media(max-width:420px){
+  aside{padding:12px 10px!important}
+  main{padding:14px 10px 80px!important}
+  .brand{font-size:17px}
+  .sub{display:none}
+  .nav button{min-width:88px;padding:9px 10px!important;font-size:13px}
+  h1{font-size:26px!important}
+  .pad,.controlPanel,.liveNowCard{padding:14px!important}
+  table{min-width:700px}
+  .ordersTableScroll table{min-width:930px}
+  .msg{max-width:96%!important}
+  .messages{min-height:320px!important}
+  .messengerTabs button{font-size:12px;padding:10px 6px}
+  .floatingChatBtn{width:50px!important;height:50px!important}
+}
 
 </style>
 </head>
