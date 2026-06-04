@@ -2418,6 +2418,24 @@ tbody tr:hover td{background:#1b1f29!important}
   }
 }
 
+
+/* V50.3 — Page Profil fix routing */
+.profilePageShell{display:grid;gap:18px}
+.profileHero{display:flex;justify-content:space-between;align-items:center;gap:18px;background:radial-gradient(circle at 0% 0%,rgba(96,165,250,.14),transparent 34%),linear-gradient(180deg,#181b22,#15171d)!important}
+.profileHeroLeft{display:flex;align-items:center;gap:18px;min-width:0}
+.profileBigAvatar{width:78px;height:78px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#1d4ed8,#111827);color:#fff;font-size:24px;font-weight:1000;box-shadow:0 0 0 8px rgba(37,99,235,.12)}
+.profileBadges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.profileBadge{display:inline-flex;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#d1d5db;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
+.profileBadge.ok{color:#bbf7d0;border-color:rgba(34,197,94,.32);background:rgba(34,197,94,.10)}
+.profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.profileInfoGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.profileInfo{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.13);border-radius:13px;padding:13px 14px;min-width:0}
+.profileInfo span{display:block;color:var(--muted);font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.10em;margin-bottom:7px}
+.profileInfo strong{display:block;color:#fff;font-size:14px;line-height:1.35;word-break:break-word}
+.profileJsonBox{margin:0;max-height:420px;overflow:auto;border:1px solid rgba(255,255,255,.08);background:#0b0e14;color:#dbeafe;border-radius:14px;padding:16px;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+@media(max-width:1050px){.profileGrid{grid-template-columns:1fr}}
+@media(max-width:760px){.profileHero{display:grid}.profileInfoGrid{grid-template-columns:1fr}.profileBigAvatar{width:62px;height:62px;border-radius:18px;font-size:20px}}
+
 </style>
 </head>
 <body>
@@ -2910,7 +2928,48 @@ tbody tr:hover td{background:#1b1f29!important}
         <div id="activity" class="activity list"></div>
       </div>
     </section>
-  </main>
+  
+      <section class="page" id="profil">
+        <div class="profilePageShell">
+          <div class="profileHero card pad">
+            <div class="profileHeroLeft">
+              <div class="profileBigAvatar" id="profilePageAvatar">--</div>
+              <div>
+                <h2 id="profilePageName">Profil</h2>
+                <p class="muted" id="profilePageRole">Informations du compte connecté</p>
+                <div class="profileBadges">
+                  <span class="profileBadge ok" id="profilePageStatus">● En ligne</span>
+                  <span class="profileBadge" id="profilePageUserId">ID: -</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="profileGrid">
+            <div class="card pad"><h2>Compte</h2><div class="profileInfoGrid">
+              <div class="profileInfo"><span>Nom</span><strong id="profileInfoName">-</strong></div>
+              <div class="profileInfo"><span>Username</span><strong id="profileInfoUsername">-</strong></div>
+              <div class="profileInfo"><span>Email</span><strong id="profileInfoEmail">-</strong></div>
+              <div class="profileInfo"><span>Rôle</span><strong id="profileInfoRole">-</strong></div>
+              <div class="profileInfo"><span>ID PocketBase</span><strong id="profileInfoId">-</strong></div>
+              <div class="profileInfo"><span>Créé le</span><strong id="profileInfoCreated">-</strong></div>
+            </div></div>
+            <div class="card pad"><h2>Connexion</h2><div class="profileInfoGrid">
+              <div class="profileInfo"><span>IP publique</span><strong id="profileInfoIp">Chargement...</strong></div>
+              <div class="profileInfo"><span>Statut PocketBase</span><strong id="profileInfoAuth">-</strong></div>
+              <div class="profileInfo"><span>Page actuelle</span><strong id="profileInfoCurrentPage">-</strong></div>
+              <div class="profileInfo"><span>Sender actif</span><strong id="profileInfoSender">-</strong></div>
+            </div></div>
+            <div class="card pad"><h2>Appareil</h2><div class="profileInfoGrid">
+              <div class="profileInfo"><span>Navigateur</span><strong id="profileInfoBrowser">-</strong></div>
+              <div class="profileInfo"><span>Système</span><strong id="profileInfoOs">-</strong></div>
+              <div class="profileInfo"><span>Écran</span><strong id="profileInfoScreen">-</strong></div>
+              <div class="profileInfo"><span>Langue</span><strong id="profileInfoLanguage">-</strong></div>
+            </div></div>
+            <div class="card pad"><h2>Détails techniques</h2><pre class="profileJsonBox" id="profileJsonBox">{}</pre></div>
+          </div>
+        </div>
+      </section>
+    </main>
 </div>
 
 
@@ -7284,187 +7343,58 @@ async function start(){
 start();
 </script>
 
-<script>
-/* V50.1 — Clic carte profil = page Profil, pas menu */
-(function(){
-  function $(id){ return document.getElementById(id); }
-
-  function openProfilPageHard(){
-    try{
-      const menu = $("sidebarProfileMenu");
-      if(menu) menu.classList.remove("open");
-
-      const toggle = $("sidebarProfileToggle");
-      if(toggle) toggle.setAttribute("aria-expanded", "false");
-
-      if(typeof goProfilePage === "function"){
-        goProfilePage();
-        return;
-      }
-
-      if(typeof goPage === "function"){
-        goPage("profil");
-      }else{
-        document.querySelectorAll(".page").forEach(function(page){
-          page.classList.remove("active");
-        });
-        $("profil")?.classList.add("active");
-
-        document.querySelectorAll("[data-page]").forEach(function(btn){
-          btn.classList.toggle("active", btn.getAttribute("data-page") === "profil");
-        });
-      }
-
-      if(typeof renderProfilePage === "function"){
-        setTimeout(renderProfilePage, 80);
-      }
-    }catch(err){
-      console.warn("Ouverture page Profil impossible:", err);
-    }
-  }
-
-  // Capture très tôt et bloque les anciens listeners qui ouvraient le menu.
-  document.addEventListener("click", function(event){
-    const card = event.target.closest("#sidebarProfileToggle, .sidebarProfileMain");
-    if(!card) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
-
-    openProfilPageHard();
-  }, true);
-
-  // Le menu ne doit plus rester ouvert par erreur.
-  document.addEventListener("DOMContentLoaded", function(){
-    const menu = $("sidebarProfileMenu");
-    if(menu) menu.classList.remove("open");
-  });
-
-  window.openProfilPageHard = openProfilPageHard;
-})();
-</script>
-
 
 <script>
-/* V50.2 — Restore profil + clic ouvre page Profil */
+/* V50.3 — Profil route hard fix */
 (function(){
-  function $(id){ return document.getElementById(id); }
-
-  function getPB(){
-    try{
-      if(window.pb) return window.pb;
-      if(typeof pb !== "undefined") return pb;
-    }catch(_){}
-    return null;
-  }
-
-  function getAuthRecord(){
-    try{
-      if(typeof authUser === "function"){
-        const u = authUser();
-        if(u) return u;
-      }
-    }catch(_){}
-    const p = getPB();
-    return p?.authStore?.record || p?.authStore?.model || null;
-  }
-
+  let cachedIp = "";
+  function $(id){return document.getElementById(id);}
+  function getPB(){try{if(window.pb)return window.pb;if(typeof pb!=="undefined")return pb;}catch(_){}return null;}
+  function getUser(){try{if(typeof authUser==="function"){const u=authUser();if(u)return u;}}catch(_){}const p=getPB();return p?.authStore?.record||p?.authStore?.model||null;}
   function detectName(){
-    const u = getAuthRecord();
-    const values = [
-      u?.name,
-      u?.username,
-      u?.email,
-      sessionStorage.getItem("duoSenderSession"),
-      sessionStorage.getItem("duoPocketBaseLogin"),
-      sessionStorage.getItem("duoPocketBaseEmail"),
-      localStorage.getItem("duoSender"),
-      localStorage.getItem("duoPocketBaseLastLogin"),
-      localStorage.getItem("duoPocketBaseLastEmail")
-    ].filter(Boolean).map(v => String(v).trim());
-
-    const raw = values.join(" ").toLowerCase();
-    if(raw.includes("dora")) return "Dora";
-    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
-
-    const first = values.find(Boolean);
-    return first ? (first.includes("@") ? first.split("@")[0] : first) : "";
+    const u=getUser();
+    const values=[u?.name,u?.username,u?.email,sessionStorage.getItem("duoSenderSession"),sessionStorage.getItem("duoPocketBaseLogin"),sessionStorage.getItem("duoPocketBaseEmail"),localStorage.getItem("duoSender")].filter(Boolean).map(v=>String(v).trim());
+    const raw=values.join(" ").toLowerCase();
+    if(raw.includes("dora"))return "Dora";
+    if(raw.includes("zerlezz")||raw.includes("zerle"))return "Zerlezz";
+    const first=values.find(Boolean);
+    return first?(first.includes("@")?first.split("@")[0]:first):"";
   }
-
-  function avatar(name){
-    if(name === "Dora") return "DO";
-    if(name === "Zerlezz") return "ZE";
-    return name ? name.slice(0,2).toUpperCase() : "--";
-  }
-
-  function role(name){
-    if(name === "Dora") return "Administrateur";
-    if(name === "Zerlezz") return "Vendeur";
-    return "Profil";
-  }
-
+  function avatar(n){if(n==="Dora")return"DO";if(n==="Zerlezz")return"ZE";return n?n.slice(0,2).toUpperCase():"--";}
+  function role(n){if(n==="Dora")return"Administrateur";if(n==="Zerlezz")return"Vendeur";return"Profil";}
+  function setText(id,v){const node=$(id);if(node)node.textContent=v??"-";}
   function refreshSidebarProfile(){
-    const name = detectName();
-    const connected = !!name || !!getPB()?.authStore?.isValid;
-
-    const finalName = connected ? (name || "Connecté") : "Non connecté";
-
-    const nameEl = $("sidebarProfileName");
-    const roleEl = $("sidebarProfileRole");
-    const avatarEl = $("sidebarProfileAvatar");
-    const statusEl = $("sidebarProfileStatus");
-
-    if(nameEl) nameEl.textContent = finalName;
-    if(roleEl) roleEl.textContent = connected ? role(finalName) : "Profil";
-    if(avatarEl) avatarEl.textContent = connected ? avatar(finalName) : "--";
-    if(statusEl) statusEl.classList.toggle("online", connected);
-
-    if(connected && (finalName === "Dora" || finalName === "Zerlezz")){
-      sessionStorage.setItem("duoSenderSession", finalName);
-      localStorage.setItem("duoSender", finalName);
-    }
+    const name=detectName();const connected=!!name||!!getPB()?.authStore?.isValid;const finalName=connected?(name||"Connecté"):"Non connecté";
+    setText("sidebarProfileName",finalName);setText("sidebarProfileRole",connected?role(finalName):"Profil");setText("sidebarProfileAvatar",connected?avatar(finalName):"--");
+    const status=$("sidebarProfileStatus");if(status)status.classList.toggle("online",connected);
+    if(finalName==="Dora"||finalName==="Zerlezz"){sessionStorage.setItem("duoSenderSession",finalName);localStorage.setItem("duoSender",finalName);}
   }
-
-  function openProfilPage(){
-    const menu = $("sidebarProfileMenu");
-    if(menu) menu.classList.remove("open");
-
-    if(typeof goProfilePage === "function"){
-      goProfilePage();
-    }else if(typeof goPage === "function"){
-      goPage("profil");
-      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 80);
-    }else{
-      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-      $("profil")?.classList.add("active");
-      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 80);
-    }
+  function browserName(){const ua=navigator.userAgent;if(/Edg/i.test(ua))return"Microsoft Edge";if(/Chrome/i.test(ua)&&!/Edg/i.test(ua))return"Chrome";if(/Safari/i.test(ua)&&!/Chrome/i.test(ua))return"Safari";if(/Firefox/i.test(ua))return"Firefox";return"Inconnu";}
+  function osName(){const ua=navigator.userAgent;if(/Windows NT/i.test(ua))return"Windows";if(/iPhone|iPad|iPod/i.test(ua))return"iOS";if(/Android/i.test(ua))return"Android";if(/Mac OS X/i.test(ua))return"macOS";if(/Linux/i.test(ua))return"Linux";return"Inconnu";}
+  async function getIp(){if(cachedIp)return cachedIp;try{const r=await fetch("https://api.ipify.org?format=json",{cache:"no-store"});const d=await r.json();cachedIp=d.ip||"Indisponible";}catch(_){cachedIp="Indisponible";}return cachedIp;}
+  async function renderProfilePage(){
+    const u=getUser();const name=detectName()||"Non connecté";const r=name!=="Non connecté"?role(name):"Profil";const pbValid=!!getPB()?.authStore?.isValid;
+    setText("profilePageAvatar",avatar(name));setText("profilePageName",name);setText("profilePageRole",r);setText("profilePageStatus",pbValid?"● En ligne":"● Session locale");setText("profilePageUserId","ID: "+(u?.id||"-"));
+    setText("profileInfoName",name);setText("profileInfoUsername",u?.username||name);setText("profileInfoEmail",u?.email||"-");setText("profileInfoRole",r);setText("profileInfoId",u?.id||"-");setText("profileInfoCreated",u?.created?new Date(u.created).toLocaleString("fr-FR"):"-");
+    setText("profileInfoAuth",pbValid?"Connecté":"Non valide / local");setText("profileInfoCurrentPage","Profil");setText("profileInfoSender",sessionStorage.getItem("duoSenderSession")||localStorage.getItem("duoSender")||"-");
+    setText("profileInfoBrowser",browserName());setText("profileInfoOs",osName());setText("profileInfoScreen",`${screen.width} x ${screen.height} @ ${devicePixelRatio}x`);setText("profileInfoLanguage",navigator.language);
+    const json={account:{name,role:r,id:u?.id||"",username:u?.username||"",email:u?.email||"",verified:u?.verified??""},session:{pocketbaseValid:pbValid,sender:sessionStorage.getItem("duoSenderSession")||localStorage.getItem("duoSender")||""},device:{browser:browserName(),os:osName(),platform:navigator.platform,userAgent:navigator.userAgent,language:navigator.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,screen:`${screen.width} x ${screen.height}`,viewport:`${innerWidth} x ${innerHeight}`},location:{origin:location.origin,url:location.href}};
+    const box=$("profileJsonBox");if(box)box.textContent=JSON.stringify(json,null,2);
+    setText("profileInfoIp",cachedIp||"Chargement...");getIp().then(ip=>{setText("profileInfoIp",ip);json.publicIp=ip;const b=$("profileJsonBox");if(b)b.textContent=JSON.stringify(json,null,2);});
+    refreshSidebarProfile();
   }
-
-  document.addEventListener("click", function(e){
-    const card = e.target.closest("#sidebarProfileToggle, .sidebarProfileMain, #sidebarProfile");
-    if(!card) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    openProfilPage();
-  }, true);
-
-  document.addEventListener("DOMContentLoaded", function(){
-    refreshSidebarProfile();
-    setTimeout(refreshSidebarProfile, 300);
-    setTimeout(refreshSidebarProfile, 1000);
-    setInterval(refreshSidebarProfile, 3000);
-  });
-
-  window.addEventListener("load", function(){
-    refreshSidebarProfile();
-    setTimeout(refreshSidebarProfile, 600);
-  });
-
-  window.updateSidebarProfile = refreshSidebarProfile;
+  function openProfilePageOnly(){
+    const page=$("profil");if(!page){alert("Page Profil introuvable dans le fichier.");return;}
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));page.classList.add("active");
+    document.querySelectorAll("[data-page]").forEach(btn=>btn.classList.toggle("active",btn.getAttribute("data-page")==="profil"));
+    const title=$("pageTitle"),desc=$("pageDesc");if(title)title.textContent="Profil";if(desc)desc.textContent="Informations complètes du compte connecté, session, IP et appareil.";
+    try{window.currentPageId="profil";}catch(_){}
+    window.scrollTo({top:0,behavior:"smooth"});setTimeout(renderProfilePage,50);
+  }
+  document.addEventListener("click",function(e){const card=e.target.closest("#sidebarProfile,#sidebarProfileToggle,.sidebarProfileMain");if(!card)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openProfilePageOnly();},true);
+  document.addEventListener("DOMContentLoaded",function(){refreshSidebarProfile();setTimeout(refreshSidebarProfile,500);setTimeout(refreshSidebarProfile,1500);setInterval(refreshSidebarProfile,3000);});
+  window.addEventListener("load",refreshSidebarProfile);
+  window.renderProfilePage=renderProfilePage;window.goProfilePage=openProfilePageOnly;window.updateSidebarProfile=refreshSidebarProfile;
 })();
 </script>
 
