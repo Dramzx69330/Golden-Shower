@@ -1,0 +1,20 @@
+{
+  "name": "Duo Update",
+  "short_name": "Duo",
+  "description": "Duo Update - commandes, comptes, chat et photos.",
+  "start_url": "./index-pocketbase-v50-4-presence-online-only.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#0f1115",
+  "theme_color": "#0f1115",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./duo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
