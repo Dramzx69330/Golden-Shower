@@ -94,6 +94,37 @@
     .dot.ok{background:#16a34a}.dot.bad{background:#dc2626}
     .activity{max-height:520px;overflow:auto}
     .mobileMenu{display:none}
+    .photoHero{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch;margin-bottom:20px}
+    .photoPanel{background:#111827;color:#fff;border:1px solid rgba(255,255,255,.08);border-radius:10px;box-shadow:var(--shadow);padding:24px;overflow:hidden}
+    .photoPanel h2{color:#fff;margin-bottom:8px}
+    .photoPanel p{color:#cbd5e1;margin:0 0 16px;line-height:1.55}
+    .photoComposer{display:grid;gap:12px}
+    .photoComposer input{width:100%;min-width:0}
+    .photoComposer label{display:grid;gap:8px;color:#e5e7eb;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .photoGate{border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 14px;background:rgba(255,255,255,.06);color:#e5e7eb;font-weight:800;margin-bottom:14px}
+    .photoRulePanel{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px;display:grid;align-content:start;gap:16px}
+    .photoRuleList{display:grid;gap:10px}
+    .photoRule{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#f9fafb}
+    .photoRule strong{font-size:13px}
+    .photoRule span{color:var(--muted);font-size:12px;text-align:right}
+    .photoGalleryShell{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px}
+    .photoGalleryHead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:16px}
+    .photoGalleryHead p{margin:4px 0 0}
+    .photoGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .photoCard{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 28px rgba(17,24,39,.08);transition:transform .16s ease,box-shadow .16s ease}
+    .photoCard:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(17,24,39,.12)}
+    .photoMedia{position:relative;background:#eef2f7;overflow:hidden}
+    .photoCard img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#f3f4f6;transition:filter .18s ease,transform .18s ease}
+    .photoCard:hover img{transform:scale(1.02)}
+    .photoCard.used img{filter:blur(5px) grayscale(.55);transform:none}
+    .photoSideBadge{position:absolute;left:10px;top:10px;background:rgba(17,24,39,.82);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:950;text-transform:uppercase}
+    .photoUsedBadge{position:absolute;inset:0;display:none;place-items:center;background:rgba(17,24,39,.38);color:#fff;font-size:24px;font-weight:950;letter-spacing:.02em;text-transform:uppercase;text-align:center}
+    .photoCard.used .photoUsedBadge{display:grid}
+    .photoBody{padding:14px;display:grid;gap:8px}
+    .photoMeta{font-size:12px;color:var(--muted)}
+    .photoActions{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+    .photoActions .secondary.small{padding:8px 10px}
+    .photoDownloadBtn[disabled]{opacity:.55;cursor:not-allowed}
 
     .checkLine{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
     .checkLine input{min-width:auto}
@@ -511,7 +542,33 @@
       white-space:nowrap;
     }
     .pdfChip:hover{background:rgba(239,68,68,.18)}
+    .pdfChipCompact{justify-content:center;width:72px;padding:6px 10px}
     .pdfEmpty{color:var(--muted);font-size:12px;font-weight:800}
+    .ordersTableCard{overflow:hidden}
+    .ordersTableScroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:2px}
+    .ordersTableScroll::-webkit-scrollbar{height:10px}
+    .ordersTableScroll::-webkit-scrollbar-track{background:rgba(148,163,184,.10);border-radius:999px}
+    .ordersTableScroll::-webkit-scrollbar-thumb{background:rgba(148,163,184,.38);border-radius:999px}
+    .ordersTableScroll table{min-width:1060px;table-layout:fixed}
+    .ordersTableScroll th,.ordersTableScroll td{padding:14px 12px}
+    .ordersTableScroll th:nth-child(1),.ordersTableScroll td:nth-child(1){width:56px}
+    .ordersTableScroll th:nth-child(2),.ordersTableScroll td:nth-child(2){width:78px}
+    .ordersTableScroll th:nth-child(3),.ordersTableScroll td:nth-child(3){width:110px}
+    .ordersTableScroll th:nth-child(4),.ordersTableScroll td:nth-child(4){width:96px}
+    .ordersTableScroll th:nth-child(5),.ordersTableScroll td:nth-child(5){width:112px}
+    .ordersTableScroll th:nth-child(6),.ordersTableScroll td:nth-child(6){width:76px}
+    .ordersTableScroll th:nth-child(7),.ordersTableScroll td:nth-child(7){width:58px}
+    .ordersTableScroll th:nth-child(8),.ordersTableScroll td:nth-child(8){width:88px}
+    .ordersTableScroll th:nth-child(9),.ordersTableScroll td:nth-child(9){width:118px}
+    .ordersTableScroll th:nth-child(10),.ordersTableScroll td:nth-child(10){width:96px}
+    .ordersTableScroll th:nth-child(11),.ordersTableScroll td:nth-child(11){width:86px}
+    .ordersTableScroll th:nth-child(12),.ordersTableScroll td:nth-child(12){width:112px}
+    .ordersTableScroll td{overflow:hidden;text-overflow:ellipsis}
+    .ordersTableScroll td:nth-child(10){overflow:visible}
+    .ordersTableScroll .pdfChip{max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+    .ordersTableScroll .right{white-space:nowrap}
+    .orderActions{display:grid;gap:6px;justify-items:center;white-space:normal}
+    .orderActions button{width:86px;text-align:center;padding-left:0;padding-right:0}
     @media(max-width:900px){.chartGrid{grid-template-columns:1fr}.chartRow{grid-template-columns:70px 1fr 76px}}
 
 
@@ -661,6 +718,8 @@
       main{padding:24px 16px}
       .cards,.two,.three,.chatWrap{grid-template-columns:1fr}
       .chatWrap{height:auto}
+      .photoHero{grid-template-columns:1fr}
+      .photoGrid{grid-template-columns:1fr}
       .messages{min-height:460px}
       .form{grid-template-columns:1fr}
     }
@@ -2486,6 +2545,7 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="clients">Clients</button>
       <button data-page="comptes">Comptes</button>
       <button data-page="chat">Chat</button>
+      <button data-page="photos">Photos</button>
       <button data-page="stats">Stats</button>
     </div>
 
@@ -2613,16 +2673,18 @@ tbody tr:hover td{background:#1b1f29!important}
         </div>
       </div>
 
-      <div class="card pad" style="margin-top:20px">
+      <div class="card pad ordersTableCard" style="margin-top:20px">
         <div class="toolbar">
           <input id="search" placeholder="Recherche client, vendeur, série..." oninput="renderAll()">
           <select id="filterStatus" onchange="renderAll()"><option value="">Tous statuts</option><option>A Send</option><option>Send</option><option>Confirmer</option><option>Annulé</option></select>
           <select id="filterPlatform" onchange="renderAll()"><option value="">Toutes plateformes</option><option>Vinted</option><option>Leboncoin</option></select>
         </div>
+        <div class="ordersTableScroll">
         <table>
           <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Suivi</th><th>Bordereau</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
           <tbody id="ordersTbody"></tbody>
         </table>
+        </div>
       </div>
     </section>
 
@@ -2883,6 +2945,46 @@ tbody tr:hover td{background:#1b1f29!important}
             </div>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section id="photos" class="page">
+      <div class="photoHero">
+        <div class="photoPanel">
+          <h2>Poster un produit</h2>
+          <div id="photoGate" class="photoGate">Verification du compte...</div>
+          <form id="photoForm" class="photoComposer" style="display:none">
+            <label>Recto
+              <input id="photoFrontFile" type="file" accept="image/*" required>
+            </label>
+            <label>Verso
+              <input id="photoBackFile" type="file" accept="image/*" required>
+            </label>
+            <label>Legende
+              <input id="photoCaption" placeholder="Legende optionnelle">
+            </label>
+            <button class="primary" type="submit">Publier la photo</button>
+          </form>
+        </div>
+        <div class="photoRulePanel">
+          <h2>Acces</h2>
+          <p class="muted">Dora publie un recto et un verso. Zerlezz peut basculer entre les deux faces et telecharger chaque face une seule fois.</p>
+          <div class="photoRuleList">
+            <div class="photoRule"><strong>Compte connecte</strong><span id="photoViewerName">-</span></div>
+            <div class="photoRule"><strong>Droit de publication</strong><span id="photoPostRight">-</span></div>
+            <div class="photoRule"><strong>Anti doublon</strong><span>Blur par face telechargee</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="photoGalleryShell">
+        <div class="photoGalleryHead">
+          <div>
+            <h2>Galerie Photos</h2>
+            <p class="muted">Chaque carte contient un recto et un verso. Change de face avant de telecharger si besoin.</p>
+          </div>
+          <span class="pill" id="photoCount">0 photo</span>
+        </div>
+        <div id="photosGrid" class="photoGrid"></div>
       </div>
     </section>
 
@@ -3624,8 +3726,8 @@ function onSnapshot(ref, next, error){
 // Ancien nom conservé pour éviter de modifier toute l'interface.
 const firebaseConfig = { pocketbaseUrl: PB_URL };
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, voiceCallRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, voiceCallRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
@@ -4842,7 +4944,7 @@ function renderOrders(){
       <td>${esc(r.date||'')}</td><td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td>
       <td>${esc(r.plateforme)}</td><td>${esc(accountLabel(r.accountId))}</td><td>${esc(r.produit)}</td><td>${esc(r.poids)}</td><td>${badge(r.statut)}</td><td>${esc(r.tracking||'')}</td><td>${shippingLabelCell(r)}</td>
       <td class="right"><strong>${euro(r.prix)}</strong></td>
-      <td class="right"><button class="secondary small" onclick="editOrder('${esc(r.id)}')">Modifier</button> <button class="danger small" onclick="removeOrder('${esc(r.id)}')">Supprimer</button></td>
+      <td class="right"><div class="orderActions"><button class="secondary small" onclick="editOrder('${esc(r.id)}')">Modifier</button><button class="danger small" onclick="removeOrder('${esc(r.id)}')">Supprimer</button></div></td>
     </tr>`).join('') || '<tr><td colspan="12" class="muted">Aucune commande.</td></tr>';
 }
 
@@ -5300,7 +5402,7 @@ function handleTypingInput(){
 
 
 function pageLabel(id){
-  const labels={dashboard:'Dashboard',control:'Contrôle',clients:'Clients',comptes:'Comptes',chat:'Chat',stats:'Stats'};
+  const labels={dashboard:'Dashboard',control:'Contrôle',clients:'Clients',comptes:'Comptes',chat:'Chat',photos:'Photos',stats:'Stats'};
   return labels[id] || id || 'Dashboard';
 }
 
@@ -5674,9 +5776,8 @@ function shippingLabelCell(order){
     return `<span class="pdfEmpty">—</span>`;
   }
 
-  const name = order.shippingLabelName || "bordereau.pdf";
-  const size = order.shippingLabelSize ? ` · ${formatFileSize(order.shippingLabelSize)}` : "";
-  return `<button type="button" class="pdfChip" onclick="downloadShippingLabel('${esc(order.id)}')">📄 ${esc(name)}${esc(size)}</button>`;
+  const title = order.shippingLabelName || "bordereau.pdf";
+  return `<button type="button" class="pdfChip pdfChipCompact" title="${esc(title)}" onclick="downloadShippingLabel('${esc(order.id)}')">📄 PDF</button>`;
 }
 
 window.downloadShippingLabel = id => {
@@ -6143,6 +6244,213 @@ window.removeNote=async id=>{ await deleteDoc(doc(notesRef,id)); };
 window.removeTask=async id=>{ await deleteDoc(doc(tasksRef,id)); };
 window.toggleTask=async(id,done)=>{ await setDoc(doc(tasksRef,id),{done,updatedAt:serverTimestamp()},{merge:true}); };
 
+function photoAccountName(){
+  const user = authUser();
+  const values = [user?.name, user?.username, user?.email].filter(Boolean).map(v=>String(v).trim());
+  const raw = values.join(" ").toLowerCase();
+  if(raw.includes("dora")) return "Dora";
+  if(raw.includes("zerlezz") || raw.includes("zherlezz") || raw.includes("zerle")) return "Zerlezz";
+  return values[0] || authUserName() || "Inconnu";
+}
+
+function canPostPhotos(){
+  const user = authUser();
+  const raw = [user?.name, user?.username, user?.email].filter(Boolean).join(" ").toLowerCase();
+  return raw.includes("dora");
+}
+
+function refreshPhotoAccess(){
+  const allowed = canPostPhotos();
+  const name = photoAccountName();
+  const gate = $("photoGate");
+  const form = $("photoForm");
+  if($("photoViewerName")) $("photoViewerName").textContent = name;
+  if($("photoPostRight")) $("photoPostRight").textContent = allowed ? "Autorise" : "Lecture seule";
+  if(gate) gate.textContent = allowed ? "Connecte en Dora : publication autorisee." : "Lecture seule : seul le compte Dora peut publier.";
+  if(form) form.style.display = allowed ? "grid" : "none";
+}
+
+function photoFileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    if(!file) return resolve("");
+    if(!String(file.type || "").startsWith("image/")) return reject(new Error("Choisis une image."));
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 1400;
+        const ratio = Math.min(1, maxSide / Math.max(img.width || 1, img.height || 1));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round((img.width || 1) * ratio));
+        canvas.height = Math.max(1, Math.round((img.height || 1) * ratio));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        let quality = 0.78;
+        let out = canvas.toDataURL("image/jpeg", quality);
+        while(out.length > 900000 && quality > 0.42){
+          quality -= 0.08;
+          out = canvas.toDataURL("image/jpeg", quality);
+        }
+        if(out.length > 1200000) return reject(new Error("Image encore trop lourde apres compression. Essaie une image plus petite."));
+        resolve(out);
+      };
+      img.onerror = () => reject(new Error("Image impossible a lire."));
+      img.src = String(reader.result || "");
+    };
+    reader.onerror = () => reject(reader.error || new Error("Lecture image impossible"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function photoSideSrc(photo, side){
+  if(side === "back") return photo.backImageData || photo.backImageUrl || "";
+  return photo.frontImageData || photo.frontImageUrl || photo.imageData || photo.imageUrl || "";
+}
+
+function photoHasBack(photo){
+  return Boolean(photo.backImageData || photo.backImageUrl);
+}
+
+function photoActiveSide(photo){
+  return photo.viewSide === "back" && photoHasBack(photo) ? "back" : "front";
+}
+
+function photoSideUsed(photo, side){
+  if(side === "back") return Boolean(photo.backUsed);
+  return Boolean(photo.frontUsed || photo.used);
+}
+
+function photoSideUsedBy(photo, side){
+  if(side === "back") return photo.backUsedBy || "";
+  return photo.frontUsedBy || photo.usedBy || "";
+}
+
+function photoSideUsedAt(photo, side){
+  if(side === "back") return photo.backUsedAt || "";
+  return photo.frontUsedAt || photo.usedAt || "";
+}
+
+function renderPhotos(){
+  refreshPhotoAccess();
+  const box = $("photosGrid");
+  if(!box) return;
+  if($("photoCount")) $("photoCount").textContent = `${photos.length} produit${photos.length > 1 ? "s" : ""}`;
+  box.innerHTML = photos.map(p=>{
+    const side = photoActiveSide(p);
+    const src = photoSideSrc(p, side);
+    const used = photoSideUsed(p, side);
+    const sideLabel = side === "back" ? "Verso" : "Recto";
+    const canDelete = canPostPhotos();
+    return `
+    <div class="photoCard ${used ? "used" : ""}">
+      <div class="photoMedia">
+        <img src="${esc(src)}" alt="${esc((p.caption || "Photo publiee par Dora") + " - " + sideLabel)}" loading="lazy">
+        <div class="photoSideBadge">${sideLabel}</div>
+        <div class="photoUsedBadge">Déjà Use</div>
+      </div>
+      <div class="photoBody">
+        <strong>${esc(p.caption || "Photo")}</strong>
+        <span class="photoMeta">Publiee par ${esc(p.sender || "Dora")} · ${stamp(p.createdAt)}</span>
+        <span class="photoMeta">${used ? `${sideLabel} deja telecharge par ${esc(photoSideUsedBy(p, side) || "Zerlezz")} · ${stamp(photoSideUsedAt(p, side))}` : `${sideLabel} disponible au telechargement`}</span>
+        <div class="photoActions">
+          <button class="secondary small" type="button" onclick="togglePhotoSide('${esc(p.id)}')" ${photoHasBack(p) ? "" : "disabled"}>${side === "back" ? "Voir recto" : "Voir verso"}</button>
+          <button class="secondary small photoDownloadBtn" type="button" onclick="downloadPhoto('${esc(p.id)}')" ${used ? "disabled" : ""}>${used ? "Deja Use" : `Telecharger ${sideLabel}`}</button>
+          ${canDelete ? `<button class="danger small" type="button" onclick="deletePhotoProduct('${esc(p.id)}')">Supprimer</button>` : ""}
+        </div>
+      </div>
+    </div>
+  `}).join("") || '<p class="muted">Aucune photo publiee pour le moment.</p>';
+}
+
+$("photoForm")?.addEventListener("submit", async e=>{
+  e.preventDefault();
+  if(!canPostPhotos()){
+    alert("Seul le compte Dora peut publier des photos.");
+    refreshPhotoAccess();
+    return;
+  }
+  const submitBtn = e.currentTarget?.querySelector('button[type="submit"]');
+  if(submitBtn?.disabled) return;
+  const frontFile = $("photoFrontFile")?.files?.[0];
+  const backFile = $("photoBackFile")?.files?.[0];
+  try{
+    if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Publication..."; }
+    const frontImageData = await photoFileToDataURL(frontFile);
+    const backImageData = await photoFileToDataURL(backFile);
+    await addDoc(photosRef, {
+      frontImageData,
+      backImageData,
+      caption: $("photoCaption")?.value?.trim() || "",
+      sender: "Dora",
+      used: false,
+      usedBy: "",
+      usedAt: "",
+      frontUsed: false,
+      frontUsedBy: "",
+      frontUsedAt: "",
+      backUsed: false,
+      backUsedBy: "",
+      backUsedAt: "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    $("photoForm")?.reset();
+    await logActivity("Photo publiee", "Dora a ajoute une photo dans la galerie.");
+  }catch(err){
+    console.error("Publication photo impossible", err);
+    const details = err?.response?.data
+      ? Object.entries(err.response.data).map(([k,v])=>`${k}: ${v?.message || JSON.stringify(v)}`).join("\n")
+      : "";
+    alert(details || err?.message || "Photo impossible a publier.");
+  }finally{
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = "Publier la photo"; }
+  }
+});
+
+function downloadDataUrl(dataUrl, filename){
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename || "photo-duo.jpg";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+window.downloadPhoto=async id=>{
+  const photo = photos.find(p=>p.id === id);
+  if(!photo) return;
+  const side = photoActiveSide(photo);
+  const used = photoSideUsed(photo, side);
+  if(used) return alert("Cette face est deja marquee Deja Use.");
+  const src = photoSideSrc(photo, side);
+  if(!src) return alert("Photo introuvable.");
+  const viewer = photoAccountName();
+  const ext = src.startsWith("data:image/png") ? "png" : src.startsWith("data:image/webp") ? "webp" : "jpg";
+  const label = side === "back" ? "verso" : "recto";
+  downloadDataUrl(src, `photo-duo-${id}-${label}.${ext}`);
+  const payload = side === "back"
+    ? { backUsed:true, backUsedBy:viewer, backUsedAt:serverTimestamp(), updatedAt:serverTimestamp() }
+    : { frontUsed:true, frontUsedBy:viewer, frontUsedAt:serverTimestamp(), used:true, usedBy:viewer, usedAt:serverTimestamp(), updatedAt:serverTimestamp() };
+  await setDoc(doc(photosRef,id), payload, {merge:true});
+  await logActivity("Photo telechargee", `${viewer} a telecharge le ${label} et l'a marque Deja Use.`);
+};
+
+window.togglePhotoSide=id=>{
+  const photo = photos.find(p=>p.id === id);
+  if(!photo || !photoHasBack(photo)) return;
+  photo.viewSide = photoActiveSide(photo) === "back" ? "front" : "back";
+  renderPhotos();
+};
+
+window.deletePhotoProduct=async id=>{
+  if(!canPostPhotos()) return alert("Seul Dora peut supprimer un produit.");
+  const photo = photos.find(p=>p.id === id);
+  if(!photo) return;
+  if(!confirm("Supprimer ce produit recto/verso ?")) return;
+  await deleteDoc(doc(photosRef,id));
+  await logActivity("Produit photo supprime", "Dora a supprime un produit recto/verso de la galerie.");
+};
+
 window.exportCSV=()=>{
   const headers=['date','vendeur','client','plateforme','produit','poids','serie','statut','prix','accountId','shippedAt','tracking','note'];
   const csv=[headers.join(';'),...filteredOrders().map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');
@@ -6161,6 +6469,7 @@ function goPage(id){
     clients:['Clients','Nom, nombre de commandes et dépense totale.'],
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
+    photos:['Photos','Galerie partagee : Dora publie, Zerlezz consulte.'],
     stats:['Stats','Performance par vendeur, plateforme et produit.']
   };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
@@ -7147,6 +7456,7 @@ async function start(){
   try{
     await ensurePbAuth();
     syncSenderInputsFromAuth();
+    refreshPhotoAccess();
     setTimeout(()=>updatePresence(), 250);
     const app=initializeApp(firebaseConfig);
     db=getFirestore(app);
@@ -7160,6 +7470,7 @@ async function start(){
     typingRef=collection(db,'duos',duoId,'typing');
     presenceRef=collection(db,'duos',duoId,'presence');
     urgenciesRef=collection(db,'duos',duoId,'urgencies');
+    photosRef=collection(db,'duos',duoId,'photos');
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
@@ -7179,6 +7490,11 @@ async function start(){
         }
       });
       renderWidget();
+    });
+
+    onSnapshot(query(photosRef,orderBy('createdAt','desc'),limit(80)), snap=>{
+      photos=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderPhotos();
     });
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
