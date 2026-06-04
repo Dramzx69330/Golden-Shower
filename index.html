@@ -95,26 +95,26 @@
     .activity{max-height:520px;overflow:auto}
     .mobileMenu{display:none}
     .photoHero{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;align-items:stretch;margin-bottom:20px}
-    .photoPanel{background:#111827;color:#fff;border:1px solid rgba(255,255,255,.08);border-radius:10px;box-shadow:var(--shadow);padding:24px;overflow:hidden}
-    .photoPanel h2{color:#fff;margin-bottom:8px}
-    .photoPanel p{color:#cbd5e1;margin:0 0 16px;line-height:1.55}
+    .photoPanel{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px;overflow:hidden}
+    .photoPanel h2{color:var(--text);margin-bottom:8px}
+    .photoPanel p{color:var(--muted);margin:0 0 16px;line-height:1.55}
     .photoComposer{display:grid;gap:12px}
     .photoComposer input{width:100%;min-width:0}
-    .photoComposer label{display:grid;gap:8px;color:#e5e7eb;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
-    .photoGate{border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 14px;background:rgba(255,255,255,.06);color:#e5e7eb;font-weight:800;margin-bottom:14px}
-    .photoRulePanel{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px;display:grid;align-content:start;gap:16px}
+    .photoComposer label{display:grid;gap:8px;color:var(--muted);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}
+    .photoGate{border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--panel2);color:var(--text);font-weight:800;margin-bottom:14px}
+    .photoRulePanel{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px;display:grid;align-content:start;gap:16px}
     .photoRuleList{display:grid;gap:10px}
-    .photoRule{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:#f9fafb}
+    .photoRule{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:8px;padding:12px 14px;background:var(--panel2)}
     .photoRule strong{font-size:13px}
     .photoRule span{color:var(--muted);font-size:12px;text-align:right}
-    .photoGalleryShell{background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px}
+    .photoGalleryShell{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px}
     .photoGalleryHead{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:16px}
     .photoGalleryHead p{margin:4px 0 0}
     .photoGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-    .photoCard{background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 28px rgba(17,24,39,.08);transition:transform .16s ease,box-shadow .16s ease}
+    .photoCard{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.16);transition:transform .16s ease,box-shadow .16s ease}
     .photoCard:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(17,24,39,.12)}
-    .photoMedia{position:relative;background:#eef2f7;overflow:hidden}
-    .photoCard img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#f3f4f6;transition:filter .18s ease,transform .18s ease}
+    .photoMedia{position:relative;background:var(--panel2);overflow:hidden}
+    .photoCard img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--panel2);transition:filter .18s ease,transform .18s ease}
     .photoCard:hover img{transform:scale(1.02)}
     .photoCard.used img{filter:blur(5px) grayscale(.55);transform:none}
     .photoSideBadge{position:absolute;left:10px;top:10px;background:rgba(17,24,39,.82);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:950;text-transform:uppercase}
@@ -125,6 +125,18 @@
     .photoActions{display:flex;gap:8px;justify-content:flex-end;align-items:center}
     .photoActions .secondary.small{padding:8px 10px}
     .photoDownloadBtn[disabled]{opacity:.55;cursor:not-allowed}
+    body[data-theme] .photoPanel,
+    body[data-theme] .photoRulePanel,
+    body[data-theme] .photoGalleryShell{
+      background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),var(--panel)!important;
+      border-color:var(--line)!important;
+    }
+    body[data-theme] .photoRule,
+    body[data-theme] .photoCard,
+    body[data-theme] .photoGate{
+      background:var(--panel2)!important;
+      border-color:var(--line)!important;
+    }
 
     .checkLine{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff}
     .checkLine input{min-width:auto}
