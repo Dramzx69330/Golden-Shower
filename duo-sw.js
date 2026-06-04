@@ -1,5 +1,6 @@
 const DUO_CACHE = "duo-update-app-v1";
 const DUO_ASSETS = [
+  "./index.html",
   "./index-pocketbase-v50-4-presence-online-only.html",
   "./duo-manifest.webmanifest",
   "./duo-icon.svg"
