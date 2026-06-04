@@ -8019,10 +8019,11 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 
+
 <script>
-/* V49.2 — Profil sidebar connecté PocketBase */
+/* V49.3 — Fix profil sidebar : lit le vrai compte connecté */
 (function(){
-  function el(id){ return document.getElementById(id); }
+  function $(id){ return document.getElementById(id); }
 
   function getPB(){
     try{
@@ -8044,97 +8045,121 @@ document.addEventListener('DOMContentLoaded', function(){
     return p?.authStore?.record || p?.authStore?.model || null;
   }
 
-  function cleanName(value){
-    return String(value || "").trim();
-  }
+  function detectFromPresence(){
+    const cards = Array.from(document.querySelectorAll(".presenceUser"));
+    for(const card of cards){
+      const text = (card.textContent || "").trim();
+      if(/hors ligne|offline|depuis/i.test(text)) continue;
 
-  function getProfileName(){
-    const user = getAuthRecord();
-    const name = cleanName(user?.name || user?.username || (user?.email ? user.email.split("@")[0] : ""));
-    if(name) return name;
+      const nameNode = card.querySelector(".presenceName");
+      const name = (nameNode?.textContent || "").trim();
 
-    const fallback = cleanName(
-      sessionStorage.getItem("duoSenderSession") ||
-      sessionStorage.getItem("duoPocketBaseLogin") ||
-      localStorage.getItem("duoSender") ||
-      localStorage.getItem("duoPocketBaseLastLogin")
-    );
-
-    if(/dora/i.test(fallback)) return "Dora";
-    if(/zerle/i.test(fallback)) return "Zerlezz";
+      if(/^dora$/i.test(name)) return "Dora";
+      if(/^zerlezz$/i.test(name) || /^zerle/i.test(name)) return "Zerlezz";
+    }
     return "";
   }
 
-  function isConnected(){
+  function detectProfileName(){
+    const user = getAuthRecord();
+
+    const candidates = [
+      user?.name,
+      user?.username,
+      user?.email,
+      sessionStorage.getItem("duoSenderSession"),
+      sessionStorage.getItem("duoPocketBaseLogin"),
+      sessionStorage.getItem("duoPocketBaseEmail"),
+      localStorage.getItem("duoSender"),
+      localStorage.getItem("duoPocketBaseLastLogin"),
+      localStorage.getItem("duoPocketBaseLastEmail"),
+      detectFromPresence()
+    ].filter(Boolean).map(v => String(v).trim());
+
+    const raw = candidates.join(" ").toLowerCase();
+
+    if(raw.includes("dora")) return "Dora";
+    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
+
+    const first = candidates.find(Boolean);
+    if(first && first.includes("@")) return first.split("@")[0];
+    return first || "";
+  }
+
+  function isReallyConnected(){
     const p = getPB();
     if(p?.authStore?.isValid) return true;
-    return !!getAuthRecord();
+    if(getAuthRecord()) return true;
+
+    const name = detectProfileName();
+    return name === "Dora" || name === "Zerlezz";
   }
 
-  function initials(name){
-    const clean = cleanName(name);
-    if(!clean) return "--";
-    if(/dora/i.test(clean)) return "DO";
-    if(/zerle/i.test(clean)) return "ZE";
-    return clean.slice(0,2).toUpperCase();
-  }
-
-  function role(name){
-    if(/dora/i.test(name)) return "Administrateur";
-    if(/zerle/i.test(name)) return "Vendeur";
+  function roleFor(name){
+    if(name === "Dora") return "Administrateur";
+    if(name === "Zerlezz") return "Vendeur";
     return "Profil";
   }
 
-  function updateSidebarProfile(){
-    const connected = isConnected();
-    const name = connected ? (getProfileName() || "Connecté") : "Non connecté";
+  function avatarFor(name){
+    if(name === "Dora") return "DO";
+    if(name === "Zerlezz") return "ZE";
+    return name ? name.slice(0,2).toUpperCase() : "--";
+  }
 
-    const nameNode = el("sidebarProfileName");
-    const roleNode = el("sidebarProfileRole");
-    const avatarNode = el("sidebarProfileAvatar");
-    const statusNode = el("sidebarProfileStatus");
+  function forceSidebarProfile(){
+    const connected = isReallyConnected();
+    const name = connected ? (detectProfileName() || "Connecté") : "Non connecté";
 
-    if(nameNode) nameNode.textContent = name;
-    if(roleNode) roleNode.textContent = connected ? role(name) : "Profil";
-    if(avatarNode) avatarNode.textContent = connected ? initials(name) : "--";
-    if(statusNode) statusNode.classList.toggle("online", connected);
+    const nameEl = $("sidebarProfileName");
+    const roleEl = $("sidebarProfileRole");
+    const avatarEl = $("sidebarProfileAvatar");
+    const statusEl = $("sidebarProfileStatus");
 
-    if(connected && name && name !== "Connecté"){
+    if(nameEl) nameEl.textContent = name;
+    if(roleEl) roleEl.textContent = connected ? roleFor(name) : "Profil";
+    if(avatarEl) avatarEl.textContent = connected ? avatarFor(name) : "--";
+    if(statusEl) statusEl.classList.toggle("online", connected);
+
+    if(connected && (name === "Dora" || name === "Zerlezz")){
       sessionStorage.setItem("duoSenderSession", name);
       localStorage.setItem("duoSender", name);
-      ["senderName","miniSenderName","threadSenderName"].forEach(function(id){
-        const input = el(id);
+
+      ["senderName","miniSenderName","threadSenderName"].forEach(id=>{
+        const input = $(id);
         if(input) input.value = name;
       });
     }
   }
 
-  function closeMenu(){
-    el("sidebarProfileMenu")?.classList.remove("open");
-    el("sidebarProfileToggle")?.setAttribute("aria-expanded","false");
+  function closeProfileMenu(){
+    $("sidebarProfileMenu")?.classList.remove("open");
+    $("sidebarProfileToggle")?.setAttribute("aria-expanded","false");
   }
 
-  function toggleMenu(){
-    const menu = el("sidebarProfileMenu");
-    const btn = el("sidebarProfileToggle");
+  function toggleProfileMenu(){
+    const menu = $("sidebarProfileMenu");
     if(!menu) return;
     const open = !menu.classList.contains("open");
     menu.classList.toggle("open", open);
-    btn?.setAttribute("aria-expanded", open ? "true" : "false");
+    $("sidebarProfileToggle")?.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
-  function clearSession(keepRemember){
+  async function clearSession(keepRemember){
     try{ getPB()?.authStore?.clear(); }catch(_){}
-    ["duoPocketBaseLogin","duoPocketBaseEmail","duoPocketBasePassword","duoSenderSession"].forEach(function(k){
+    ["duoPocketBaseLogin","duoPocketBaseEmail","duoPocketBasePassword","duoSenderSession"].forEach(k=>{
       sessionStorage.removeItem(k);
     });
-    if(!keepRemember) localStorage.removeItem("duoRememberLogin");
+    if(!keepRemember){
+      localStorage.removeItem("duoRememberLogin");
+      localStorage.removeItem("duoSender");
+    }
   }
 
   async function openLogin(){
-    closeMenu();
-    clearSession(true);
-    updateSidebarProfile();
+    closeProfileMenu();
+    await clearSession(true);
+    forceSidebarProfile();
 
     try{
       if(typeof showDuoLoginModal === "function"){
@@ -8147,48 +8172,54 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     try{ if(typeof syncSenderInputsFromAuth === "function") syncSenderInputsFromAuth(); }catch(_){}
-    updateSidebarProfile();
-    setTimeout(updateSidebarProfile, 600);
+    forceSidebarProfile();
+    setTimeout(forceSidebarProfile, 400);
+    setTimeout(forceSidebarProfile, 1200);
   }
 
   async function logout(){
-    closeMenu();
-    clearSession(false);
-    updateSidebarProfile();
+    closeProfileMenu();
+    await clearSession(false);
+    forceSidebarProfile();
     setTimeout(openLogin, 150);
   }
 
-  document.addEventListener("click", function(event){
-    if(event.target.closest("#sidebarProfileToggle")){
-      toggleMenu();
+  document.addEventListener("click", function(e){
+    if(e.target.closest("#sidebarProfileToggle")){
+      toggleProfileMenu();
       return;
     }
-    if(event.target.closest("#sidebarSwitchProfileBtn")){
+
+    if(e.target.closest("#sidebarSwitchProfileBtn")){
       openLogin();
       return;
     }
-    if(event.target.closest("#sidebarLogoutBtn")){
+
+    if(e.target.closest("#sidebarLogoutBtn")){
       logout();
       return;
     }
-    if(!event.target.closest("#sidebarProfile")){
-      closeMenu();
+
+    if(!e.target.closest("#sidebarProfile")){
+      closeProfileMenu();
     }
   });
 
   document.addEventListener("DOMContentLoaded", function(){
-    updateSidebarProfile();
-    setTimeout(updateSidebarProfile, 500);
-    setTimeout(updateSidebarProfile, 1500);
-    setInterval(updateSidebarProfile, 4000);
+    forceSidebarProfile();
+    setTimeout(forceSidebarProfile, 300);
+    setTimeout(forceSidebarProfile, 1000);
+    setTimeout(forceSidebarProfile, 2500);
+    setInterval(forceSidebarProfile, 3000);
   });
 
   window.addEventListener("load", function(){
-    updateSidebarProfile();
-    setTimeout(updateSidebarProfile, 800);
+    forceSidebarProfile();
+    setTimeout(forceSidebarProfile, 600);
   });
 
-  window.updateSidebarProfile = updateSidebarProfile;
+  window.updateSidebarProfile = forceSidebarProfile;
+  window.forceSidebarProfile = forceSidebarProfile;
 })();
 </script>
 
