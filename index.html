@@ -2311,141 +2311,8 @@ tbody tr:hover td{background:#1b1f29!important}
 }
 
 
-/* V50.2 — Restore carte profil visible en bas à gauche */
-@media (min-width:1051px){
-  aside{
-    display:flex!important;
-    flex-direction:column!important;
-    min-height:100vh!important;
-    height:100vh!important;
-  }
-
-  aside .nav{
-    display:flex!important;
-    flex-direction:column!important;
-    gap:8px!important;
-    flex:0 0 auto!important;
-  }
-
-  .sidebarProfile{
-    display:block!important;
-    position:relative!important;
-    margin-top:auto!important;
-    padding-top:14px!important;
-    border-top:1px solid rgba(255,255,255,.08)!important;
-    visibility:visible!important;
-    opacity:1!important;
-  }
-
-  .sidebarProfileMain{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:38px minmax(0,1fr) 10px!important;
-    align-items:center!important;
-    gap:10px!important;
-    padding:10px!important;
-    border:1px solid rgba(255,255,255,.12)!important;
-    border-radius:14px!important;
-    background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.025))!important;
-    color:var(--text)!important;
-    cursor:pointer!important;
-    text-align:left!important;
-  }
-
-  .sidebarProfileMain:hover{
-    background:rgba(255,255,255,.075)!important;
-    border-color:rgba(255,255,255,.20)!important;
-  }
-
-  .sidebarAvatar{
-    width:38px!important;
-    height:38px!important;
-    border-radius:13px!important;
-    display:grid!important;
-    place-items:center!important;
-    background:linear-gradient(135deg,#1d4ed8,#111827)!important;
-    color:#fff!important;
-    font-size:13px!important;
-    font-weight:1000!important;
-    box-shadow:0 0 0 4px rgba(37,99,235,.12)!important;
-  }
-
-  .sidebarProfileText{
-    min-width:0!important;
-    display:grid!important;
-    gap:2px!important;
-  }
-
-  .sidebarProfileText strong{
-    color:#fff!important;
-    font-size:14px!important;
-    line-height:1.1!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-
-  .sidebarProfileText small{
-    color:#93c5fd!important;
-    font-size:11px!important;
-    font-weight:800!important;
-    white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-  }
-
-  .sidebarProfileStatus{
-    width:9px!important;
-    height:9px!important;
-    border-radius:999px!important;
-    background:#6b7280!important;
-    box-shadow:none!important;
-  }
-
-  .sidebarProfileStatus.online{
-    background:#22c55e!important;
-    box-shadow:0 0 0 4px rgba(34,197,94,.13)!important;
-  }
-
-  .sidebarProfileMenu{
-    display:none!important;
-  }
-}
-
-@media (max-width:1050px){
-  .sidebarProfile{
-    display:none!important;
-  }
-}
-
-
-/* V50.3 — Page Profil fix routing */
-.profilePageShell{display:grid;gap:18px}
-.profileHero{display:flex;justify-content:space-between;align-items:center;gap:18px;background:radial-gradient(circle at 0% 0%,rgba(96,165,250,.14),transparent 34%),linear-gradient(180deg,#181b22,#15171d)!important}
-.profileHeroLeft{display:flex;align-items:center;gap:18px;min-width:0}
-.profileBigAvatar{width:78px;height:78px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(135deg,#1d4ed8,#111827);color:#fff;font-size:24px;font-weight:1000;box-shadow:0 0 0 8px rgba(37,99,235,.12)}
-.profileBadges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.profileBadge{display:inline-flex;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.055);color:#d1d5db;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900}
-.profileBadge.ok{color:#bbf7d0;border-color:rgba(34,197,94,.32);background:rgba(34,197,94,.10)}
-.profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.profileInfoGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.profileInfo{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.13);border-radius:13px;padding:13px 14px;min-width:0}
-.profileInfo span{display:block;color:var(--muted);font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.10em;margin-bottom:7px}
-.profileInfo strong{display:block;color:#fff;font-size:14px;line-height:1.35;word-break:break-word}
-.profileJsonBox{margin:0;max-height:420px;overflow:auto;border:1px solid rgba(255,255,255,.08);background:#0b0e14;color:#dbeafe;border-radius:14px;padding:16px;font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-@media(max-width:1050px){.profileGrid{grid-template-columns:1fr}}
-@media(max-width:760px){.profileHero{display:grid}.profileInfoGrid{grid-template-columns:1fr}.profileBigAvatar{width:62px;height:62px;border-radius:18px;font-size:20px}}
-
-
-/* V50.5 — Avatar profil modifiable */
-.profileAvatarUpload{border:0!important;cursor:pointer!important;position:relative!important;overflow:hidden!important;padding:0!important}
-.profileAvatarUpload span{position:relative;z-index:1}
-.profileAvatarUpload img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.profileAvatarUpload.hasImage span{display:none}
-.profileAvatarUpload em{position:absolute;left:0;right:0;bottom:0;z-index:2;display:block;padding:5px 4px;font-size:10px;font-style:normal;font-weight:1000;text-align:center;color:#fff;background:rgba(0,0,0,.58);opacity:0;transition:opacity .16s ease}
-.profileAvatarUpload:hover em{opacity:1}
-.sidebarAvatar{overflow:hidden!important;position:relative!important}
-.sidebarAvatar img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;border-radius:inherit!important}
+/* V51 — Page Photos Dora/Zerlezz */
+.photosPageShell{display:grid;gap:18px}.photosHero{display:flex;justify-content:space-between;align-items:center;gap:18px;background:radial-gradient(circle at 0 0,rgba(245,158,11,.15),transparent 34%),radial-gradient(circle at 100% 0,rgba(96,165,250,.12),transparent 28%),linear-gradient(180deg,#181b22,#15171d)!important}.photosHero h2{margin:0 0 8px!important;font-size:34px!important}.photosHeroStats{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:10px}.photosHeroStats div{border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.13);border-radius:13px;padding:13px}.photosHeroStats span{display:block;color:var(--muted);font-size:10px;font-weight:1000;text-transform:uppercase;letter-spacing:.1em}.photosHeroStats strong{display:block;margin-top:6px;color:#fff;font-size:24px}.photosUploadBox{display:grid;gap:14px;border:1px dashed rgba(245,158,11,.35);background:rgba(245,158,11,.055);border-radius:16px;padding:16px}.photosUploadIntro{display:grid;gap:4px}.photosUploadIntro strong{color:#fff;font-size:16px}.photosUploadIntro span{color:var(--muted);font-size:13px}.photosDoraOnly{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:12px;align-items:end}.photosDoraOnly label{display:grid;gap:8px;font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.photosDoraOnly input{width:100%;min-width:0}.photosLockedBox{display:none;border:1px solid rgba(245,158,11,.28);background:rgba(245,158,11,.08);color:#fef3c7;border-radius:12px;padding:12px 14px;font-weight:800;line-height:1.4}.photosUploadPanelLocked .photosDoraOnly{display:none!important}.photosUploadPanelLocked .photosLockedBox{display:block!important}.photosPreview{display:none;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.14);border-radius:13px;padding:10px}.photosPreview.show{display:flex}.photosPreview img{width:76px;height:76px;object-fit:cover;border-radius:12px;background:#0b0e14}.photosPreview strong{display:block;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.photosPreview span{display:block;margin-top:4px;color:var(--muted);font-size:12px}.photosToolbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}.photosToolbar h2{margin:0 0 6px!important}.photosFilters{display:flex;gap:10px;flex-wrap:wrap}.photosFilters input{min-width:250px}.photosGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.photoCard{overflow:hidden;border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.02));border-radius:16px}.photoThumb{position:relative;aspect-ratio:1/1;background:#0b0e14}.photoThumb img{width:100%;height:100%;object-fit:cover;display:block;transition:.18s ease}.photoCard.used .photoThumb img{filter:blur(8px) grayscale(.35);opacity:.58;transform:scale(1.04)}.photoBadge{position:absolute;top:10px;left:10px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.42);backdrop-filter:blur(8px);border-radius:999px;padding:6px 9px;font-size:11px;font-weight:1000;color:#fff}.photoBadge.available{color:#bbf7d0}.photoBadge.used{color:#e5e7eb}.photoUsedOverlay{position:absolute;inset:0;display:none;place-items:center;background:rgba(0,0,0,.38);color:#fff;font-weight:1000;text-transform:uppercase;letter-spacing:.08em;font-size:12px}.photoCard.used .photoUsedOverlay{display:grid}.photoBody{display:grid;gap:9px;padding:13px}.photoTitle{color:#fff;font-weight:1000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.photoMeta{color:var(--muted);font-size:12px;line-height:1.4}.photoActions{display:grid}.photoActions button{width:100%;justify-content:center;text-align:center}.photoDownloadDisabled{opacity:.55!important;cursor:not-allowed!important}.photosEmpty{grid-column:1/-1;border:1px dashed rgba(255,255,255,.14);border-radius:14px;padding:24px;text-align:center;color:var(--muted);background:rgba(255,255,255,.025)}@media(max-width:1150px){.photosGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.photosHero{display:grid}.photosHeroStats{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.photosGrid{grid-template-columns:1fr 1fr}.photosDoraOnly{grid-template-columns:1fr}.photosFilters{display:grid;width:100%}.photosFilters input{min-width:0;width:100%}.photosHeroStats{grid-template-columns:1fr}}@media(max-width:430px){.photosGrid{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -2499,18 +2366,6 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="chat">Chat</button>
       <button data-page="stats">Stats</button>
     </div>
-
-    <div class="sidebarProfile" id="sidebarProfile">
-      <button class="sidebarProfileMain" id="sidebarProfileToggle" type="button" aria-expanded="false">
-        <span class="sidebarAvatar" id="sidebarProfileAvatar">--</span>
-        <span class="sidebarProfileText">
-          <strong id="sidebarProfileName">Non connecté</strong>
-          <small id="sidebarProfileRole">Profil</small>
-        </span>
-        <span class="sidebarProfileStatus" id="sidebarProfileStatus"></span>
-      </button>
-    </div>
-
   </aside>
 
   <main>
@@ -2940,51 +2795,56 @@ tbody tr:hover td{background:#1b1f29!important}
       </div>
     </section>
   
-      <section class="page" id="profil">
-        <div class="profilePageShell">
-          <div class="profileHero card pad">
-            <div class="profileHeroLeft">
-              <button class="profileBigAvatar profileAvatarUpload" id="profilePageAvatarBtn" type="button" title="Changer la photo de profil">
-                <span id="profilePageAvatar">--</span>
-                <img id="profilePageAvatarImg" alt="" style="display:none">
-                <em>Changer</em>
-              </button>
-              <input type="file" id="profileAvatarFile" accept="image/*" style="display:none">
-              <div>
-                <h2 id="profilePageName">Profil</h2>
-                <p class="muted" id="profilePageRole">Informations du compte connecté</p>
-                <div class="profileBadges">
-                  <span class="profileBadge ok" id="profilePageStatus">● En ligne</span>
-                  <span class="profileBadge" id="profilePageUserId">ID: -</span>
-                </div>
+      <section class="page" id="photos">
+        <div class="photosPageShell">
+          <div class="photosHero card pad">
+            <div>
+              <h2>Photos</h2>
+              <p class="muted">Galerie privée. Dora peut publier des photos. Zerlezz peut consulter et télécharger les photos disponibles.</p>
+            </div>
+            <div class="photosHeroStats">
+              <div><span>Total</span><strong id="photosTotalStat">0</strong></div>
+              <div><span>Disponibles</span><strong id="photosAvailableStat">0</strong></div>
+              <div><span>Téléchargées</span><strong id="photosUsedStat">0</strong></div>
+            </div>
+          </div>
+
+          <div class="card pad" id="photosUploadPanel">
+            <h2>Publier une photo</h2>
+            <div class="photosUploadBox">
+              <div class="photosUploadIntro">
+                <strong>Upload réservé à Dora</strong>
+                <span>Ajoute une photo d'or, lingotin, preuve ou visuel à partager avec Zerlezz.</span>
+              </div>
+              <div class="photosDoraOnly" id="photosDoraOnly">
+                <label>PHOTO<input type="file" id="duoPhotoFile" accept="image/*"></label>
+                <label>NOM / NOTE<input type="text" id="duoPhotoTitle" placeholder="Ex : Lingotin 10g, Perth Mint..."></label>
+                <button class="primary" type="button" id="duoPhotoUploadBtn">Publier</button>
+              </div>
+              <div class="photosPreview" id="photosPreview">
+                <img id="photosPreviewImg" alt="">
+                <div><strong id="photosPreviewName">Photo sélectionnée</strong><span id="photosPreviewMeta">Prête à publier</span></div>
+              </div>
+              <div class="photosLockedBox" id="photosLockedBox">
+                Connecte-toi avec <strong>Dora</strong> pour publier des photos. Zerlezz peut seulement consulter et télécharger.
               </div>
             </div>
           </div>
-          <div class="profileGrid">
-            <div class="card pad"><h2>Compte</h2><div class="profileInfoGrid">
-              <div class="profileInfo"><span>Nom</span><strong id="profileInfoName">-</strong></div>
-              <div class="profileInfo"><span>Username</span><strong id="profileInfoUsername">-</strong></div>
-              <div class="profileInfo"><span>Email</span><strong id="profileInfoEmail">-</strong></div>
-              <div class="profileInfo"><span>Rôle</span><strong id="profileInfoRole">-</strong></div>
-              <div class="profileInfo"><span>ID PocketBase</span><strong id="profileInfoId">-</strong></div>
-              <div class="profileInfo"><span>Créé le</span><strong id="profileInfoCreated">-</strong></div>
-            </div></div>
-            <div class="card pad"><h2>Connexion</h2><div class="profileInfoGrid">
-              <div class="profileInfo"><span>IP publique</span><strong id="profileInfoIp">Chargement...</strong></div>
-              <div class="profileInfo"><span>Statut PocketBase</span><strong id="profileInfoAuth">-</strong></div>
-              <div class="profileInfo"><span>Page actuelle</span><strong id="profileInfoCurrentPage">-</strong></div>
-              <div class="profileInfo"><span>Sender actif</span><strong id="profileInfoSender">-</strong></div>
-            </div></div>
-            <div class="card pad"><h2>Appareil</h2><div class="profileInfoGrid">
-              <div class="profileInfo"><span>Navigateur</span><strong id="profileInfoBrowser">-</strong></div>
-              <div class="profileInfo"><span>Système</span><strong id="profileInfoOs">-</strong></div>
-              <div class="profileInfo"><span>Écran</span><strong id="profileInfoScreen">-</strong></div>
-              <div class="profileInfo"><span>Langue</span><strong id="profileInfoLanguage">-</strong></div>
-            </div></div>
-            <div class="card pad"><h2>Détails techniques</h2><pre class="profileJsonBox" id="profileJsonBox">{}</pre></div>
+
+          <div class="card pad">
+            <div class="photosToolbar">
+              <div><h2>Galerie</h2><p class="muted">Les photos téléchargées sont marquées comme utilisées.</p></div>
+              <div class="photosFilters">
+                <input type="search" id="photosSearchInput" placeholder="Rechercher une photo...">
+                <select id="photosFilterSelect"><option value="all">Toutes</option><option value="available">Disponibles</option><option value="used">Téléchargées</option></select>
+                <button class="secondary small" type="button" id="duoPhotosRefreshBtn">Actualiser</button>
+              </div>
+            </div>
+            <div class="photosGrid" id="duoPhotosGrid"><div class="photosEmpty">Chargement des photos...</div></div>
           </div>
         </div>
       </section>
+
     </main>
 </div>
 
@@ -5393,24 +5253,21 @@ function setLiveAction(action){
 function renderPresence(){
   const now=Date.now();
   const typingNames=currentTypingNames();
-
-  // V50.4 — Présence Live : on ne génère JAMAIS les utilisateurs hors ligne.
-  // Les offline ne sont pas masqués en CSS : ils sont exclus avant création du HTML.
-  const onlineList=presenceUsers.map(u=>{
+  const list=presenceUsers.map(u=>{
     const ts=u.lastSeen?.toDate ? u.lastSeen.toDate().getTime() : new Date(u.lastSeen || 0).getTime();
     const age=now-ts;
-    const online=!!u.online && age<45000;
+    const online=u.online && age<45000;
     const idle=online && age>22000;
     return {...u, age, online, idle, typing:typingNames.includes(normalizeName(u.sender))};
-  }).filter(u=>u.online)
-    .sort((a,b)=>String(a.sender||'').localeCompare(String(b.sender||'')));
+  }).sort((a,b)=>(b.online-a.online) || String(a.sender).localeCompare(String(b.sender)));
 
-  if($("presenceCount")) $("presenceCount").textContent = `${onlineList.length} en ligne`;
+  const onlineCount=list.filter(u=>u.online).length;
+  if($("presenceCount")) $("presenceCount").textContent = `${onlineCount} en ligne`;
 
-  const html=onlineList.map(u=>{
-    const dotClass=u.idle ? 'idle' : '';
+  const html=list.map(u=>{
+    const dotClass=u.online ? (u.idle?'idle':'') : 'offline';
     const initials=String(u.sender||'?').slice(0,2).toUpperCase();
-    const status=u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`;
+    const status=u.online ? (u.typing ? '✍️ écrit actuellement' : `👀 regarde ${esc(u.pageLabel||pageLabel(u.page))}`) : `hors ligne ${u.age && isFinite(u.age) ? 'depuis '+Math.max(1,Math.round(u.age/60000))+' min' : ''}`;
     const action=u.action ? `<div class="presenceTyping">${esc(u.action)}</div>` : (u.typing ? `<div class="presenceTyping">est en train d'écrire…</div>` : '');
     return `<div class="presenceUser">
       <div class="presenceLeft">
@@ -5428,7 +5285,7 @@ function renderPresence(){
   if($("livePresenceList")) $("livePresenceList").innerHTML = html;
   if($("dashboardPresenceList")) $("dashboardPresenceList").innerHTML = html;
 
-  const actions=onlineList.filter(u=>u.action || u.typing).map(u=>`
+  const actions=list.filter(u=>u.online && (u.action || u.typing)).map(u=>`
     <div class="row"><div><strong>${esc(u.sender)}</strong><div class="muted">${esc(u.typing ? '✍️ écrit actuellement' : u.action)}</div></div><span class="muted">${esc(u.pageLabel||pageLabel(u.page))}</span></div>
   `).join('');
   if($("dashboardLiveActions")) $("dashboardLiveActions").innerHTML = actions || '<p class="muted">Aucune action en direct.</p>';
@@ -6177,7 +6034,8 @@ function goPage(id){
     clients:['Clients','Nom, nombre de commandes et dépense totale.'],
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
-    stats:['Stats','Performance par vendeur, plateforme et produit.']
+    stats:['Stats','Performance par vendeur, plateforme et produit.'],
+    photos:['Photos','Galerie privée : Dora publie, Zerlezz consulte et télécharge.']
   };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
@@ -7362,175 +7220,96 @@ async function start(){
 start();
 </script>
 
-
 <script>
-/* V50.3 — Profil route hard fix */
+/* V50.1 — Clic carte profil = page Profil, pas menu */
 (function(){
-  let cachedIp = "";
-  function $(id){return document.getElementById(id);}
-  function getPB(){try{if(window.pb)return window.pb;if(typeof pb!=="undefined")return pb;}catch(_){}return null;}
-  function getUser(){try{if(typeof authUser==="function"){const u=authUser();if(u)return u;}}catch(_){}const p=getPB();return p?.authStore?.record||p?.authStore?.model||null;}
-  function detectName(){
-    const u=getUser();
-    const values=[u?.name,u?.username,u?.email,sessionStorage.getItem("duoSenderSession"),sessionStorage.getItem("duoPocketBaseLogin"),sessionStorage.getItem("duoPocketBaseEmail"),localStorage.getItem("duoSender")].filter(Boolean).map(v=>String(v).trim());
-    const raw=values.join(" ").toLowerCase();
-    if(raw.includes("dora"))return "Dora";
-    if(raw.includes("zerlezz")||raw.includes("zerle"))return "Zerlezz";
-    const first=values.find(Boolean);
-    return first?(first.includes("@")?first.split("@")[0]:first):"";
+  function $(id){ return document.getElementById(id); }
+
+  function openProfilPageHard(){
+    try{
+      const menu = $("sidebarProfileMenu");
+      if(menu) menu.classList.remove("open");
+
+      const toggle = $("sidebarProfileToggle");
+      if(toggle) toggle.setAttribute("aria-expanded", "false");
+
+      if(typeof goProfilePage === "function"){
+        goProfilePage();
+        return;
+      }
+
+      if(typeof goPage === "function"){
+        goPage("profil");
+      }else{
+        document.querySelectorAll(".page").forEach(function(page){
+          page.classList.remove("active");
+        });
+        $("profil")?.classList.add("active");
+
+        document.querySelectorAll("[data-page]").forEach(function(btn){
+          btn.classList.toggle("active", btn.getAttribute("data-page") === "profil");
+        });
+      }
+
+      if(typeof renderProfilePage === "function"){
+        setTimeout(renderProfilePage, 80);
+      }
+    }catch(err){
+      console.warn("Ouverture page Profil impossible:", err);
+    }
   }
-  function avatar(n){if(n==="Dora")return"DO";if(n==="Zerlezz")return"ZE";return n?n.slice(0,2).toUpperCase():"--";}
-  function role(n){if(n==="Dora")return"Administrateur";if(n==="Zerlezz")return"Vendeur";return"Profil";}
-  function setText(id,v){const node=$(id);if(node)node.textContent=v??"-";}
-  function refreshSidebarProfile(){
-    const name=detectName();const connected=!!name||!!getPB()?.authStore?.isValid;const finalName=connected?(name||"Connecté"):"Non connecté";
-    setText("sidebarProfileName",finalName);setText("sidebarProfileRole",connected?role(finalName):"Profil");setText("sidebarProfileAvatar",connected?avatar(finalName):"--");
-    const status=$("sidebarProfileStatus");if(status)status.classList.toggle("online",connected);
-    if(finalName==="Dora"||finalName==="Zerlezz"){sessionStorage.setItem("duoSenderSession",finalName);localStorage.setItem("duoSender",finalName);}
-  }
-  function browserName(){const ua=navigator.userAgent;if(/Edg/i.test(ua))return"Microsoft Edge";if(/Chrome/i.test(ua)&&!/Edg/i.test(ua))return"Chrome";if(/Safari/i.test(ua)&&!/Chrome/i.test(ua))return"Safari";if(/Firefox/i.test(ua))return"Firefox";return"Inconnu";}
-  function osName(){const ua=navigator.userAgent;if(/Windows NT/i.test(ua))return"Windows";if(/iPhone|iPad|iPod/i.test(ua))return"iOS";if(/Android/i.test(ua))return"Android";if(/Mac OS X/i.test(ua))return"macOS";if(/Linux/i.test(ua))return"Linux";return"Inconnu";}
-  async function getIp(){if(cachedIp)return cachedIp;try{const r=await fetch("https://api.ipify.org?format=json",{cache:"no-store"});const d=await r.json();cachedIp=d.ip||"Indisponible";}catch(_){cachedIp="Indisponible";}return cachedIp;}
-  async function renderProfilePage(){
-    const u=getUser();const name=detectName()||"Non connecté";const r=name!=="Non connecté"?role(name):"Profil";const pbValid=!!getPB()?.authStore?.isValid;
-    setText("profilePageAvatar",avatar(name));setText("profilePageName",name);setText("profilePageRole",r);setText("profilePageStatus",pbValid?"● En ligne":"● Session locale");setText("profilePageUserId","ID: "+(u?.id||"-"));
-    setText("profileInfoName",name);setText("profileInfoUsername",u?.username||name);setText("profileInfoEmail",u?.email||"-");setText("profileInfoRole",r);setText("profileInfoId",u?.id||"-");setText("profileInfoCreated",u?.created?new Date(u.created).toLocaleString("fr-FR"):"-");
-    setText("profileInfoAuth",pbValid?"Connecté":"Non valide / local");setText("profileInfoCurrentPage","Profil");setText("profileInfoSender",sessionStorage.getItem("duoSenderSession")||localStorage.getItem("duoSender")||"-");
-    setText("profileInfoBrowser",browserName());setText("profileInfoOs",osName());setText("profileInfoScreen",`${screen.width} x ${screen.height} @ ${devicePixelRatio}x`);setText("profileInfoLanguage",navigator.language);
-    const json={account:{name,role:r,id:u?.id||"",username:u?.username||"",email:u?.email||"",verified:u?.verified??""},session:{pocketbaseValid:pbValid,sender:sessionStorage.getItem("duoSenderSession")||localStorage.getItem("duoSender")||""},device:{browser:browserName(),os:osName(),platform:navigator.platform,userAgent:navigator.userAgent,language:navigator.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,screen:`${screen.width} x ${screen.height}`,viewport:`${innerWidth} x ${innerHeight}`},location:{origin:location.origin,url:location.href}};
-    const box=$("profileJsonBox");if(box)box.textContent=JSON.stringify(json,null,2);
-    setText("profileInfoIp",cachedIp||"Chargement...");getIp().then(ip=>{setText("profileInfoIp",ip);json.publicIp=ip;const b=$("profileJsonBox");if(b)b.textContent=JSON.stringify(json,null,2);});
-    refreshSidebarProfile();
-  }
-  function openProfilePageOnly(){
-    const page=$("profil");if(!page){alert("Page Profil introuvable dans le fichier.");return;}
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));page.classList.add("active");
-    document.querySelectorAll("[data-page]").forEach(btn=>btn.classList.toggle("active",btn.getAttribute("data-page")==="profil"));
-    const title=$("pageTitle"),desc=$("pageDesc");if(title)title.textContent="Profil";if(desc)desc.textContent="Informations complètes du compte connecté, session, IP et appareil.";
-    try{window.currentPageId="profil";}catch(_){}
-    window.scrollTo({top:0,behavior:"smooth"});setTimeout(renderProfilePage,50);
-  }
-  document.addEventListener("click",function(e){const card=e.target.closest("#sidebarProfile,#sidebarProfileToggle,.sidebarProfileMain");if(!card)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openProfilePageOnly();},true);
-  document.addEventListener("DOMContentLoaded",function(){refreshSidebarProfile();setTimeout(refreshSidebarProfile,500);setTimeout(refreshSidebarProfile,1500);setInterval(refreshSidebarProfile,3000);});
-  window.addEventListener("load",refreshSidebarProfile);
-  window.renderProfilePage=renderProfilePage;window.goProfilePage=openProfilePageOnly;window.updateSidebarProfile=refreshSidebarProfile;
+
+  // Capture très tôt et bloque les anciens listeners qui ouvraient le menu.
+  document.addEventListener("click", function(event){
+    const card = event.target.closest("#sidebarProfileToggle, .sidebarProfileMain");
+    if(!card) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    openProfilPageHard();
+  }, true);
+
+  // Le menu ne doit plus rester ouvert par erreur.
+  document.addEventListener("DOMContentLoaded", function(){
+    const menu = $("sidebarProfileMenu");
+    if(menu) menu.classList.remove("open");
+  });
+
+  window.openProfilPageHard = openProfilPageHard;
 })();
 </script>
 
 
 <script>
-/* V50.5 — Avatar profil modifiable */
+/* V51 — Page Photos Dora/Zerlezz */
 (function(){
-  function $(id){ return document.getElementById(id); }
-  function getPB(){ try{ if(window.pb) return window.pb; if(typeof pb !== "undefined") return pb; }catch(_){} return null; }
-  function getAuthRecord(){
-    try{ if(typeof authUser === "function"){ const u = authUser(); if(u) return u; } }catch(_){}
-    const p = getPB();
-    return p?.authStore?.record || p?.authStore?.model || null;
-  }
-  function detectName(){
-    const u = getAuthRecord();
-    const values = [u?.name,u?.username,u?.email,sessionStorage.getItem("duoSenderSession"),sessionStorage.getItem("duoPocketBaseLogin"),sessionStorage.getItem("duoPocketBaseEmail"),localStorage.getItem("duoSender")].filter(Boolean).map(v=>String(v).trim());
-    const raw = values.join(" ").toLowerCase();
-    if(raw.includes("dora")) return "Dora";
-    if(raw.includes("zerlezz") || raw.includes("zerle")) return "Zerlezz";
-    const first = values.find(Boolean);
-    return first ? (first.includes("@") ? first.split("@")[0] : first) : "";
-  }
-  function initials(name){ if(name==="Dora") return "DO"; if(name==="Zerlezz") return "ZE"; return name ? name.slice(0,2).toUpperCase() : "--"; }
-  function getAvatarUrl(){
-    const pb = getPB();
-    const user = getAuthRecord();
-    if(!pb || !user || !user.avatar) return "";
-    try{ return pb.files.getUrl(user, user.avatar, { thumb:"160x160" }); }
-    catch(_){ try{ return pb.files.getUrl(user, user.avatar); }catch(__){ return ""; } }
-  }
-  function renderAvatarEverywhere(){
-    const name = detectName();
-    const url = getAvatarUrl();
-    const pageBtn = $("profilePageAvatarBtn");
-    const pageText = $("profilePageAvatar");
-    const pageImg = $("profilePageAvatarImg");
-    const sidebarAvatar = $("sidebarProfileAvatar");
-
-    if(pageText) pageText.textContent = initials(name);
-    if(pageImg){
-      if(url){
-        pageImg.src = url;
-        pageImg.style.display = "";
-        pageBtn?.classList.add("hasImage");
-      }else{
-        pageImg.removeAttribute("src");
-        pageImg.style.display = "none";
-        pageBtn?.classList.remove("hasImage");
-      }
-    }
-    if(sidebarAvatar){
-      if(url) sidebarAvatar.innerHTML = '<img src="'+url+'" alt="">';
-      else sidebarAvatar.textContent = initials(name);
-    }
-  }
-  async function uploadAvatar(file){
-    const pb = getPB();
-    const user = getAuthRecord();
-    if(!pb || !user?.id){ alert("PocketBase n'est pas connecté."); return; }
-    if(!file) return;
-    if(!file.type || !file.type.startsWith("image/")){ alert("Choisis une image."); return; }
-    if(file.size > 5*1024*1024){ alert("Image trop lourde. Maximum 5 Mo."); return; }
-
-    const form = new FormData();
-    form.append("avatar", file);
-    const btn = $("profilePageAvatarBtn");
-    try{
-      if(btn) btn.style.opacity = ".55";
-      const updated = await pb.collection("users").update(user.id, form);
-      try{ if(pb.authStore?.save && pb.authStore?.token) pb.authStore.save(pb.authStore.token, updated); }catch(_){}
-      renderAvatarEverywhere();
-      if(typeof renderProfilePage === "function") setTimeout(renderProfilePage, 100);
-      if(typeof updateSidebarProfile === "function") setTimeout(updateSidebarProfile, 100);
-    }catch(error){
-      console.error("Erreur avatar:", error);
-      alert("Erreur changement photo : " + (error.message || error));
-    }finally{
-      if(btn) btn.style.opacity = "";
-      const input = $("profileAvatarFile");
-      if(input) input.value = "";
-    }
-  }
-  document.addEventListener("click", function(e){
-    if(e.target.closest("#profilePageAvatarBtn")){
-      e.preventDefault();
-      e.stopPropagation();
-      $("profileAvatarFile")?.click();
-    }
-  }, true);
-  document.addEventListener("change", function(e){
-    if(e.target && e.target.id === "profileAvatarFile") uploadAvatar(e.target.files && e.target.files[0]);
-  });
-  document.addEventListener("DOMContentLoaded", function(){
-    setTimeout(renderAvatarEverywhere, 600);
-    setTimeout(renderAvatarEverywhere, 1600);
-    setInterval(renderAvatarEverywhere, 4000);
-  });
-  window.addEventListener("load", function(){ setTimeout(renderAvatarEverywhere, 500); });
-
-  const oldRender = window.renderProfilePage;
-  if(typeof oldRender === "function"){
-    window.renderProfilePage = async function(){
-      const result = await oldRender.apply(this, arguments);
-      renderAvatarEverywhere();
-      return result;
-    };
-  }
-  const oldUpdate = window.updateSidebarProfile;
-  if(typeof oldUpdate === "function"){
-    window.updateSidebarProfile = function(){
-      const result = oldUpdate.apply(this, arguments);
-      renderAvatarEverywhere();
-      return result;
-    };
-  }
-  window.renderAvatarEverywhere = renderAvatarEverywhere;
+ const COLLECTION="photos"; let lastPhotos=[];
+ const $=id=>document.getElementById(id);
+ function getPB(){try{if(window.pb)return window.pb;if(typeof pb!=="undefined")return pb}catch(e){}return null}
+ function userRecord(){try{if(typeof authUser==="function"){const u=authUser();if(u)return u}}catch(e){}const p=getPB();return p?.authStore?.record||p?.authStore?.model||null}
+ function rawIdentity(){const u=userRecord();return [u?.name,u?.username,u?.email,sessionStorage.getItem("duoSenderSession"),sessionStorage.getItem("duoPocketBaseLogin"),localStorage.getItem("duoSender")].filter(Boolean).join(" ").toLowerCase()}
+ function currentName(){const raw=rawIdentity();if(raw.includes("dora"))return"Dora";if(raw.includes("zerlezz")||raw.includes("zerle"))return"Zerlezz";const u=userRecord();return u?.name||u?.username||(u?.email?u.email.split("@")[0]:"")||""}
+ const isDora=()=>currentName()==="Dora"; const isZerlezz=()=>currentName()==="Zerlezz";
+ const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+ function fmtDate(v){if(!v)return"-";try{return new Date(v).toLocaleString("fr-FR")}catch(e){return"-"}}
+ function updateUploadAccess(){const p=$("photosUploadPanel");if(p)p.classList.toggle("photosUploadPanelLocked",!isDora())}
+ function setStats(recs){const total=recs.length, used=recs.filter(r=>!!r.used||!!r.downloadedAt).length; if($("photosTotalStat"))$("photosTotalStat").textContent=total; if($("photosAvailableStat"))$("photosAvailableStat").textContent=total-used; if($("photosUsedStat"))$("photosUsedStat").textContent=used}
+ function filtered(recs){const q=String($("photosSearchInput")?.value||"").toLowerCase().trim(), f=$("photosFilterSelect")?.value||"all";return recs.filter(r=>{const used=!!r.used||!!r.downloadedAt;if(f==="available"&&used)return false;if(f==="used"&&!used)return false;if(q&&![r.title,r.uploadedBy,r.downloadedBy,r.image].join(" ").toLowerCase().includes(q))return false;return true})}
+ function renderPhotos(recs){const pb=getPB(), grid=$("duoPhotosGrid"); if(!grid)return; updateUploadAccess(); setStats(lastPhotos); const list=filtered(recs); if(!list.length){grid.innerHTML='<div class="photosEmpty">Aucune photo à afficher.</div>';return}
+  grid.innerHTML=list.map(r=>{const used=!!r.used||!!r.downloadedAt, url=r.image&&pb?pb.files.getUrl(r,r.image):"", canDownload=isZerlezz()&&!used&&url, title=r.title||"Photo", meta=used?`Téléchargée par ${esc(r.downloadedBy||"-")} · ${esc(fmtDate(r.downloadedAt))}`:"Disponible pour Zerlezz";
+   return `<article class="photoCard ${used?"used":"available"}"><div class="photoThumb">${url?`<img src="${esc(url)}" alt="${esc(title)}" loading="lazy">`:""}<div class="photoBadge ${used?"used":"available"}">${used?"🔒 Utilisée":"🟢 Disponible"}</div><div class="photoUsedOverlay">Déjà téléchargée</div></div><div class="photoBody"><div class="photoTitle" title="${esc(title)}">${esc(title)}</div><div class="photoMeta">Ajoutée par ${esc(r.uploadedBy||"Dora")}<br>${meta}</div><div class="photoActions">${canDownload?`<button class="primary small" type="button" data-photo-download="${esc(r.id)}">Télécharger</button>`:`<button class="secondary small photoDownloadDisabled" type="button" disabled>${used?"Verrouillée":(isDora()?"Réservé Zerlezz":"Téléchargement Zerlezz")}</button>`}</div></div></article>`}).join("")}
+ async function showHelp(e){console.warn("Photos PocketBase:",e);const grid=$("duoPhotosGrid");if(grid)grid.innerHTML='<div class="photosEmpty"><strong>Collection PocketBase photos à créer.</strong><br><br>Champs : <code>title text</code>, <code>image file</code>, <code>uploadedBy text</code>, <code>downloadedBy text</code>, <code>downloadedAt date</code>, <code>used bool</code>.<br><br>Règles API : <code>@request.auth.id != ""</code></div>'}
+ async function loadPhotos(){updateUploadAccess();const pb=getPB(), grid=$("duoPhotosGrid"); if(!grid)return; if(!pb||!pb.collection){grid.innerHTML='<div class="photosEmpty">PocketBase pas encore prêt...</div>';return} try{lastPhotos=await pb.collection(COLLECTION).getFullList({sort:"-created"});renderPhotos(lastPhotos)}catch(e){await showHelp(e)}}
+ function updatePreview(){const input=$("duoPhotoFile"), file=input?.files?.[0], preview=$("photosPreview"); if(!file){preview?.classList.remove("show");return} if($("duoPhotoTitle")&&!$("duoPhotoTitle").value.trim())$("duoPhotoTitle").value=file.name.replace(/\.[^.]+$/,""); $("photosPreviewName").textContent=file.name; $("photosPreviewMeta").textContent=`${file.type||"image"} · ${Math.round(file.size/1024)} Ko`; const reader=new FileReader(); reader.onload=()=>{$("photosPreviewImg").src=reader.result;preview?.classList.add("show")}; reader.readAsDataURL(file)}
+ async function uploadPhoto(){const pb=getPB(); if(!pb||!pb.collection)return alert("PocketBase pas prêt."); if(!isDora())return alert("Upload réservé au compte Dora."); const file=$("duoPhotoFile")?.files?.[0]; if(!file)return alert("Choisis une photo."); if(!file.type||!file.type.startsWith("image/"))return alert("Le fichier doit être une image."); const fd=new FormData(); fd.append("title",($("duoPhotoTitle")?.value||file.name||"Photo").trim()); fd.append("uploadedBy","Dora"); fd.append("used","false"); fd.append("image",file); const btn=$("duoPhotoUploadBtn"); try{if(btn){btn.disabled=true;btn.textContent="Publication..."} await pb.collection(COLLECTION).create(fd); $("duoPhotoFile").value=""; $("duoPhotoTitle").value=""; updatePreview(); await loadPhotos()}catch(e){console.error(e);alert("Erreur upload photo : "+(e.message||e))}finally{if(btn){btn.disabled=false;btn.textContent="Publier"}}}
+ async function downloadPhoto(id){const pb=getPB(); if(!pb||!pb.collection)return alert("PocketBase pas prêt."); if(!isZerlezz())return alert("Téléchargement réservé au compte Zerlezz."); try{const r=await pb.collection(COLLECTION).getOne(id); if(r.used||r.downloadedAt){await loadPhotos();return alert("Cette photo a déjà été téléchargée.")} const a=document.createElement("a"); a.href=pb.files.getUrl(r,r.image); a.download=r.image||"photo.jpg"; document.body.appendChild(a); a.click(); a.remove(); await pb.collection(COLLECTION).update(id,{used:true,downloadedBy:"Zerlezz",downloadedAt:new Date().toISOString()}); await loadPhotos()}catch(e){console.error(e);alert("Erreur téléchargement : "+(e.message||e))}}
+ document.addEventListener("click",e=>{if(e.target.closest("#duoPhotoUploadBtn"))uploadPhoto(); if(e.target.closest("#duoPhotosRefreshBtn"))loadPhotos(); const dl=e.target.closest("[data-photo-download]"); if(dl)downloadPhoto(dl.getAttribute("data-photo-download")); if(e.target.closest('[data-page="photos"]'))setTimeout(loadPhotos,180)});
+ document.addEventListener("change",e=>{if(e.target?.id==="duoPhotoFile")updatePreview(); if(e.target?.id==="photosFilterSelect")renderPhotos(lastPhotos)});
+ document.addEventListener("input",e=>{if(e.target?.id==="photosSearchInput")renderPhotos(lastPhotos)});
+ document.addEventListener("DOMContentLoaded",()=>setTimeout(loadPhotos,900));
+ window.loadDuoPhotos=loadPhotos;
 })();
 </script>
 
