@@ -2,7 +2,7 @@
   "name": "Duo Update",
   "short_name": "Duo",
   "description": "Duo Update - commandes, comptes, chat et photos.",
-  "start_url": "./index-pocketbase-v50-4-presence-online-only.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
