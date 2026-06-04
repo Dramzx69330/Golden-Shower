@@ -4150,6 +4150,17 @@ async function ensurePbAuth(){
   return await showDuoLoginModal();
 }
 
+
+/* V48.4 — Expose auth module for sidebar profile */
+window.pb = pb;
+window.authUser = authUser;
+window.authUserName = authUserName;
+window.authUserId = authUserId;
+window.syncSenderInputsFromAuth = syncSenderInputsFromAuth;
+window.showDuoLoginModal = showDuoLoginModal;
+window.ensurePbAuth = ensurePbAuth;
+window.duoSavedLogin = duoSavedLogin;
+
 function initializeApp(){ return { pocketbase:true }; }
 function getFirestore(){ return { pocketbase:true }; }
 
@@ -8536,12 +8547,21 @@ start();
     }
   }
 
+  async function waitForLoginModule(){
+    for(let i = 0; i < 40; i++){
+      if(typeof window.showDuoLoginModal === "function" || typeof window.ensurePbAuth === "function") return true;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    return false;
+  }
+
   async function openLoginModal(){
     try{
-      if(typeof showDuoLoginModal === "function"){
-        await showDuoLoginModal();
-      }else if(typeof ensurePbAuth === "function"){
-        await ensurePbAuth();
+      await waitForLoginModule();
+      if(typeof window.showDuoLoginModal === "function"){
+        await window.showDuoLoginModal();
+      }else if(typeof window.ensurePbAuth === "function"){
+        await window.ensurePbAuth();
       }else{
         alert("Module de connexion introuvable.");
       }
