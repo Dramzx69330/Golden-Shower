@@ -3131,26 +3131,45 @@ aside{
 }
 
 
-/* V48.1 — Fix sidebar profil : boutons menu non étirés */
-aside{
-  display:flex!important;
-  flex-direction:column!important;
+
+/* V48.2 — Fix sidebar profil PC uniquement, mobile inchangé */
+@media (min-width: 1051px){
+  aside{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  aside .nav{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:8px!important;
+    flex:0 0 auto!important;
+  }
+
+  aside .nav button{
+    margin:0!important;
+    min-height:0!important;
+  }
+
+  .sidebarProfile{
+    margin-top:auto!important;
+  }
 }
 
-.nav{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:8px!important;
-  flex:0 0 auto!important;
-}
+/* Sur téléphone/tablette, on laisse le responsive d'origine gérer le menu */
+@media (max-width: 1050px){
+  aside{
+    display:block!important;
+  }
 
-.nav button{
-  margin:0!important;
-  min-height:0!important;
-}
+  aside .nav{
+    display:grid!important;
+    flex:none!important;
+  }
 
-.sidebarProfile{
-  margin-top:auto!important;
+  .sidebarProfile{
+    display:none!important;
+  }
 }
 
 </style>
