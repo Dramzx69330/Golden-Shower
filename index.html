@@ -4101,14 +4101,39 @@ function beep(){
 
 window.enableNotifications = async () => {
   soundOn = true;
-  try{ if("Notification" in window && Notification.permission !== "granted") await Notification.requestPermission(); }catch{}
-  alert("Son activé. Le navigateur peut demander une interaction avant de jouer le son.");
+  try{
+    if("Notification" in window && Notification.permission !== "granted") await Notification.requestPermission();
+    if("serviceWorker" in navigator && location.protocol !== "file:") await navigator.serviceWorker.ready;
+  }catch{}
+  alert("Notifications activees. Le navigateur peut demander une autorisation.");
 };
+
+async function showAppNotification(title, body){
+  if(!("Notification" in window) || Notification.permission !== "granted") return;
+  const options = {
+    body,
+    icon: "./duo-icon.svg",
+    badge: "./duo-icon.svg",
+    tag: `duo-${String(title || "notif").toLowerCase().replace(/\s+/g,"-").slice(0,40)}`,
+    data: { url: location.href },
+    renotify: true
+  };
+  try{
+    if("serviceWorker" in navigator && navigator.serviceWorker.controller){
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(title, options);
+      return;
+    }
+  }catch(e){
+    console.warn("Notification service worker indisponible", e);
+  }
+  try{ new Notification(title, options); }catch{}
+}
 
 function notify(title, body){
   beep();
   if(document.hidden && "Notification" in window && Notification.permission === "granted"){
-    new Notification(title,{body});
+    showAppNotification(title, body);
   }
 }
 
