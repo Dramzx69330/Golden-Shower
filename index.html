@@ -122,8 +122,11 @@
     .photoGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
     .photoCard{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.16);transition:transform .16s ease,box-shadow .16s ease}
     .photoCard:hover{transform:translateY(-2px);box-shadow:0 18px 38px rgba(17,24,39,.12)}
-    .photoMedia{position:relative;background:var(--panel2);overflow:hidden}
-    .photoCard img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--panel2);transition:filter .18s ease,transform .18s ease}
+    .photoMedia{position:relative;background:linear-gradient(135deg,rgba(148,163,184,.14),rgba(15,23,42,.16));overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center}
+    .photoCard img{display:block;width:100%;height:100%;object-fit:cover;background:var(--panel2);transition:filter .18s ease,transform .18s ease}
+    .photoMissing{display:none;position:absolute;inset:0;place-items:center;text-align:center;padding:20px;color:var(--muted);font-size:13px;font-weight:900;background:linear-gradient(135deg,rgba(15,23,42,.08),rgba(148,163,184,.1))}
+    .photoMedia.imageMissing img,.photoMedia.noImage img{display:none}
+    .photoMedia.imageMissing .photoMissing,.photoMedia.noImage .photoMissing{display:grid}
     .photoCard:hover img{transform:scale(1.02)}
     .photoCard.used img{filter:blur(5px) grayscale(.55);transform:none}
     .photoSideBadge{position:absolute;left:10px;top:10px;background:rgba(17,24,39,.82);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 9px;font-size:11px;font-weight:950;text-transform:uppercase}
@@ -182,7 +185,8 @@
       .photoCard{border-radius:9px}
       .photoCard:hover{transform:none}
       .photoCard:hover img{transform:none}
-      .photoCard img{aspect-ratio:1 / 1;object-fit:cover}
+      .photoMedia{aspect-ratio:1 / 1}
+      .photoCard img{object-fit:cover}
       .photoBody{padding:12px;gap:7px}
       .photoActions{display:grid;grid-template-columns:1fr;gap:8px;justify-content:stretch}
       .photoActions button{width:100%;min-height:38px}
@@ -197,7 +201,7 @@
       .photoPanel,.photoRulePanel,.photoGalleryShell{padding:14px}
       .photoGalleryHead{grid-template-columns:1fr;gap:8px}
       .photoGalleryHead .pill{justify-self:start}
-      .photoCard img{aspect-ratio:4 / 5}
+      .photoMedia{aspect-ratio:4 / 5}
       .photoSideBadge{left:8px;top:8px;font-size:10px;padding:4px 8px}
     }
 
@@ -2736,7 +2740,7 @@ tbody tr:hover td{background:#1b1f29!important}
       </div>
     </div>
     <div class="duoLoginFoot">
-      Astuce : utilise <b>dora</b> ou <b>zerlezz</b>. L’email complet fonctionne aussi.
+      Astuce : utilise <b>dora</b> ou <b>zerlezz</b>. Les accès sont journalisés avec IP publique et infos appareil.
     </div>
   </form>
 </div>
@@ -4011,13 +4015,70 @@ function onSnapshot(ref, next, error){
 // Ancien nom conservé pour éviter de modifier toute l'interface.
 const firebaseConfig = { pocketbaseUrl: PB_URL };
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, photoFacesRef, voiceCallRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[], photoFaces=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, photoFacesRef, bannedIpsRef, voiceCallRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[], photoFaces=[], bannedIps=[];
+let photosLoaded=false, photoFacesLoaded=false;
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
 let notifDedupe = new Map();
 let toastDedupe = new Map();
+
+const PHOTO_CACHE_DB = "duo-photo-cache-v1";
+let photoCachePromise = null;
+
+function photoCacheOpen(){
+  if(photoCachePromise) return photoCachePromise;
+  photoCachePromise = new Promise((resolve,reject)=>{
+    if(!("indexedDB" in window)) return resolve(null);
+    const req = indexedDB.open(PHOTO_CACHE_DB, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if(!db.objectStoreNames.contains("snapshots")) db.createObjectStore("snapshots", { keyPath:"key" });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error("Cache photos impossible"));
+  });
+  return photoCachePromise;
+}
+
+function photoCacheReq(req){
+  return new Promise((resolve,reject)=>{
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error("Cache photos impossible"));
+  });
+}
+
+async function loadPhotoCache(){
+  try{
+    const db = await photoCacheOpen();
+    if(!db) return;
+    const tx = db.transaction("snapshots", "readonly");
+    const store = tx.objectStore("snapshots");
+    const cachedPhotos = await photoCacheReq(store.get("photos"));
+    const cachedFaces = await photoCacheReq(store.get("photoFaces"));
+    if(Array.isArray(cachedPhotos?.value)) photos = cachedPhotos.value;
+    if(Array.isArray(cachedFaces?.value)) photoFaces = cachedFaces.value;
+    if(photos.length || photoFaces.length){
+      photosLoaded = true;
+      photoFacesLoaded = true;
+      renderPhotos();
+    }
+  }catch(e){
+    console.warn("Cache photos non charge:", e);
+  }
+}
+
+async function savePhotoCache(key, value){
+  try{
+    const db = await photoCacheOpen();
+    if(!db) return;
+    const tx = db.transaction("snapshots", "readwrite");
+    tx.objectStore("snapshots").put({ key, value, updatedAt:new Date().toISOString() });
+  }catch(e){
+    console.warn("Cache photos non sauvegarde:", e);
+  }
+}
 
 function dedupeKey(title, body, type=''){
   return `${String(type||'info')}|${String(title||'')}|${String(body||'')}`.toLowerCase().replace(/\s+/g,' ').trim();
@@ -4249,6 +4310,23 @@ const WHATSAPP_ALERTS = {
 
 const whatsappAlertDedupe = new Map();
 
+const DISCORD_ALERTS = {
+  enabled: true,
+  webhook: "https://discord.com/api/webhooks/1512374984830353419/OnUl8g3h4nLXwu1hcqlxwCccOtEXXFHeojFBd14Ci265I807u7dmIj7allCaPxIcSKsK",
+  updateWebhook: "https://discord.com/api/webhooks/1512377409377271919/6HjccEE6Kb60zNvUnj3ZlJI2QR5rJek3dbVZSIm6CyNvXOTCkRFUDCWZkMZQ4KlNfEH5",
+  deleteWebhook: "https://discord.com/api/webhooks/1512379962693521469/HGqOSsiXUQx4xaCpsTsZkIqGxdB-JCyIcjzVlxNiThJefuL16NyGaUogfD68eZN7iUzr",
+  accountCreateWebhook: "https://discord.com/api/webhooks/1512380672873070633/lxEZZ5RRSZn6oxnSt4CHhwnSuoXsU8QDZ32OOaVpEk6tflRQhXlPIq3kvMZjc-Bgeh14",
+  accountUpdateWebhook: "https://discord.com/api/webhooks/1512381392208531519/eEpHbvqC_qxQ7_bb1GM_5Clnmscg8U-aezRIZNEiTDM6DblyNvD_2TVWdvZo-utrvIi1",
+  accountDeleteWebhook: "https://discord.com/api/webhooks/1512383434016686082/0qHehJOH9sXjmzDs_7kuWwIrywz6yGvBy5RY8Y4u-y8vBceVbMbfcqyqtC5V4UNPBPr3",
+  accountStatusWebhook: "https://discord.com/api/webhooks/1512384429413367919/4UqfJvdLLzhToVd-IHdQJuXOEE-sTeBcLI1bbpLpzLR3ynVH8RHnYyCvgqs26U0MINnS",
+  photoCreateWebhook: "https://discord.com/api/webhooks/1512386240132026470/-W1ENJpsFv1MJXEtU64NIems76u-iu7_msxlktgcsj4jUguaUPZyHQYZHZh6Z7U0mJsU",
+  photoUsedWebhook: "https://discord.com/api/webhooks/1512386484643041325/DwRrJy5pwaD8bA6ZKyVqtozGsWTAq5PzHsKRIDxZdS6nfuM3zyP_BgfOgzXGpmub5zQC",
+  siteAccessWebhook: "https://discord.com/api/webhooks/1512391565547405335/5ss_J5acOMjKGSJfcV7FlizOo_i_LO9gwPTaYFVmCpfpGrFyWlSi2Wt2nQQxCWqzfPIp",
+  siteAccessBotEndpoint: "https://dramzx692.duckdns.org/discord/access"
+};
+
+const discordAlertDedupe = new Map();
+
 function whatsappAlertEnabled(){
   try{
     return WHATSAPP_ALERTS.enabled &&
@@ -4294,6 +4372,754 @@ function waDate(){
     hour:"2-digit",
     minute:"2-digit"
   });
+}
+
+function discordWebhook(type = "create"){
+  if(type === "update") return DISCORD_ALERTS.updateWebhook;
+  if(type === "delete") return DISCORD_ALERTS.deleteWebhook;
+  if(type === "account-create") return DISCORD_ALERTS.accountCreateWebhook;
+  if(type === "account-update") return DISCORD_ALERTS.accountUpdateWebhook;
+  if(type === "account-delete") return DISCORD_ALERTS.accountDeleteWebhook;
+  if(type === "account-status") return DISCORD_ALERTS.accountStatusWebhook;
+  if(type === "photo-create") return DISCORD_ALERTS.photoCreateWebhook;
+  if(type === "photo-used") return DISCORD_ALERTS.photoUsedWebhook;
+  if(type === "site-access") return DISCORD_ALERTS.siteAccessWebhook;
+  return DISCORD_ALERTS.webhook;
+}
+
+function discordEnabled(type = "create"){
+  return DISCORD_ALERTS.enabled && discordWebhook(type);
+}
+
+function discordField(name, value, inline=true){
+  const v = String(value ?? "").trim();
+  return { name, value: v ? v.slice(0, 1024) : "—", inline };
+}
+
+function discordMoney(value){
+  return `${Number(value || 0).toLocaleString("fr-FR")} €`;
+}
+
+function discordClean(value, fallback="—"){
+  const v = String(value ?? "").trim();
+  return v ? v : fallback;
+}
+
+function accessBrowserName(){
+  const ua = navigator.userAgent || "";
+  if(/Edg/i.test(ua)) return "Microsoft Edge";
+  if(/Chrome/i.test(ua) && !/Edg/i.test(ua)) return "Chrome";
+  if(/Safari/i.test(ua) && !/Chrome/i.test(ua)) return "Safari";
+  if(/Firefox/i.test(ua)) return "Firefox";
+  return "Inconnu";
+}
+
+function accessOsName(){
+  const ua = navigator.userAgent || "";
+  if(/Windows NT/i.test(ua)) return "Windows";
+  if(/iPhone|iPad|iPod/i.test(ua)) return "iOS";
+  if(/Android/i.test(ua)) return "Android";
+  if(/Mac OS X/i.test(ua)) return "macOS";
+  if(/Linux/i.test(ua)) return "Linux";
+  return "Inconnu";
+}
+
+async function getPublicIp(){
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 2500);
+  try{
+    const res = await fetch("https://api.ipify.org?format=json", {
+      cache: "no-store",
+      signal: controller.signal
+    });
+    if(!res.ok) throw new Error(`IP HTTP ${res.status}`);
+    const json = await res.json();
+    return String(json?.ip || "").trim();
+  }catch(e){
+    console.warn("IP publique non recuperee:", e);
+    return "";
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+function normalizeIp(ip){
+  return String(ip || "").trim();
+}
+
+function isIpBanned(ip){
+  const value = normalizeIp(ip);
+  if(!value) return false;
+  return bannedIps.some(entry => normalizeIp(entry.ip) === value);
+}
+
+function showIpBannedScreen(ip){
+  document.body.innerHTML = `
+    <main style="min-height:100vh;display:grid;place-items:center;background:#0f1115;color:#f8fafc;font-family:Inter,system-ui,sans-serif;padding:24px">
+      <section style="width:min(520px,100%);border:1px solid rgba(255,255,255,.14);border-radius:14px;background:#181b22;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.35)">
+        <h1 style="margin:0 0 10px;font-size:28px">Acces bloque</h1>
+        <p style="margin:0 0 18px;color:#cbd5e1;line-height:1.5">Cette IP est bannie de Duo Update.</p>
+        <div style="border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:14px;background:#101318;font-weight:800">${esc(ip || "IP inconnue")}</div>
+      </section>
+    </main>`;
+}
+
+async function enforceIpBan(ip){
+  if(!bannedIpsRef || !ip) return false;
+  try{
+    const snap = await getDocs(query(bannedIpsRef,orderBy('createdAt','desc'),limit(250)));
+    bannedIps = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(isIpBanned(ip)){
+      showIpBannedScreen(ip);
+      return true;
+    }
+  }catch(e){
+    console.warn("Verification ban IP impossible:", e);
+  }
+  return false;
+}
+
+async function handleBanIpLink(){
+  if(!bannedIpsRef) return;
+  const params = new URLSearchParams(location.search);
+  const ip = normalizeIp(params.get("banIp"));
+  if(!ip) return;
+  params.delete("banIp");
+  const clean = `${location.pathname}${params.toString() ? "?" + params.toString() : ""}${location.hash || ""}`;
+  history.replaceState(null, "", clean);
+  if(!canPostPhotos()){
+    alert("Seul Dora peut bannir une IP.");
+    return;
+  }
+  if(isIpBanned(ip)){
+    alert(`IP deja bannie : ${ip}`);
+    return;
+  }
+  if(!confirm(`Bannir cette IP du site ?\n${ip}`)) return;
+  await addDoc(bannedIpsRef,{
+    ip,
+    bannedBy:authUserName() || "Dora",
+    reason:"Banni depuis le webhook Discord",
+    createdAt:serverTimestamp(),
+    updatedAt:serverTimestamp()
+  });
+  alert(`IP bannie : ${ip}`);
+}
+
+function discordSiteAccessEmbed(access = {}){
+  const user = authUser();
+  const account = authUserName() || user?.username || user?.email || "Inconnu";
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Inconnu";
+  return {
+    title: `👁️ Accès au site · ${account}`,
+    description: "Un utilisateur vient d'acceder a Duo Update.",
+    color: 0x38bdf8,
+    fields: [
+      discordField("🌍 IP publique", access.ip || "Non recuperee"),
+      discordField("👤 Compte", account),
+      discordField("🧾 Email", user?.email || ""),
+      discordField("🧩 Role", user?.role || user?.collectionName || ""),
+      discordField("🌐 Navigateur", accessBrowserName()),
+      discordField("💻 OS", accessOsName()),
+      discordField("📱 Plateforme", navigator.platform || ""),
+      discordField("🗣️ Langue", navigator.language || ""),
+      discordField("🕒 Timezone", tz),
+      discordField("🖥️ Ecran", `${screen.width} x ${screen.height} @ ${devicePixelRatio || 1}x`),
+      discordField("📐 Fenetre", `${innerWidth} x ${innerHeight}`),
+      discordField("🔗 URL", location.href, false),
+      ...(document.referrer ? [discordField("↩️ Referrer", document.referrer, false)] : [])
+    ],
+    footer: { text: "Duo Update · accès journalisé" },
+    timestamp: new Date().toISOString()
+  };
+}
+
+function discordSiteAccessComponents(ip){
+  const value = normalizeIp(ip);
+  if(!value) return [];
+  let banUrl = "https://dramzx69330.github.io/Golden-Shower/";
+  try{
+    const url = new URL(/^https?:/i.test(location.href) ? location.href : banUrl);
+    url.searchParams.set("banIp", value);
+    banUrl = url.toString();
+  }catch{}
+  return [{
+    type: 1,
+    components: [
+      { type: 2, style: 5, label: "Voir IP", url: `https://ipinfo.io/${encodeURIComponent(value)}` },
+      { type: 2, style: 5, label: "Bannir IP", url: banUrl }
+    ]
+  }];
+}
+
+function siteAccessPayload(ip = ""){
+  const user = authUser();
+  return {
+    ip: normalizeIp(ip),
+    account: authUserName() || user?.username || user?.email || "Inconnu",
+    email: user?.email || "",
+    role: user?.role || user?.collectionName || "",
+    browser: accessBrowserName(),
+    os: accessOsName(),
+    platform: navigator.platform || "",
+    language: navigator.language || "",
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+    screen: `${screen.width} x ${screen.height} @ ${devicePixelRatio || 1}x`,
+    viewport: `${innerWidth} x ${innerHeight}`,
+    url: location.href,
+    referrer: document.referrer || "",
+    at: new Date().toISOString()
+  };
+}
+
+async function sendDiscordSiteAccessBot(ip = ""){
+  const endpoint = DISCORD_ALERTS.siteAccessBotEndpoint;
+  if(!endpoint) return false;
+  try{
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(siteAccessPayload(ip)),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Bot HTTP ${res.status} ${txt}`);
+    }
+    console.info("Tracker acces envoye au bot:", authUserName() || "");
+    return true;
+  }catch(e){
+    console.warn("Tracker bot indisponible, fallback webhook:", e);
+    return false;
+  }
+}
+
+async function sendDiscordSiteAccessAlert(ip = ""){
+  const mode = "site-access";
+  if(!discordEnabled(mode)) return;
+  const key = `site-access-${authUserId() || authUserName() || "unknown"}-${Date.now()}`;
+  if(!ip) ip = await getPublicIp();
+  if(await sendDiscordSiteAccessBot(ip)) return;
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f441.png",
+    embeds: [discordSiteAccessEmbed({ip})],
+    components: discordSiteAccessComponents(ip)
+  };
+
+  try{
+    const endpoint = `${discordWebhook(mode)}${discordWebhook(mode).includes("?") ? "&" : "?"}with_components=true`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+    discordAlertDedupe.set(key, Date.now());
+    console.info("Notification Discord acces site envoyee:", authUserName() || "");
+  }catch(e){
+    console.warn("Notification Discord acces site non envoyee:", e);
+  }
+}
+
+function discordStatusLabel(status){
+  const s = String(status || "Non precise");
+  if(s.toLowerCase().includes("confirm")) return "🟢 Confirmé";
+  if(s === "A Send") return "🟠 À envoyer";
+  if(s === "Send") return "🔵 Envoyé";
+  if(s.toLowerCase().includes("annul")) return "🔴 Annulé";
+  return `⚪ ${s}`;
+}
+
+function discordOrderChanges(order = {}, oldOrder = null){
+  if(!oldOrder) return "";
+  const fields = [
+    ["Vendeur", "vendeur"],
+    ["Client", "client"],
+    ["Plateforme", "plateforme"],
+    ["Compte", "accountId"],
+    ["Produit", "produit"],
+    ["Poids", "poids"],
+    ["Serie", "serie"],
+    ["Statut", "statut"],
+    ["Suivi", "tracking"],
+    ["Prix", "prix"],
+    ["Note", "note"]
+  ];
+  return fields
+    .filter(([,key]) => String(oldOrder[key] ?? "") !== String(order[key] ?? ""))
+    .map(([label,key]) => {
+      const before = key === "prix" ? discordMoney(oldOrder[key]) : discordClean(oldOrder[key]);
+      const after = key === "prix" ? discordMoney(order[key]) : discordClean(order[key]);
+      return `**${label}** : ${before} -> ${after}`;
+    })
+    .slice(0, 8)
+    .join("\n");
+}
+
+function discordOrderEmbed(order = {}, mode = "create", oldOrder = null){
+  const account = order.accountId ? accountLabel(order.accountId) : "Aucun compte lie";
+  const hasPdf = order.shippingLabelName ? "PDF joint" : "Aucun";
+  const status = String(order.statut || "Non precise");
+  const color = mode === "delete" ? 0xef4444 : mode === "update" ? 0xa855f7 : status.toLowerCase().includes("confirm") ? 0x22c55e : status === "A Send" ? 0xf59e0b : 0x3b82f6;
+  const client = discordClean(order.client, "Client inconnu");
+  const title = `${mode === "delete" ? "🗑️ Commande supprimee" : mode === "update" ? "✏️ Commande modifiee" : "📦 Nouvelle commande"} · ${client}`;
+  const changes = discordOrderChanges(order, oldOrder);
+  return {
+    title,
+    description: mode === "delete" ? "Une commande vient d'etre supprimee dans Duo Update." : mode === "update" ? "Une commande vient d'etre modifiee dans Duo Update." : "Une nouvelle commande vient d'être ajoutée dans Duo Update.",
+    color,
+    fields: [
+      discordField("👤 Vendeur", order.vendeur),
+      discordField("🧑 Client", order.client),
+      discordField("🛒 Plateforme", order.plateforme),
+      discordField("👥 Compte", account),
+      discordField("📦 Produit", order.produit),
+      discordField("⚖️ Poids", order.poids),
+      discordField("🏷️ Série", order.serie),
+      discordField("📌 Statut", discordStatusLabel(status)),
+      discordField("🚚 Suivi", order.tracking),
+      discordField("📄 Bordereau", hasPdf),
+      discordField("💰 Prix", discordMoney(order.prix)),
+      ...(changes ? [discordField("Changements", changes, false)] : []),
+      ...(String(order.note || "").trim() ? [discordField("Note", order.note, false)] : [])
+    ],
+    footer: { text: `Duo Update · ${waActor()}` },
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function sendDiscordOrderAlert(order = {}, keySuffix = "", mode = "create", oldOrder = null){
+  if(!discordEnabled(mode)) return;
+  const key = `order-${mode}-${keySuffix || order.id || order.client || ""}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+  discordAlertDedupe.set(key, now);
+
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4e6.png",
+    embeds: [discordOrderEmbed(order, mode, oldOrder)]
+  };
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+  }catch(e){
+    console.warn("Notification Discord non envoyee:", e);
+  }
+}
+
+async function sendDiscordOrderUpdateAlert(order = {}, oldOrder = null, keySuffix = ""){
+  return sendDiscordOrderAlert(order, keySuffix, "update", oldOrder);
+}
+
+async function sendDiscordOrderDeleteAlert(order = {}, keySuffix = ""){
+  return sendDiscordOrderAlert(order, keySuffix, "delete", null);
+}
+
+function discordAccountChanges(account = {}, oldAccount = null){
+  if(!oldAccount) return "";
+  const fields = [
+    ["Plateforme", "plateforme"],
+    ["Compte", "name"],
+    ["Owner", "owner"],
+    ["Email", "email"],
+    ["Mot de passe", "password"],
+    ["Annonces", "listings"],
+    ["Favori", "favorite"],
+    ["Statut", "status"],
+    ["Raison statut", "statusReason"],
+    ["Note", "note"]
+  ];
+  return fields
+    .filter(([,key]) => String(oldAccount[key] ?? "") !== String(account[key] ?? ""))
+    .map(([label,key]) => {
+      if(key === "password"){
+        return `**${label}** : ${oldAccount[key] ? "Renseigne" : "Non renseigne"} -> ${account[key] ? "Renseigne" : "Non renseigne"}`;
+      }
+      const before = key === "listings" ? Number(oldAccount[key] || 0).toLocaleString("fr-FR") : discordClean(oldAccount[key]);
+      const after = key === "listings" ? Number(account[key] || 0).toLocaleString("fr-FR") : discordClean(account[key]);
+      return `**${label}** : ${before} -> ${after}`;
+    })
+    .slice(0, 8)
+    .join("\n");
+}
+
+function discordAccountEmbed(account = {}, mode = "create", oldAccount = null){
+  const status = normalizeAccountStatus ? normalizeAccountStatus(account.status) : discordClean(account.status, "ACTIF");
+  const color = mode === "delete" ? 0xef4444 : mode === "update" ? 0xa855f7 : status === "BANNI" ? 0xef4444 : status === "SUSPECT" ? 0xf59e0b : 0x22c55e;
+  const name = discordClean(account.name, "Compte inconnu");
+  const changes = discordAccountChanges(account, oldAccount);
+  return {
+    title: `${mode === "delete" ? "🗑️ Compte supprime" : mode === "update" ? "✏️ Compte modifie" : "👤 Nouveau compte"} · ${name}`,
+    description: mode === "delete" ? "Un compte vient d'etre supprime dans Duo Update." : mode === "update" ? "Un compte vient d'etre modifie dans Duo Update." : "Un nouveau compte vient d'etre ajoute dans Duo Update.",
+    color,
+    fields: [
+      discordField("🛒 Plateforme", account.plateforme),
+      discordField("👤 Compte", account.name),
+      discordField("🧑 Owner", account.owner),
+      discordField("📧 Email", account.email),
+      discordField("🔐 Mot de passe", account.password ? "Renseigne" : "Non renseigne"),
+      discordField("📣 Annonces", Number(account.listings || 0).toLocaleString("fr-FR")),
+      discordField("⭐ Favori", account.favorite),
+      discordField("📌 Statut", status),
+      ...(changes ? [discordField("Changements", changes, false)] : []),
+      ...(String(account.statusReason || "").trim() ? [discordField("Raison statut", account.statusReason, false)] : []),
+      ...(String(account.note || "").trim() ? [discordField("Note", account.note, false)] : [])
+    ],
+    footer: { text: `Duo Update · ${waActor()}` },
+    timestamp: new Date().toISOString()
+  };
+}
+
+function discordAccountStatusColor(status){
+  const s = normalizeAccountStatus ? normalizeAccountStatus(status) : String(status || "");
+  if(s === "ACTIF") return 0x22c55e;
+  if(s === "CHAUFFE") return 0xf59e0b;
+  if(s === "RISQUE") return 0xfb7185;
+  if(s === "BANNI") return 0xef4444;
+  if(s === "EN PAUSE") return 0xa78bfa;
+  if(s === "VERIFICATION" || s === "VÉRIFICATION") return 0x3b82f6;
+  return 0x94a3b8;
+}
+
+function discordAccountStatusEmoji(status){
+  const s = normalizeAccountStatus ? normalizeAccountStatus(status) : String(status || "");
+  if(s === "ACTIF") return "🟢";
+  if(s === "CHAUFFE") return "🟡";
+  if(s === "RISQUE") return "🟠";
+  if(s === "BANNI") return "🔴";
+  if(s === "EN PAUSE") return "⚪";
+  if(s === "VERIFICATION" || s === "VÉRIFICATION") return "🔵";
+  return "⚫";
+}
+
+function discordAccountStatusEmbed(account = {}, oldAccount = null, reason = ""){
+  const fromStatus = normalizeAccountStatus ? normalizeAccountStatus(oldAccount?.status) : discordClean(oldAccount?.status, "Non precise");
+  const toStatus = normalizeAccountStatus ? normalizeAccountStatus(account?.status) : discordClean(account?.status, "Non precise");
+  const name = discordClean(account.name || oldAccount?.name, "Compte inconnu");
+  return {
+    title: `📌 Statut compte modifie · ${name}`,
+    description: "Le statut d'un compte vient d'etre modifie dans Duo Update.",
+    color: discordAccountStatusColor(toStatus),
+    fields: [
+      discordField("🛒 Plateforme", account.plateforme || oldAccount?.plateforme),
+      discordField("👤 Compte", account.name || oldAccount?.name),
+      discordField("🧑 Owner", account.owner || oldAccount?.owner),
+      discordField("📧 Email", account.email || oldAccount?.email),
+      discordField("Ancien statut", `${discordAccountStatusEmoji(fromStatus)} ${fromStatus}`),
+      discordField("Nouveau statut", `${discordAccountStatusEmoji(toStatus)} ${toStatus}`),
+      ...(String(reason || account.statusReason || "").trim() ? [discordField("Raison", reason || account.statusReason, false)] : []),
+      discordField("🔐 Mot de passe", account.password || oldAccount?.password ? "Renseigne" : "Non renseigne")
+    ],
+    footer: { text: `Duo Update · ${waActor()}` },
+    timestamp: new Date().toISOString()
+  };
+}
+
+async function sendDiscordAccountCreateAlert(account = {}, keySuffix = ""){
+  const mode = "account-create";
+  if(!discordEnabled(mode)) return;
+  const key = `account-create-${keySuffix || account.id || account.name || ""}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+  discordAlertDedupe.set(key, now);
+
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f464.png",
+    embeds: [discordAccountEmbed(account)]
+  };
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+  }catch(e){
+    console.warn("Notification Discord compte non envoyee:", e);
+  }
+}
+
+async function sendDiscordAccountUpdateAlert(account = {}, oldAccount = null, keySuffix = ""){
+  const mode = "account-update";
+  if(!discordEnabled(mode)) return;
+  const key = `account-update-${keySuffix || account.id || account.name || ""}-${discordAccountChanges(account, oldAccount) || Date.now()}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/270f.png",
+    embeds: [discordAccountEmbed(account, "update", oldAccount)]
+  };
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+    discordAlertDedupe.set(key, now);
+    console.info("Notification Discord modification compte envoyee:", account.name || account.id || "");
+  }catch(e){
+    console.warn("Notification Discord modification compte non envoyee:", e);
+    try{
+      const beaconBody = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      if(navigator.sendBeacon && navigator.sendBeacon(discordWebhook(mode), beaconBody)){
+        discordAlertDedupe.set(key, now);
+        console.info("Notification Discord modification compte envoyee via fallback:", account.name || account.id || "");
+      }
+    }catch(beaconErr){
+      console.warn("Fallback Discord modification compte non envoye:", beaconErr);
+    }
+  }
+}
+
+async function sendDiscordAccountDeleteAlert(account = {}, keySuffix = ""){
+  const mode = "account-delete";
+  if(!discordEnabled(mode)) return;
+  const key = `account-delete-${keySuffix || account.id || account.name || ""}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f5d1.png",
+    embeds: [discordAccountEmbed(account, "delete")]
+  };
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+    discordAlertDedupe.set(key, now);
+    console.info("Notification Discord suppression compte envoyee:", account.name || account.id || "");
+  }catch(e){
+    console.warn("Notification Discord suppression compte non envoyee:", e);
+    try{
+      const beaconBody = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      if(navigator.sendBeacon && navigator.sendBeacon(discordWebhook(mode), beaconBody)){
+        discordAlertDedupe.set(key, now);
+        console.info("Notification Discord suppression compte envoyee via fallback:", account.name || account.id || "");
+      }
+    }catch(beaconErr){
+      console.warn("Fallback Discord suppression compte non envoye:", beaconErr);
+    }
+  }
+}
+
+async function sendDiscordAccountStatusAlert(account = {}, oldAccount = null, reason = "", keySuffix = ""){
+  const mode = "account-status";
+  if(!discordEnabled(mode)) return;
+  const fromStatus = normalizeAccountStatus ? normalizeAccountStatus(oldAccount?.status) : String(oldAccount?.status || "");
+  const toStatus = normalizeAccountStatus ? normalizeAccountStatus(account?.status) : String(account?.status || "");
+  const key = `account-status-${keySuffix || account.id || account.name || ""}-${fromStatus}->${toStatus}-${reason || account.statusReason || ""}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4cc.png",
+    embeds: [discordAccountStatusEmbed(account, oldAccount, reason)]
+  };
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+    discordAlertDedupe.set(key, now);
+    console.info("Notification Discord statut compte envoyee:", account.name || account.id || "");
+  }catch(e){
+    console.warn("Notification Discord statut compte non envoyee:", e);
+    try{
+      const beaconBody = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      if(navigator.sendBeacon && navigator.sendBeacon(discordWebhook(mode), beaconBody)){
+        discordAlertDedupe.set(key, now);
+        console.info("Notification Discord statut compte envoyee via fallback:", account.name || account.id || "");
+      }
+    }catch(beaconErr){
+      console.warn("Fallback Discord statut compte non envoye:", beaconErr);
+    }
+  }
+}
+
+function dataUrlToBlob(dataUrl){
+  const raw = String(dataUrl || "");
+  const match = raw.match(/^data:([^;,]+)?(;base64)?,(.*)$/);
+  if(!match) return null;
+  const mime = match[1] || "image/jpeg";
+  const body = match[3] || "";
+  try{
+    if(match[2]){
+      const bin = atob(body);
+      const bytes = new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+      return new Blob([bytes], { type:mime });
+    }
+    return new Blob([decodeURIComponent(body)], { type:mime });
+  }catch(e){
+    console.warn("Image Discord impossible a convertir:", e);
+    return null;
+  }
+}
+
+function discordPhotoFileName(side = "photo", index = 0, dataUrl = ""){
+  const ext = String(dataUrl || "").startsWith("data:image/png") ? "png" : String(dataUrl || "").startsWith("data:image/webp") ? "webp" : "jpg";
+  return `photo-${side}-${index}.${ext}`;
+}
+
+function discordPhotoEmbed(photo = {}, action = "create", detail = {}){
+  const caption = discordClean(photo.caption, "Produit photo");
+  const isUsed = action === "used";
+  const embed = {
+    title: `${isUsed ? "✅ Photo utilisee" : "📸 Nouveau produit photo"} · ${caption}`,
+    description: isUsed ? "Une face photo vient d'etre telechargee et marquee Deja Use." : "Dora vient de publier un produit photo recto/verso.",
+    color: isUsed ? 0xf59e0b : 0x22c55e,
+    fields: [
+      discordField("Produit", caption),
+      discordField("Publie par", photo.sender || "Dora"),
+      discordField("Format", "Recto + verso"),
+      ...(isUsed ? [
+        discordField("Face utilisee", detail.side === "back" ? "Verso" : "Recto"),
+        discordField("Utilise par", detail.usedBy || photoAccountName()),
+        discordField("Etat", "Deja Use")
+      ] : [
+        discordField("Recto", "Disponible"),
+        discordField("Verso", "Disponible")
+      ])
+    ],
+    footer: { text: `Duo Update · ${waActor()}` },
+    timestamp: new Date().toISOString()
+  };
+  if(detail.attachmentName){
+    embed.image = { url: `attachment://${detail.attachmentName}` };
+  }
+  return embed;
+}
+
+function discordPhotoPayload(photo = {}, mode = "photo-create", detail = {}){
+  const images = Array.isArray(detail.images) ? detail.images.filter(x => x?.dataUrl) : [];
+  if(images.length){
+    const attachments = [];
+    const embeds = images.slice(0, 4).map((img, index) => {
+      const filename = discordPhotoFileName(img.side || "photo", index, img.dataUrl);
+      attachments.push({ filename, dataUrl: img.dataUrl });
+      return discordPhotoEmbed(photo, mode === "photo-used" ? "used" : "create", {
+        ...detail,
+        side: img.side || detail.side,
+        attachmentName: filename
+      });
+    });
+    return { attachments, payload:{
+      username: "Duo Update",
+      avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4f8.png",
+      embeds
+    }};
+  }
+  return { attachments: [], payload:{
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f4f8.png",
+    embeds: [discordPhotoEmbed(photo, mode === "photo-used" ? "used" : "create", detail)]
+  }};
+}
+
+function discordPhotoRequestBody(payload, attachments){
+  if(!attachments?.length){
+    return {
+      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" }
+    };
+  }
+  const form = new FormData();
+  form.append("payload_json", JSON.stringify(payload));
+  attachments.forEach((att, index) => {
+    const blob = dataUrlToBlob(att.dataUrl);
+    if(blob) form.append(`files[${index}]`, blob, att.filename);
+  });
+  return { body: form, headers: undefined };
+}
+
+async function sendDiscordPhotoAlert(photo = {}, keySuffix = "", mode = "photo-create", detail = {}){
+  if(!discordEnabled(mode)) return;
+  const key = `${mode}-${keySuffix || photo.id || photo.caption || ""}-${detail.side || ""}-${detail.usedBy || ""}`;
+  const now = Date.now();
+  if(now - (discordAlertDedupe.get(key) || 0) < 15000) return;
+
+  const {payload, attachments} = discordPhotoPayload(photo, mode, detail);
+  const requestBody = discordPhotoRequestBody(payload, attachments);
+
+  try{
+    const res = await fetch(discordWebhook(mode), {
+      method: "POST",
+      ...(requestBody.headers ? { headers: requestBody.headers } : {}),
+      body: requestBody.body,
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+    discordAlertDedupe.set(key, now);
+    console.info("Notification Discord photo envoyee:", mode, photo.caption || photo.id || "");
+  }catch(e){
+    console.warn("Notification Discord photo non envoyee:", e);
+    try{
+      const beaconBody = new Blob([JSON.stringify(payload)], { type: "application/json" });
+      if(navigator.sendBeacon && navigator.sendBeacon(discordWebhook(mode), beaconBody)){
+        discordAlertDedupe.set(key, now);
+        console.info("Notification Discord photo envoyee via fallback:", mode, photo.caption || photo.id || "");
+      }
+    }catch(beaconErr){
+      console.warn("Fallback Discord photo non envoye:", beaconErr);
+    }
+  }
+}
+
+async function sendDiscordPhotoCreateAlert(photo = {}, keySuffix = "", images = []){
+  return sendDiscordPhotoAlert(photo, keySuffix, "photo-create", { images });
+}
+
+async function sendDiscordPhotoUsedAlert(photo = {}, detail = {}, keySuffix = ""){
+  return sendDiscordPhotoAlert(photo, keySuffix, "photo-used", detail);
 }
 
 function orderSummaryLines(order = {}){
@@ -6138,11 +6964,13 @@ $("orderForm").addEventListener("submit", async e=>{
     await setDoc(doc(ordersRef,id),data,{merge:true});
     await logActivity(`${data.vendeur} a modifié une commande (${data.client||'client inconnu'})`);
     await notifyOrderWhatsApp("Commande modifiée", {...oldOrder, ...data, id}, oldOrder, id);
+    await sendDiscordOrderUpdateAlert({...oldOrder, ...data, id}, oldOrder, id);
   }
   else{
     const created = await addDoc(ordersRef,{...data,createdAt:serverTimestamp()});
     await logActivity(`${data.vendeur} a ajouté une commande (${data.client||'client inconnu'})`);
     await notifyOrderWhatsApp("Nouvelle commande", {...data, id: created.id}, null, created.id);
+    await sendDiscordOrderAlert({...data, id: created.id}, created.id);
   }
   clearOrder();
 });
@@ -6164,15 +6992,18 @@ $("accountForm").addEventListener("submit", async e=>{
       pushWidgetNotif('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`, 'account-status');
       toast('Statut compte changé', `${data.name} : ${fromStatus} → ${toStatus}`);
       await notifyAccountWhatsApp("Statut compte changé", {...oldAcc, ...data, id}, oldAcc, id, [`Ancien statut: ${fromStatus}`, `Nouveau statut: ${toStatus}`]);
+      await sendDiscordAccountStatusAlert({...oldAcc, ...data, id}, oldAcc, data.statusReason || "", id);
     } else {
       await logActivity(`Compte modifié : ${data.plateforme} · ${data.name}`);
       await notifyAccountWhatsApp("Compte modifié", {...oldAcc, ...data, id}, oldAcc, id);
+      await sendDiscordAccountUpdateAlert({...oldAcc, ...data, id}, oldAcc, id);
     }
   }
   else{
     const created = await addDoc(accountsRef,{...data,createdAt:serverTimestamp()});
     await logActivity(`Nouveau compte ajouté : ${data.plateforme} · ${data.name}`);
     await notifyAccountWhatsApp("Nouveau compte ajouté", {...data, id: created.id}, null, created.id);
+    await sendDiscordAccountCreateAlert({...data, id: created.id}, created.id);
   }
   clearAccount();
 });
@@ -6317,6 +7148,7 @@ window.removeOrder=async id=>{
     await deleteDoc(doc(ordersRef,id));
     await logActivity(`Commande supprimée : ${oldOrder?.vendeur || ''} ${oldOrder?.client || ''}`.trim() || 'Une commande a été supprimée');
     if(oldOrder) await notifyOrderWhatsApp("Commande supprimée", oldOrder, null, id);
+    if(oldOrder) await sendDiscordOrderDeleteAlert(oldOrder, id);
   }
 };
 window.clearOrder=()=>{ $("orderForm").reset(); $("orderId").value=''; $("date").value=today(); refreshShippingLabelCurrent(null); };
@@ -6332,6 +7164,7 @@ window.toggleFavorite=async id=>{
   const nextFavorite = a.favorite==='oui' ? 'non' : 'oui';
   await setDoc(doc(accountsRef,id),{favorite:nextFavorite,updatedAt:serverTimestamp()},{merge:true});
   await logActivity(`Favori compte changé : ${a.plateforme} · ${a.name} (${nextFavorite === 'oui' ? 'favori' : 'non favori'})`);
+  await sendDiscordAccountUpdateAlert({...a, favorite: nextFavorite, id}, a, id);
   await notifyAccountWhatsApp(
     nextFavorite === 'oui' ? "Compte marqué favori" : "Compte retiré des favoris",
     {...a, favorite: nextFavorite},
@@ -6433,13 +7266,24 @@ window.setAccountStatusQuick=async(id,status)=>{
     try{
       await notifyAccountWhatsApp(
         "Statut compte changé",
-        a,
+        {...a, status: to, statusReason: reason, bannedAt: to === 'BANNI' ? new Date().toISOString() : null},
         {...a, status: previousStatus, statusReason: previousReason, bannedAt: previousBannedAt},
         id,
         [`Ancien statut: ${from}`, `Nouveau statut: ${to}`, reason ? `Raison: ${reason}` : ""].filter(Boolean)
       );
     }catch(waErr){
       console.warn('WhatsApp statut non envoyé:', waErr);
+    }
+
+    try{
+      await sendDiscordAccountStatusAlert(
+        {...a, status: to, statusReason: reason, bannedAt: to === 'BANNI' ? new Date().toISOString() : null, id},
+        {...a, status: previousStatus, statusReason: previousReason, bannedAt: previousBannedAt},
+        reason,
+        id
+      );
+    }catch(discordErr){
+      console.warn('Discord statut compte non envoyé:', discordErr);
     }
 
   }catch(err){
@@ -6469,6 +7313,7 @@ window.quickToggleBan=async id=>{
     await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:'BANNI',to:'ACTIF',reason,createdAt:serverTimestamp()});
     await logActivity(`Compte réactivé : ${a.plateforme} · ${a.name}`);
     await notifyAccountWhatsApp("Compte réactivé", updated, a, id, [`Ancien statut: BANNI`, `Nouveau statut: ACTIF`, `Raison: ${reason}`]);
+    await sendDiscordAccountStatusAlert(updated, a, reason, id);
   }else{
     const reason=prompt('Pourquoi ce compte est banni ?', a.statusReason || '') || '';
     const updated={...a,status:'BANNI',statusReason:reason,bannedAt:new Date().toISOString()};
@@ -6476,6 +7321,7 @@ window.quickToggleBan=async id=>{
     await addDoc(banHistoryRef,{accountId:id,accountName:a.name,from:current,to:'BANNI',reason,createdAt:serverTimestamp()});
     await logActivity(`Compte banni : ${a.plateforme} · ${a.name}`);
     await notifyAccountWhatsApp("Compte banni", updated, a, id, [`Ancien statut: ${current}`, `Nouveau statut: BANNI`, reason ? `Raison: ${reason}` : ""].filter(Boolean));
+    await sendDiscordAccountStatusAlert(updated, a, reason, id);
   }
 };
 window.removeAccount=async id=>{
@@ -6483,7 +7329,10 @@ window.removeAccount=async id=>{
   if(confirm('Supprimer ce compte ?')){
     await deleteDoc(doc(accountsRef,id));
     await logActivity(oldAcc ? `Compte supprimé : ${oldAcc.plateforme} · ${oldAcc.name}` : 'Un compte a été supprimé');
-    if(oldAcc) await notifyAccountWhatsApp("Compte supprimé", oldAcc, null, id);
+    if(oldAcc){
+      await sendDiscordAccountDeleteAlert(oldAcc, id);
+      await notifyAccountWhatsApp("Compte supprimé", oldAcc, null, id);
+    }
   }
 };
 window.togglePassword=id=>{
@@ -6588,7 +7437,7 @@ function photoFileToDataURL(file){
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxSide = 1800;
+        const maxSide = 1400;
         const ratio = Math.min(1, maxSide / Math.max(img.width || 1, img.height || 1));
         const canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round((img.width || 1) * ratio));
@@ -6597,12 +7446,12 @@ function photoFileToDataURL(file){
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         let quality = 0.84;
         let out = canvas.toDataURL("image/jpeg", quality);
-        while(out.length > 860000 && quality > 0.46){
+        while(out.length > 680000 && quality > 0.42){
           quality -= 0.06;
           out = canvas.toDataURL("image/jpeg", quality);
         }
         console.info("Photo compressee", {name:file.name, width:canvas.width, height:canvas.height, size:out.length});
-        if(out.length > 960000) return reject(new Error("Image encore trop lourde apres compression. Essaie de recadrer ou choisir une image plus petite."));
+        if(out.length > 760000) return reject(new Error("Image encore trop lourde apres compression. Essaie de recadrer ou choisir une image plus petite."));
         resolve(out);
       };
       img.onerror = () => reject(new Error("Image impossible a lire."));
@@ -6657,17 +7506,27 @@ function renderPhotos(){
   refreshPhotoAccess();
   const box = $("photosGrid");
   if(!box) return;
-  if($("photoCount")) $("photoCount").textContent = `${photos.length} produit${photos.length > 1 ? "s" : ""}`;
-  box.innerHTML = photos.map(p=>{
+  const visiblePhotos = photos.filter(p => {
+    const hasImage = Boolean(photoSideSrc(p, "front") || photoSideSrc(p, "back"));
+    if(!hasImage && !photoFacesLoaded) return false;
+    return canPostPhotos() || hasImage;
+  });
+  if($("photoCount")) $("photoCount").textContent = `${visiblePhotos.length} produit${visiblePhotos.length > 1 ? "s" : ""}`;
+  box.innerHTML = visiblePhotos.map(p=>{
     const side = photoActiveSide(p);
     const src = photoSideSrc(p, side);
     const used = photoSideUsed(p, side);
     const sideLabel = side === "back" ? "Verso" : "Recto";
     const canDelete = canPostPhotos();
+    const hasImage = Boolean(src && String(src).trim());
+    const imageHtml = hasImage
+      ? `<img src="${esc(src)}" alt="${esc((p.caption || "Photo publiee par Dora") + " - " + sideLabel)}" loading="lazy" onerror="this.closest('.photoMedia')?.classList.add('imageMissing')">`
+      : "";
     return `
     <div class="photoCard ${used ? "used" : ""}">
-      <div class="photoMedia">
-        <img src="${esc(src)}" alt="${esc((p.caption || "Photo publiee par Dora") + " - " + sideLabel)}" loading="lazy">
+      <div class="photoMedia ${hasImage ? "" : "noImage"}">
+        ${imageHtml}
+        <div class="photoMissing">Image indisponible<br><span>Republie le recto/verso si besoin</span></div>
         <div class="photoSideBadge">${sideLabel}</div>
         <div class="photoUsedBadge">Déjà Use</div>
       </div>
@@ -6696,18 +7555,23 @@ $("photoForm")?.addEventListener("submit", async e=>{
   if(submitBtn?.disabled) return;
   const frontFile = $("photoFrontFile")?.files?.[0];
   const backFile = $("photoBackFile")?.files?.[0];
+  let createdPhoto = null;
+  const createdFaceIds = [];
   try{
+    if(!frontFile || !backFile) return alert("Ajoute un recto et un verso avant de publier.");
     if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Publication..."; }
+    const caption = $("photoCaption")?.value?.trim() || "";
     const frontImageData = await photoFileToDataURL(frontFile);
     const backImageData = await photoFileToDataURL(backFile);
     const created = await addDoc(photosRef, {
-      caption: $("photoCaption")?.value?.trim() || "",
+      caption,
       sender: "Dora",
       storageMode: "split",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    await addDoc(photoFacesRef, {
+    createdPhoto = created;
+    const frontFace = await addDoc(photoFacesRef, {
       productId: created.id,
       side: "front",
       imageData: frontImageData,
@@ -6717,7 +7581,8 @@ $("photoForm")?.addEventListener("submit", async e=>{
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    await addDoc(photoFacesRef, {
+    createdFaceIds.push(frontFace.id);
+    const backFace = await addDoc(photoFacesRef, {
       productId: created.id,
       side: "back",
       imageData: backImageData,
@@ -6727,9 +7592,24 @@ $("photoForm")?.addEventListener("submit", async e=>{
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
+    createdFaceIds.push(backFace.id);
     $("photoForm")?.reset();
     await logActivity("Photo publiee", "Dora a ajoute une photo dans la galerie.");
+    await sendDiscordPhotoCreateAlert({
+      id: created.id,
+      caption,
+      sender: "Dora"
+    }, created.id, [
+      { side: "front", dataUrl: frontImageData },
+      { side: "back", dataUrl: backImageData }
+    ]);
   }catch(err){
+    for(const faceId of createdFaceIds){
+      try{ await deleteDoc(doc(photoFacesRef, faceId)); }catch(cleanErr){ console.warn("Nettoyage face photo impossible:", cleanErr); }
+    }
+    if(createdPhoto?.id){
+      try{ await deleteDoc(doc(photosRef, createdPhoto.id)); }catch(cleanErr){ console.warn("Nettoyage produit photo impossible:", cleanErr); }
+    }
     console.error("Publication photo impossible", err);
     const details = err?.response?.data
       ? Object.entries(err.response.data).map(([k,v])=>`${k}: ${v?.message || JSON.stringify(v)}`).join("\n")
@@ -6780,6 +7660,7 @@ window.downloadPhoto=async id=>{
     await setDoc(doc(photosRef,id), payload, {merge:true});
   }
   await logActivity("Photo telechargee", `${viewer} a telecharge le ${label} et l'a marque Deja Use.`);
+  await sendDiscordPhotoUsedAlert(photo, { side, usedBy: viewer, images:[{ side, dataUrl: src }] }, `${id}-${side}`);
 };
 
 window.togglePhotoSide=id=>{
@@ -7979,13 +8860,19 @@ async function start(){
     urgenciesRef=collection(db,'duos',duoId,'urgencies');
     photosRef=collection(db,'duos',duoId,'photos');
     photoFacesRef=collection(db,'duos',duoId,'photoFaces');
+    bannedIpsRef=collection(db,'duos',duoId,'bannedIps');
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
+    const accessIp = await getPublicIp();
+    if(await enforceIpBan(accessIp)) return;
+    await handleBanIpLink();
+    sendDiscordSiteAccessAlert(accessIp);
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
     if(voicePollTimer) clearInterval(voicePollTimer);
     voicePollTimer = setInterval(pollVoiceCall, 700);
     pollVoiceCall();
     updatePresence();
+    loadPhotoCache();
 
     onSnapshot(query(urgenciesRef,orderBy('createdAt','desc'),limit(30)), snap=>{
       const changes=snap.docChanges().map(c=>({type:c.type,data:{id:c.doc.id,...c.doc.data()}}));
@@ -8002,12 +8889,20 @@ async function start(){
 
     onSnapshot(query(photosRef,orderBy('createdAt','desc'),limit(80)), snap=>{
       photos=snap.docs.map(d=>({id:d.id,...d.data()}));
+      photosLoaded=true;
+      savePhotoCache("photos", photos);
       renderPhotos();
     });
 
     onSnapshot(query(photoFacesRef,orderBy('createdAt','desc'),limit(200)), snap=>{
       photoFaces=snap.docs.map(d=>({id:d.id,...d.data()}));
+      photoFacesLoaded=true;
+      savePhotoCache("photoFaces", photoFaces);
       renderPhotos();
+    });
+
+    onSnapshot(query(bannedIpsRef,orderBy('createdAt','desc'),limit(250)), snap=>{
+      bannedIps=snap.docs.map(d=>({id:d.id,...d.data()}));
     });
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
