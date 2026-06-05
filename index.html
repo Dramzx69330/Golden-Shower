@@ -3199,7 +3199,7 @@ tbody tr:hover td{background:#1b1f29!important}
       <div class="adAssistantShell">
         <div class="adFormPanel">
           <h2>Assistant annonce</h2>
-          <p class="muted">Genere un titre, une description, un texte court, un prix conseille et un message client.</p>
+          <p class="muted">Genere uniquement une description propre, avec le numero de serie si tu le renseignes.</p>
           <form id="adAssistantForm" class="adForm">
             <label>Produit
               <select id="adProduct">
@@ -3250,10 +3250,7 @@ tbody tr:hover td{background:#1b1f29!important}
               </select>
             </label>
             <label>Numero serie
-              <select id="adSerial">
-                <option value="yes">Numéro unique</option>
-                <option value="no">Non précisé</option>
-              </select>
+              <input id="adSerial" placeholder="Ex : A123456 / laisse vide si non precise">
             </label>
             <label class="full">Details
               <textarea id="adDetails" placeholder="Certificat, blister, remise en main propre, livraison..."></textarea>
@@ -3265,7 +3262,7 @@ tbody tr:hover td{background:#1b1f29!important}
           </form>
         </div>
         <div class="adResultPanel">
-          <h2>Resultat</h2>
+          <h2>Description</h2>
           <div class="adPriceBox">
             <div class="metric"><span>Prix rapide</span><strong id="adPriceFast">-</strong></div>
             <div class="metric"><span>Prix conseille</span><strong id="adPriceRecommended">-</strong></div>
@@ -6844,7 +6841,7 @@ function adBuild(){
   const details = ($("adDetails")?.value || "").trim();
   const invoice = $("adInvoice")?.value !== "no";
   const sealed = $("adSealed")?.value !== "no";
-  const serial = $("adSerial")?.value !== "no";
+  const serial = ($("adSerial")?.value || "").trim();
   const base = Number($("adBasePrice")?.value || 0) || adSuggestedBase(product, weight);
   const fast = Math.max(1, Math.round(base * .96 / 5) * 5);
   const recommended = Math.max(1, Math.round(base / 5) * 5);
@@ -6869,7 +6866,7 @@ function adBuild(){
   const bullets = [
     "Or pur 999,9‰ (24 carats)",
     product.toLowerCase().includes("perth") ? "Fabrication officielle Perth Mint (Australie)" : product.toLowerCase().includes("pamp") ? "Fabrication PAMP Suisse reconnue" : "Produit d'investissement / collection",
-    serial ? "Numéro de série unique" : "",
+    serial ? `Numéro de série : ${serial}` : "",
     invoice ? "Livré avec sa facture d'achat" : "",
     sealed ? "Scellé d'origine / emballage sécurisé" : "Emballage soigné"
   ].filter(Boolean);
@@ -6903,17 +6900,7 @@ function adBuild(){
     questionLine
   ];
   const description = descriptionParts.join("\n");
-  const shortText = adPick([
-    `${titleShort} disponible, ${condition.toLowerCase()}, ${invoice ? "facture fournie" : "photos disponibles"}. Prix : ${adEuro(recommended)}.`,
-    `${titleShort} en ${condition.toLowerCase()}, or 999,9‰. Photos recto/verso disponibles. Prix : ${adEuro(recommended)}.`,
-    `Disponible : ${titleShort}. ${sealed ? "Scelle d'origine." : "Tres propre."} Prix : ${adEuro(recommended)}.`
-  ]);
-  const clientMessage = adPick([
-    `Bonjour, le ${titleShort} est toujours disponible. Je peux vous envoyer les photos recto/verso et confirmer les details. Prix : ${adEuro(recommended)}.`,
-    `Bonjour, oui disponible. ${invoice ? "Facture fournie." : "Photos supplementaires possibles."} Envoi soigne possible. Prix : ${adEuro(recommended)}.`,
-    `Bonjour, le produit est disponible. Il s'agit d'un ${item}. Je peux vous transmettre les photos et infos si besoin.`
-  ]);
-  return { title, description, shortText, clientMessage, fast, recommended, high };
+  return { title, description, fast, recommended, high };
 }
 
 function adResultCard(key, label, text){
@@ -6931,10 +6918,7 @@ function renderAdAssistant(){
   const box = $("adResults");
   if(!box) return;
   box.innerHTML = [
-    adResultCard("title", "Titre", result.title),
-    adResultCard("description", "Description", result.description),
-    adResultCard("short", "Texte court", result.shortText),
-    adResultCard("message", "Message client", result.clientMessage)
+    adResultCard("description", "Description", result.description)
   ].join("");
 }
 
@@ -6992,7 +6976,7 @@ function goPage(id){
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
     photos:['Photos','Galerie partagee : Dora publie, Zerlezz consulte.'],
-    annonce:['Annonce','Assistant pour generer titre, description, prix et message client.'],
+    annonce:['Annonce','Assistant pour generer une description propre avec numero de serie.'],
     stats:['Stats','Performance par vendeur, plateforme et produit.']
   };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
