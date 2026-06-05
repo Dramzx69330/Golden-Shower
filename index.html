@@ -134,6 +134,23 @@
     .photoActions{display:flex;gap:8px;justify-content:flex-end;align-items:center}
     .photoActions .secondary.small{padding:8px 10px}
     .photoDownloadBtn[disabled]{opacity:.55;cursor:not-allowed}
+    .adAssistantShell{display:grid;grid-template-columns:.9fr 1.1fr;gap:20px;align-items:start}
+    .adFormPanel,.adResultPanel{background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);padding:24px}
+    .adForm{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .adForm label{display:grid;gap:7px;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .adForm input,.adForm select,.adForm textarea{width:100%;min-width:0}
+    .adForm textarea{min-height:92px}
+    .adResultGrid{display:grid;gap:12px}
+    .adResultCard{border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:14px;display:grid;gap:10px}
+    .adResultHead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .adResultHead strong{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .adResultText{white-space:pre-wrap;line-height:1.5;font-weight:700}
+    .adPriceBox{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+    .adPriceBox .metric{border:1px solid var(--line);border-radius:9px;background:var(--panel2);padding:12px}
+    .adPriceBox .metric span{font-size:11px}
+    .adPriceBox .metric strong{font-size:22px}
+    body[data-theme] .adFormPanel,body[data-theme] .adResultPanel{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012)),var(--panel)!important}
+    body[data-theme] .adResultCard,body[data-theme] .adPriceBox .metric{background:var(--panel2)!important;border-color:var(--line)!important}
     body[data-theme] .photoPanel,
     body[data-theme] .photoRulePanel,
     body[data-theme] .photoGalleryShell{
@@ -170,6 +187,11 @@
       .photoActions{display:grid;grid-template-columns:1fr;gap:8px;justify-content:stretch}
       .photoActions button{width:100%;min-height:38px}
       .photoUsedBadge{font-size:20px}
+      .adAssistantShell{grid-template-columns:1fr;gap:12px}
+      .adFormPanel,.adResultPanel{padding:16px}
+      .adForm{grid-template-columns:1fr}
+      .adPriceBox{grid-template-columns:1fr}
+      .adResultHead{align-items:flex-start}
     }
     @media(max-width:420px){
       .photoPanel,.photoRulePanel,.photoGalleryShell{padding:14px}
@@ -2730,6 +2752,7 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="comptes">Comptes</button>
       <button data-page="chat">Chat</button>
       <button data-page="photos">Photos</button>
+      <button data-page="annonce">Annonce</button>
       <button data-page="stats">Stats</button>
     </div>
 
@@ -3169,6 +3192,87 @@ tbody tr:hover td{background:#1b1f29!important}
           <span class="pill" id="photoCount">0 photo</span>
         </div>
         <div id="photosGrid" class="photoGrid"></div>
+      </div>
+    </section>
+
+    <section id="annonce" class="page">
+      <div class="adAssistantShell">
+        <div class="adFormPanel">
+          <h2>Assistant annonce</h2>
+          <p class="muted">Genere un titre, une description, un texte court, un prix conseille et un message client.</p>
+          <form id="adAssistantForm" class="adForm">
+            <label>Produit
+              <select id="adProduct">
+                <option>Perth Mint</option>
+                <option>PAMP</option>
+                <option>Lingot or</option>
+                <option>Piece or</option>
+              </select>
+            </label>
+            <label>Poids
+              <select id="adWeight">
+                <option>10g</option>
+                <option>5g</option>
+                <option>1g</option>
+                <option>20g</option>
+              </select>
+            </label>
+            <label>Plateforme
+              <select id="adPlatform">
+                <option>Leboncoin</option>
+                <option>Vinted</option>
+              </select>
+            </label>
+            <label>Etat
+              <select id="adCondition">
+                <option>Excellent état</option>
+                <option>Neuf</option>
+                <option>Très bon état</option>
+                <option>Bon état</option>
+              </select>
+            </label>
+            <label>Prix base
+              <input id="adBasePrice" type="number" min="0" step="1" placeholder="Ex : 800">
+            </label>
+            <label>Ville
+              <input id="adCity" placeholder="Ex : Paris">
+            </label>
+            <label>Facture
+              <select id="adInvoice">
+                <option value="yes">Avec facture</option>
+                <option value="no">Sans facture</option>
+              </select>
+            </label>
+            <label>Scelle
+              <select id="adSealed">
+                <option value="yes">Scellé d'origine</option>
+                <option value="no">Non scellé</option>
+              </select>
+            </label>
+            <label>Numero serie
+              <select id="adSerial">
+                <option value="yes">Numéro unique</option>
+                <option value="no">Non précisé</option>
+              </select>
+            </label>
+            <label class="full">Details
+              <textarea id="adDetails" placeholder="Certificat, blister, remise en main propre, livraison..."></textarea>
+            </label>
+            <div class="full" style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="primary" type="submit">Generer annonce</button>
+              <button class="secondary" type="button" onclick="fillAdFromPhotos()">Depuis Photos dispo</button>
+            </div>
+          </form>
+        </div>
+        <div class="adResultPanel">
+          <h2>Resultat</h2>
+          <div class="adPriceBox">
+            <div class="metric"><span>Prix rapide</span><strong id="adPriceFast">-</strong></div>
+            <div class="metric"><span>Prix conseille</span><strong id="adPriceRecommended">-</strong></div>
+            <div class="metric"><span>Marge nego</span><strong id="adPriceHigh">-</strong></div>
+          </div>
+          <div id="adResults" class="adResultGrid" style="margin-top:14px"></div>
+        </div>
       </div>
     </section>
 
@@ -3910,8 +4014,8 @@ function onSnapshot(ref, next, error){
 // Ancien nom conservé pour éviter de modifier toute l'interface.
 const firebaseConfig = { pocketbaseUrl: PB_URL };
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, voiceCallRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, photoFacesRef, voiceCallRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[], photoFaces=[];
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
 let widgetOpen=false, widgetUnread=0, widgetTab="miniChat", widgetNotifs=[];
@@ -5096,7 +5200,7 @@ function renderControlCenter(){
 }
 
 function renderAll(){
-  renderDashboard(); renderControlCenter(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence();
+  renderDashboard(); renderControlCenter(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence(); renderAdAssistant();
 }
 
 function renderDashboard(){
@@ -5611,7 +5715,7 @@ function handleTypingInput(){
 
 
 function pageLabel(id){
-  const labels={dashboard:'Dashboard',control:'Contrôle',clients:'Clients',comptes:'Comptes',chat:'Chat',photos:'Photos',stats:'Stats'};
+  const labels={dashboard:'Dashboard',control:'Contrôle',clients:'Clients',comptes:'Comptes',chat:'Chat',photos:'Photos',annonce:'Annonce',stats:'Stats'};
   return labels[id] || id || 'Dashboard';
 }
 
@@ -6487,20 +6591,21 @@ function photoFileToDataURL(file){
     reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const maxSide = 1400;
+        const maxSide = 1800;
         const ratio = Math.min(1, maxSide / Math.max(img.width || 1, img.height || 1));
         const canvas = document.createElement("canvas");
         canvas.width = Math.max(1, Math.round((img.width || 1) * ratio));
         canvas.height = Math.max(1, Math.round((img.height || 1) * ratio));
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        let quality = 0.78;
+        let quality = 0.84;
         let out = canvas.toDataURL("image/jpeg", quality);
-        while(out.length > 900000 && quality > 0.42){
-          quality -= 0.08;
+        while(out.length > 860000 && quality > 0.46){
+          quality -= 0.06;
           out = canvas.toDataURL("image/jpeg", quality);
         }
-        if(out.length > 1200000) return reject(new Error("Image encore trop lourde apres compression. Essaie une image plus petite."));
+        console.info("Photo compressee", {name:file.name, width:canvas.width, height:canvas.height, size:out.length});
+        if(out.length > 960000) return reject(new Error("Image encore trop lourde apres compression. Essaie de recadrer ou choisir une image plus petite."));
         resolve(out);
       };
       img.onerror = () => reject(new Error("Image impossible a lire."));
@@ -6511,13 +6616,19 @@ function photoFileToDataURL(file){
   });
 }
 
+function photoFace(photo, side){
+  return photoFaces.find(f => f.productId === photo.id && f.side === side) || null;
+}
+
 function photoSideSrc(photo, side){
+  const face = photoFace(photo, side);
+  if(face) return face.imageData || face.imageUrl || "";
   if(side === "back") return photo.backImageData || photo.backImageUrl || "";
   return photo.frontImageData || photo.frontImageUrl || photo.imageData || photo.imageUrl || "";
 }
 
 function photoHasBack(photo){
-  return Boolean(photo.backImageData || photo.backImageUrl);
+  return Boolean(photoFace(photo, "back") || photo.backImageData || photo.backImageUrl);
 }
 
 function photoActiveSide(photo){
@@ -6525,16 +6636,22 @@ function photoActiveSide(photo){
 }
 
 function photoSideUsed(photo, side){
+  const face = photoFace(photo, side);
+  if(face) return Boolean(face.used);
   if(side === "back") return Boolean(photo.backUsed);
   return Boolean(photo.frontUsed || photo.used);
 }
 
 function photoSideUsedBy(photo, side){
+  const face = photoFace(photo, side);
+  if(face) return face.usedBy || "";
   if(side === "back") return photo.backUsedBy || "";
   return photo.frontUsedBy || photo.usedBy || "";
 }
 
 function photoSideUsedAt(photo, side){
+  const face = photoFace(photo, side);
+  if(face) return face.usedAt || "";
   if(side === "back") return photo.backUsedAt || "";
   return photo.frontUsedAt || photo.usedAt || "";
 }
@@ -6586,20 +6703,30 @@ $("photoForm")?.addEventListener("submit", async e=>{
     if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = "Publication..."; }
     const frontImageData = await photoFileToDataURL(frontFile);
     const backImageData = await photoFileToDataURL(backFile);
-    await addDoc(photosRef, {
-      frontImageData,
-      backImageData,
+    const created = await addDoc(photosRef, {
       caption: $("photoCaption")?.value?.trim() || "",
       sender: "Dora",
+      storageMode: "split",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    await addDoc(photoFacesRef, {
+      productId: created.id,
+      side: "front",
+      imageData: frontImageData,
       used: false,
       usedBy: "",
       usedAt: "",
-      frontUsed: false,
-      frontUsedBy: "",
-      frontUsedAt: "",
-      backUsed: false,
-      backUsedBy: "",
-      backUsedAt: "",
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    await addDoc(photoFacesRef, {
+      productId: created.id,
+      side: "back",
+      imageData: backImageData,
+      used: false,
+      usedBy: "",
+      usedAt: "",
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -6610,7 +6737,11 @@ $("photoForm")?.addEventListener("submit", async e=>{
     const details = err?.response?.data
       ? Object.entries(err.response.data).map(([k,v])=>`${k}: ${v?.message || JSON.stringify(v)}`).join("\n")
       : "";
-    alert(details || err?.message || "Photo impossible a publier.");
+    const rawMessage = details || err?.message || "Photo impossible a publier.";
+    const friendly = /maximum allowed JSON size|1048576|request entity too large/i.test(rawMessage)
+      ? "Une des images est encore trop lourde pour PocketBase. Le site stocke maintenant recto et verso separement, mais essaie de recadrer la photo concernee."
+      : rawMessage;
+    alert(friendly);
   }finally{
     if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = "Publier la photo"; }
   }
@@ -6637,10 +6768,20 @@ window.downloadPhoto=async id=>{
   const ext = src.startsWith("data:image/png") ? "png" : src.startsWith("data:image/webp") ? "webp" : "jpg";
   const label = side === "back" ? "verso" : "recto";
   downloadDataUrl(src, `photo-duo-${id}-${label}.${ext}`);
-  const payload = side === "back"
-    ? { backUsed:true, backUsedBy:viewer, backUsedAt:serverTimestamp(), updatedAt:serverTimestamp() }
-    : { frontUsed:true, frontUsedBy:viewer, frontUsedAt:serverTimestamp(), used:true, usedBy:viewer, usedAt:serverTimestamp(), updatedAt:serverTimestamp() };
-  await setDoc(doc(photosRef,id), payload, {merge:true});
+  const face = photoFace(photo, side);
+  if(face){
+    await setDoc(doc(photoFacesRef, face.id), {
+      used:true,
+      usedBy:viewer,
+      usedAt:serverTimestamp(),
+      updatedAt:serverTimestamp()
+    }, {merge:true});
+  }else{
+    const payload = side === "back"
+      ? { backUsed:true, backUsedBy:viewer, backUsedAt:serverTimestamp(), updatedAt:serverTimestamp() }
+      : { frontUsed:true, frontUsedBy:viewer, frontUsedAt:serverTimestamp(), used:true, usedBy:viewer, usedAt:serverTimestamp(), updatedAt:serverTimestamp() };
+    await setDoc(doc(photosRef,id), payload, {merge:true});
+  }
   await logActivity("Photo telechargee", `${viewer} a telecharge le ${label} et l'a marque Deja Use.`);
 };
 
@@ -6656,8 +6797,180 @@ window.deletePhotoProduct=async id=>{
   const photo = photos.find(p=>p.id === id);
   if(!photo) return;
   if(!confirm("Supprimer ce produit recto/verso ?")) return;
+  const faces = photoFaces.filter(f => f.productId === id);
+  for(const face of faces){
+    await deleteDoc(doc(photoFacesRef, face.id));
+  }
   await deleteDoc(doc(photosRef,id));
   await logActivity("Produit photo supprime", "Dora a supprime un produit recto/verso de la galerie.");
+};
+
+function adEuro(value){
+  return `${Math.round(Number(value || 0)).toLocaleString("fr-FR")} €`;
+}
+
+function adWeightNumber(weight){
+  const n = Number(String(weight || "").replace(",", ".").replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? n : 10;
+}
+
+function adSuggestedBase(product, weight){
+  const g = adWeightNumber(weight);
+  const name = String(product || "").toLowerCase();
+  const gramBase = name.includes("pamp") ? 82 : name.includes("perth") ? 80 : 78;
+  return Math.round(g * gramBase);
+}
+
+function adPick(list){
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function adProductLabel(product, weight){
+  const p = String(product || "").trim();
+  const lower = p.toLowerCase();
+  const longWeight = String(weight || "").replace(/(\d+(?:[.,]\d+)?)g/i, "$1 grammes");
+  if(lower.includes("perth")) return `lingotin d'or Perth Mint de ${longWeight}`;
+  if(lower.includes("pamp")) return `lingotin d'or PAMP Suisse de ${longWeight}`;
+  if(lower.includes("piece")) return `pièce d'or de ${longWeight}`;
+  return `lingotin d'or de ${longWeight}`;
+}
+
+function adBuild(){
+  const product = $("adProduct")?.value || "Perth Mint";
+  const weight = $("adWeight")?.value || "10g";
+  const platform = $("adPlatform")?.value || "Leboncoin";
+  const condition = $("adCondition")?.value || "Excellent etat";
+  const city = ($("adCity")?.value || "").trim();
+  const details = ($("adDetails")?.value || "").trim();
+  const invoice = $("adInvoice")?.value !== "no";
+  const sealed = $("adSealed")?.value !== "no";
+  const serial = $("adSerial")?.value !== "no";
+  const base = Number($("adBasePrice")?.value || 0) || adSuggestedBase(product, weight);
+  const fast = Math.max(1, Math.round(base * .96 / 5) * 5);
+  const recommended = Math.max(1, Math.round(base / 5) * 5);
+  const high = Math.max(1, Math.round(base * 1.08 / 5) * 5);
+  const item = adProductLabel(product, weight);
+  const title = adPick([
+    `${item[0].toUpperCase()}${item.slice(1)} - ${invoice ? "avec facture" : condition}`,
+    `${product} ${weight} or 999,9 - ${condition}`,
+    `${item[0].toUpperCase()}${item.slice(1)} ${sealed ? "scelle" : "en tres bon etat"}`,
+    `${product} ${weight} - or pur 999,9‰`
+  ]);
+  const titleShort = `${product} ${weight}`;
+  const platformLine = platform === "Vinted"
+    ? adPick(["Envoi possible via la plateforme, emballage soigné.", "Expédition possible avec protection adaptée.", "Envoi rapide et soigné possible."])
+    : adPick(["Envoi rapide et soigné ou remise en main propre possible selon localisation.", "Remise en main propre possible selon secteur, envoi possible sur accord.", "Envoi protégé possible, remise en main propre envisageable selon localisation."]);
+  const locationLine = city ? `Localisation : ${city}.` : "";
+  const intro = adPick([
+    `Je vends un ${item}, ${condition.toLowerCase()}.`,
+    `Disponible : ${item}, conserve proprement et en ${condition.toLowerCase()}.`,
+    `Je propose à la vente un ${item}, en ${condition.toLowerCase()}.`
+  ]);
+  const bullets = [
+    "Or pur 999,9‰ (24 carats)",
+    product.toLowerCase().includes("perth") ? "Fabrication officielle Perth Mint (Australie)" : product.toLowerCase().includes("pamp") ? "Fabrication PAMP Suisse reconnue" : "Produit d'investissement / collection",
+    serial ? "Numéro de série unique" : "",
+    invoice ? "Livré avec sa facture d'achat" : "",
+    sealed ? "Scellé d'origine / emballage sécurisé" : "Emballage soigné"
+  ].filter(Boolean);
+  const trust = adPick([
+    "Produit ideal pour la collection ou l'investissement.",
+    "Pièce intéressante pour collectionneur ou achat plaisir.",
+    "Produit recherché, facile à conserver et à présenter."
+  ]);
+  const brandLine = product.toLowerCase().includes("perth")
+    ? "La Perth Mint fait partie des raffineries les plus reconnues au monde."
+    : product.toLowerCase().includes("pamp")
+      ? "PAMP Suisse est une référence reconnue dans les métaux précieux."
+      : "Produit compose d'or pur 99,99 %.";
+  const detailLine = details ? `Précision : ${details}` : "";
+  const questionLine = adPick([
+    "N'hésitez pas à me contacter pour toute question ou photo supplémentaire.",
+    "Je reste disponible pour toute question sérieuse.",
+    "Photos ou informations supplémentaires possibles sur demande."
+  ]);
+  const descriptionParts = [
+    intro,
+    "",
+    ...bullets.map(b => `- ${b}`),
+    "",
+    `${trust} ${brandLine}`,
+    "",
+    platformLine,
+    ...(locationLine ? [locationLine] : []),
+    ...(detailLine ? ["", detailLine] : []),
+    "",
+    questionLine
+  ];
+  const description = descriptionParts.join("\n");
+  const shortText = adPick([
+    `${titleShort} disponible, ${condition.toLowerCase()}, ${invoice ? "facture fournie" : "photos disponibles"}. Prix : ${adEuro(recommended)}.`,
+    `${titleShort} en ${condition.toLowerCase()}, or 999,9‰. Photos recto/verso disponibles. Prix : ${adEuro(recommended)}.`,
+    `Disponible : ${titleShort}. ${sealed ? "Scelle d'origine." : "Tres propre."} Prix : ${adEuro(recommended)}.`
+  ]);
+  const clientMessage = adPick([
+    `Bonjour, le ${titleShort} est toujours disponible. Je peux vous envoyer les photos recto/verso et confirmer les details. Prix : ${adEuro(recommended)}.`,
+    `Bonjour, oui disponible. ${invoice ? "Facture fournie." : "Photos supplementaires possibles."} Envoi soigne possible. Prix : ${adEuro(recommended)}.`,
+    `Bonjour, le produit est disponible. Il s'agit d'un ${item}. Je peux vous transmettre les photos et infos si besoin.`
+  ]);
+  return { title, description, shortText, clientMessage, fast, recommended, high };
+}
+
+function adResultCard(key, label, text){
+  return `<div class="adResultCard">
+    <div class="adResultHead"><strong>${esc(label)}</strong><button class="secondary small" type="button" onclick="copyAdText('${key}')">Copier</button></div>
+    <div class="adResultText" id="ad-${key}">${esc(text)}</div>
+  </div>`;
+}
+
+function renderAdAssistant(){
+  const result = adBuild();
+  if($("adPriceFast")) $("adPriceFast").textContent = adEuro(result.fast);
+  if($("adPriceRecommended")) $("adPriceRecommended").textContent = adEuro(result.recommended);
+  if($("adPriceHigh")) $("adPriceHigh").textContent = adEuro(result.high);
+  const box = $("adResults");
+  if(!box) return;
+  box.innerHTML = [
+    adResultCard("title", "Titre", result.title),
+    adResultCard("description", "Description", result.description),
+    adResultCard("short", "Texte court", result.shortText),
+    adResultCard("message", "Message client", result.clientMessage)
+  ].join("");
+}
+
+$("adAssistantForm")?.addEventListener("submit", e=>{
+  e.preventDefault();
+  renderAdAssistant();
+});
+
+window.copyAdText=async key=>{
+  const text = $(`ad-${key}`)?.textContent || "";
+  if(!text) return;
+  try{
+    await navigator.clipboard.writeText(text);
+    toast("Copie", "Texte annonce copie.");
+  }catch{
+    prompt("Copie le texte :", text);
+  }
+};
+
+window.fillAdFromPhotos=()=>{
+  const available = photos.find(p => !photoSideUsed(p, "front") || (photoHasBack(p) && !photoSideUsed(p, "back")));
+  if(!available) return alert("Aucune photo disponible.");
+  const caption = String(available.caption || "").trim();
+  if(caption){
+    const lower = caption.toLowerCase();
+    if(lower.includes("pamp")) $("adProduct").value = "PAMP";
+    else if(lower.includes("perth")) $("adProduct").value = "Perth Mint";
+    const weight = caption.match(/(\d+(?:[.,]\d+)?)\s*g/i)?.[1];
+    if(weight){
+      const normalized = `${weight.replace(",", ".")}g`;
+      const option = [...$("adWeight").options].find(o => o.value.toLowerCase() === normalized.toLowerCase());
+      if(option) $("adWeight").value = option.value;
+    }
+    $("adDetails").value = `Photos recto/verso pretes depuis la galerie. Reference : ${caption}`;
+  }
+  renderAdAssistant();
 };
 
 window.exportCSV=()=>{
@@ -6679,6 +6992,7 @@ function goPage(id){
     comptes:['Comptes','Comptes Vinted / Leboncoin, annonces en cours et accès partagés.'],
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
     photos:['Photos','Galerie partagee : Dora publie, Zerlezz consulte.'],
+    annonce:['Annonce','Assistant pour generer titre, description, prix et message client.'],
     stats:['Stats','Performance par vendeur, plateforme et produit.']
   };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
@@ -7680,6 +7994,7 @@ async function start(){
     presenceRef=collection(db,'duos',duoId,'presence');
     urgenciesRef=collection(db,'duos',duoId,'urgencies');
     photosRef=collection(db,'duos',duoId,'photos');
+    photoFacesRef=collection(db,'duos',duoId,'photoFaces');
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
@@ -7703,6 +8018,11 @@ async function start(){
 
     onSnapshot(query(photosRef,orderBy('createdAt','desc'),limit(80)), snap=>{
       photos=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderPhotos();
+    });
+
+    onSnapshot(query(photoFacesRef,orderBy('createdAt','desc'),limit(200)), snap=>{
+      photoFaces=snap.docs.map(d=>({id:d.id,...d.data()}));
       renderPhotos();
     });
 
