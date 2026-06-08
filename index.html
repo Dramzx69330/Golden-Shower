@@ -2705,6 +2705,78 @@ tbody tr:hover td{background:#1b1f29!important}
   .floatingChatBtn{width:50px!important;height:50px!important}
 }
 
+/* Correctif lisibilite table commandes : evite les colonnes trop tassees. */
+.ordersTableScroll table{
+  min-width:1320px!important;
+  table-layout:fixed;
+}
+.ordersTableScroll th,.ordersTableScroll td{
+  white-space:nowrap;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.ordersTableScroll th:nth-child(1),.ordersTableScroll td:nth-child(1){width:52px!important;text-align:center}
+.ordersTableScroll th:nth-child(2),.ordersTableScroll td:nth-child(2){width:96px!important}
+.ordersTableScroll th:nth-child(3),.ordersTableScroll td:nth-child(3){width:100px!important}
+.ordersTableScroll th:nth-child(4),.ordersTableScroll td:nth-child(4){width:104px!important}
+.ordersTableScroll th:nth-child(5),.ordersTableScroll td:nth-child(5){width:178px!important}
+.ordersTableScroll th:nth-child(6),.ordersTableScroll td:nth-child(6){width:104px!important}
+.ordersTableScroll th:nth-child(7),.ordersTableScroll td:nth-child(7){width:58px!important}
+.ordersTableScroll th:nth-child(8),.ordersTableScroll td:nth-child(8){width:92px!important}
+.ordersTableScroll th:nth-child(9),.ordersTableScroll td:nth-child(9){width:116px!important}
+.ordersTableScroll th:nth-child(10),.ordersTableScroll td:nth-child(10){
+  width:160px!important;
+}
+.ordersTableScroll th:nth-child(11),.ordersTableScroll td:nth-child(11){width:92px!important}
+.ordersTableScroll th:nth-child(12),.ordersTableScroll td:nth-child(12){width:84px!important}
+.ordersTableScroll th:nth-child(13),.ordersTableScroll td:nth-child(13){
+  width:116px!important;
+  position:sticky;
+  right:0;
+  z-index:3;
+  background:var(--panel)!important;
+  box-shadow:-12px 0 18px rgba(0,0,0,.18);
+}
+.ordersTableScroll th:nth-child(13){
+  z-index:4;
+  background:#111827!important;
+}
+.ordersTableScroll td:nth-child(1),
+.ordersTableScroll td:nth-child(8),
+.ordersTableScroll td:nth-child(11),
+.ordersTableScroll td:nth-child(12),
+.ordersTableScroll td:nth-child(13){
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+.orderInfoBtn{
+  width:28px;
+  height:28px;
+  display:inline-grid;
+  place-items:center;
+  border-radius:999px;
+  border:1px solid rgba(96,165,250,.42);
+  background:#101e32;
+  color:#bfdbfe;
+  font-weight:900;
+  cursor:pointer;
+  padding:0;
+}
+.orderInfoBtn:hover{background:#172b48;color:#fff}
+.trackingLink{
+  color:#bfdbfe;
+  font-weight:900;
+  text-decoration:none;
+}
+.trackingLink:hover{
+  color:#fff;
+  text-decoration:underline;
+}
+.ordersTableScroll .pdfChipCompact{
+  width:auto;
+  min-width:72px;
+}
+
 </style>
 </head>
 <body>
@@ -2758,6 +2830,7 @@ tbody tr:hover td{background:#1b1f29!important}
       <button data-page="photos">Photos</button>
       <button data-page="annonce">Annonce</button>
       <button data-page="stats">Stats</button>
+      <button data-page="audit">Audit</button>
     </div>
 
     <div class="sidebarProfile" id="sidebarProfile">
@@ -2851,19 +2924,9 @@ tbody tr:hover td{background:#1b1f29!important}
             <label>Prix<input id="prix" type="number" min="0" step="0.01" placeholder="0"></label>
             <label>Compte utilisé<select id="orderAccount"><option value="">Aucun compte lié</option></select></label>
             <label>Date d'envoi<input id="shippedAt" type="date"></label>
+            <label>Transporteur<select id="carrier"><option value="">Aucun</option><option>Colissimo</option><option>Chronopost</option><option>Mondial Relay</option></select></label>
             <label>Suivi<input id="tracking" placeholder="Numéro de suivi"></label>
             <label class="full">Note<input id="note" placeholder="Note interne"></label>
-            <div class="scannerBox full">
-              <strong>📱 Scanner bordereau intelligent</strong>
-              <span class="uploadHint">Ajoute une photo/PDF ou colle du texte : Duo détecte le numéro de suivi et le transporteur.</span>
-              <div class="scannerActions">
-                <input id="inlineScanFile" type="file" accept="image/*,application/pdf" onchange="scanBordereauFile(this.files?.[0], true)">
-                <button class="secondary small" type="button" onclick="scanBordereauText(true)">Analyser</button>
-                <button class="secondary small" type="button" onclick="applyScannedTracking()">Remplir suivi</button>
-              </div>
-              <textarea id="inlineScanText" placeholder="Texte du bordereau ou numéro de suivi..."></textarea>
-              <div id="inlineScanResult" class="scannerResult"></div>
-            </div>
             <label class="full">Bordereau d'envoi PDF
               <input id="shippingLabelFile" type="file" accept="application/pdf">
               <span id="shippingLabelCurrent" class="uploadHint">Aucun bordereau joint.</span>
@@ -2892,7 +2955,7 @@ tbody tr:hover td{background:#1b1f29!important}
         </div>
         <div class="ordersTableScroll">
         <table>
-          <thead><tr><th>Date</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Suivi</th><th>Bordereau</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
+          <thead><tr><th>Info</th><th>Vendeur</th><th>Client</th><th>Plateforme</th><th>Compte</th><th>Produit</th><th>Poids</th><th>Statut</th><th>Transporteur</th><th>Suivi</th><th>Bordereau</th><th class="right">Prix</th><th class="right">Actions</th></tr></thead>
           <tbody id="ordersTbody"></tbody>
         </table>
         </div>
@@ -3317,6 +3380,50 @@ tbody tr:hover td{background:#1b1f29!important}
       <div class="card pad" style="margin-top:20px">
         <h2>Activité récente</h2>
         <div id="activity" class="activity list"></div>
+      </div>
+    </section>
+
+    <section id="audit" class="page">
+      <div class="grid cards">
+        <div class="card pad metric"><span>Acces 24h</span><strong id="auditAccess24">0</strong></div>
+        <div class="card pad metric"><span>IP uniques</span><strong id="auditUniqueIps">0</strong></div>
+        <div class="card pad metric"><span>IP bannies</span><strong id="auditBannedIps">0</strong></div>
+        <div class="card pad metric"><span>Sessions live</span><strong id="auditLiveSessions">0</strong></div>
+      </div>
+
+      <div class="grid two" style="margin-top:20px">
+        <div class="card pad">
+          <div class="toolbar">
+            <input id="auditSearch" placeholder="Filtrer : compte, IP, navigateur..." oninput="renderAuditSecurity()">
+            <select id="auditTypeFilter" onchange="renderAuditSecurity()">
+              <option value="">Tous types</option>
+              <option value="site-access">Acces site</option>
+              <option value="ip-ban">Ban IP</option>
+              <option value="ip-unban">Unban IP</option>
+              <option value="account">Comptes</option>
+            </select>
+            <button class="secondary" type="button" onclick="renderAuditSecurity()">Actualiser</button>
+          </div>
+          <h2>Journal securite</h2>
+          <div id="auditLogList" class="list"></div>
+        </div>
+
+        <div class="card pad">
+          <h2>IP bannies</h2>
+          <p class="muted">Liste synchronisee avec PocketBase. Le bouton unban supprime l'entree de ban.</p>
+          <div id="auditBannedList" class="list"></div>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-top:20px">
+        <div class="card pad">
+          <h2>Sessions actives</h2>
+          <div id="auditPresenceList" class="list"></div>
+        </div>
+        <div class="card pad">
+          <h2>Sante alertes</h2>
+          <div id="auditHealthList" class="list"></div>
+        </div>
       </div>
     </section>
   
@@ -4015,8 +4122,8 @@ function onSnapshot(ref, next, error){
 // Ancien nom conservé pour éviter de modifier toute l'interface.
 const firebaseConfig = { pocketbaseUrl: PB_URL };
 const duoId = "duo-principal";
-let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, photoFacesRef, bannedIpsRef, voiceCallRef;
-let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[], photoFaces=[], bannedIps=[];
+let db, ordersRef, accountsRef, chatRef, activityRef, notesRef, tasksRef, banHistoryRef, typingRef, presenceRef, urgenciesRef, photosRef, photoFacesRef, bannedIpsRef, securityAuditRef, voiceCallRef;
+let orders=[], accounts=[], messages=[], activities=[], notes=[], tasks=[], banHistory=[], typingUsers=[], presenceUsers=[], urgencies=[], photos=[], photoFaces=[], bannedIps=[], securityAudit=[];
 let photosLoaded=false, photoFacesLoaded=false;
 let firstOrders=true, firstChat=true, soundOn=false;
 let previousAccountStatuses = {};
@@ -4682,6 +4789,7 @@ function discordOrderEmbed(order = {}, mode = "create", oldOrder = null){
       discordField("⚖️ Poids", order.poids),
       discordField("🏷️ Série", order.serie),
       discordField("📌 Statut", discordStatusLabel(status)),
+      discordField("🚚 Transporteur", order.carrier),
       discordField("🚚 Suivi", order.tracking),
       discordField("📄 Bordereau", hasPdf),
       discordField("💰 Prix", discordMoney(order.prix)),
@@ -5132,6 +5240,7 @@ function orderSummaryLines(order = {}){
     waLine("⚖️ Poids", order.poids),
     waLine("🏷️ Série", order.serie),
     waLine("📌 Statut", order.statut),
+    waLine("🚚 Transporteur", order.carrier),
     waLine("🚚 Suivi", order.tracking),
     waLine("📄 Bordereau", order.shippingLabelName ? `${order.shippingLabelName}${order.shippingLabelSize ? " (" + formatFileSize(order.shippingLabelSize) + ")" : ""}` : ""),
     waLine("💰 Prix", waMoney(order.prix)),
@@ -5173,6 +5282,7 @@ function buildOrderWhatsApp(action, order = {}, oldOrder = null){
     serie:"Série",
     statut:"Statut",
     prix:"Prix",
+    carrier:"Transporteur",
     tracking:"Suivi",
     note:"Note",
     accountId:"Compte"
@@ -5702,8 +5812,8 @@ function parseBordereauText(raw=''){
 
   const carriers = [
     ['Mondial Relay', /MONDIAL\s*RELAY|LOCKER|POINT\s*RELAIS/i],
-    ['La Poste / Colissimo', /COLISSIMO|LA\s*POSTE|CHRONOPOST/i],
     ['Chronopost', /CHRONOPOST/i],
+    ['Colissimo', /COLISSIMO|LA\s*POSTE/i],
     ['UPS', /\bUPS\b/i],
     ['DHL', /\bDHL\b/i],
     ['Relais Colis', /RELAIS\s*COLIS/i],
@@ -5777,6 +5887,10 @@ window.applyScannedTracking = () => {
     return;
   }
   if($('tracking')) $('tracking').value = lastScanResult.tracking;
+  if(lastScanResult.carrier && $('carrier')){
+    const option = [...$('carrier').options].find(o => o.value === lastScanResult.carrier);
+    if(option) $('carrier').value = option.value;
+  }
   if(lastScanResult.carrier && $('note')){
     const current = $('note').value || '';
     const extra = `Transporteur détecté : ${lastScanResult.carrier}`;
@@ -6023,7 +6137,7 @@ function renderControlCenter(){
 }
 
 function renderAll(){
-  renderDashboard(); renderControlCenter(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderGlobalSearch(); renderWidget(); renderPresence(); renderAdAssistant();
+  renderDashboard(); renderControlCenter(); renderAccountStatusDashboard(); renderSmartAlerts(); renderOrders(); renderClients(); renderAccounts(); renderAccountSelect(); renderChat(); renderStats(); renderSeasonRanking(); renderCharts(); renderActivity(); renderNotes(); renderTasks(); renderBanHistory(); renderAuditSecurity(); renderGlobalSearch(); renderWidget(); renderPresence(); renderAdAssistant();
 }
 
 function renderDashboard(){
@@ -6064,6 +6178,34 @@ function accountLabel(id){
   return a ? `${a.plateforme} · ${a.name}` : '';
 }
 
+function trackingUrl(carrier = '', tracking = ''){
+  const code = String(tracking || '').trim();
+  if(!code) return '';
+
+  const normalizedCarrier = String(carrier || '').toLowerCase();
+  const encoded = encodeURIComponent(code);
+  if(normalizedCarrier.includes('chrono')){
+    return `https://www.chronopost.fr/tracking-no-cms/suivi-page?listeNumerosLT=${encoded}`;
+  }
+  if(normalizedCarrier.includes('colissimo') || normalizedCarrier.includes('poste')){
+    return `https://www.laposte.fr/outils/suivre-vos-envois?code=${encoded}`;
+  }
+  if(normalizedCarrier.includes('mondial')){
+    return `https://www.mondialrelay.fr/suivi-de-colis/?numeroExpedition=${encoded}`;
+  }
+  return '';
+}
+
+function trackingCell(order = {}){
+  const tracking = String(order.tracking || '').trim();
+  if(!tracking) return '';
+
+  const url = trackingUrl(order.carrier, tracking);
+  if(!url) return esc(tracking);
+
+  return `<a class="trackingLink" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Suivre le colis ${esc(tracking)}">${esc(tracking)}</a>`;
+}
+
 function renderAccountSelect(){
   const opts = '<option value="">Aucun compte lié</option>' + accounts.map(a=>`<option value="${esc(a.id)}">${esc(a.favorite==='oui'?'★ ':'')}${esc(a.plateforme)} · ${esc(a.name)}</option>`).join('');
   if($("orderAccount")){
@@ -6077,11 +6219,11 @@ function renderOrders(){
   const list=filteredOrders();
   $("ordersTbody").innerHTML=list.map(r=>`
     <tr>
-      <td>${esc(r.date||'')}</td><td><strong>${esc(r.vendeur)}</strong></td><td>${esc(r.client)}</td>
-      <td>${esc(r.plateforme)}</td><td>${esc(accountLabel(r.accountId))}</td><td>${esc(r.produit)}</td><td>${esc(r.poids)}</td><td>${badge(r.statut)}</td><td>${esc(r.tracking||'')}</td><td>${shippingLabelCell(r)}</td>
+      <td><button type="button" class="orderInfoBtn" title="Date : ${esc(r.date||'Non renseignée')}" data-date="${esc(r.date||'Non renseignée')}" onclick="alert('Date : ' + this.dataset.date)">i</button></td><td title="${esc(r.vendeur)}"><strong>${esc(r.vendeur)}</strong></td><td title="${esc(r.client)}">${esc(r.client)}</td>
+      <td title="${esc(r.plateforme)}">${esc(r.plateforme)}</td><td title="${esc(accountLabel(r.accountId))}">${esc(accountLabel(r.accountId))}</td><td title="${esc(r.produit)}">${esc(r.produit)}</td><td>${esc(r.poids)}</td><td>${badge(r.statut)}</td><td title="${esc(r.carrier||'')}">${esc(r.carrier||'')}</td><td title="${esc(r.tracking||'')}">${trackingCell(r)}</td><td>${shippingLabelCell(r)}</td>
       <td class="right"><strong>${euro(r.prix)}</strong></td>
       <td class="right"><div class="orderActions"><button class="secondary small" onclick="editOrder('${esc(r.id)}')">Modifier</button><button class="danger small" onclick="removeOrder('${esc(r.id)}')">Supprimer</button></div></td>
-    </tr>`).join('') || '<tr><td colspan="12" class="muted">Aucune commande.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="13" class="muted">Aucune commande.</td></tr>';
 }
 
 function buildClientMap(){
@@ -6211,6 +6353,97 @@ function renderBanHistory(){
     </div>
   `).join('') || '<p class="muted">Aucun historique de bannissement.</p>';
 }
+function auditTimeValue(item){
+  return item?.createdAt || item?.at || item?.created || item?.updated || "";
+}
+function auditTypeLabel(type){
+  const value = String(type || "site-access");
+  if(value === "site-access") return "Acces site";
+  if(value === "ip-ban") return "Ban IP";
+  if(value === "ip-unban") return "Unban IP";
+  if(value === "account") return "Compte";
+  return value;
+}
+function auditEventText(item){
+  const account = item.account || item.actor || item.user || "Inconnu";
+  const ip = item.ip ? ` IP ${item.ip}` : "";
+  const browser = item.browser ? ` - ${item.browser}` : "";
+  return `${auditTypeLabel(item.type)} - ${account}${ip}${browser}`;
+}
+function renderAuditSecurity(){
+  if(!$("auditLogList")) return;
+  const now = Date.now();
+  const dayAgo = now - 24 * 60 * 60 * 1000;
+  const logs = (securityAudit || []).slice().sort((a,b)=>String(auditTimeValue(b)).localeCompare(String(auditTimeValue(a))));
+  const recent = logs.filter(item => {
+    const t = new Date(auditTimeValue(item) || 0).getTime();
+    return Number.isFinite(t) && t >= dayAgo;
+  });
+  const uniqueIps = new Set(logs.map(item=>normalizeIp(item.ip)).filter(Boolean));
+  $("auditAccess24").textContent = recent.length;
+  $("auditUniqueIps").textContent = uniqueIps.size;
+  $("auditBannedIps").textContent = (bannedIps || []).length;
+  $("auditLiveSessions").textContent = (presenceUsers || []).length;
+
+  const term = String($("auditSearch")?.value || "").toLowerCase().trim();
+  const type = $("auditTypeFilter")?.value || "";
+  const visible = logs.filter(item => {
+    if(type && String(item.type || "") !== type) return false;
+    if(!term) return true;
+    return [item.type,item.account,item.actor,item.email,item.ip,item.browser,item.os,item.url,item.referrer]
+      .some(v=>String(v || "").toLowerCase().includes(term));
+  }).slice(0,80);
+
+  $("auditLogList").innerHTML = visible.map(item=>`
+    <div class="row">
+      <div>
+        <strong>${esc(auditEventText(item))}</strong>
+        <div class="muted">${esc(item.email || item.os || item.platform || "")}${item.url ? " - " + esc(shortText(item.url, 90)) : ""}</div>
+      </div>
+      <span class="pill">${esc(stamp(auditTimeValue(item)))}</span>
+    </div>
+  `).join('') || '<p class="muted">Aucun evenement securite pour le moment.</p>';
+
+  $("auditBannedList").innerHTML = (bannedIps || []).slice(0,80).map(entry=>`
+    <div class="row">
+      <div>
+        <strong>${esc(entry.ip || "IP inconnue")}</strong>
+        <div class="muted">${esc(entry.reason || "Aucune raison")} - ${esc(entry.bannedBy || "Systeme")}</div>
+      </div>
+      <button class="danger small" type="button" onclick="unbanAuditIp('${esc(entry.id)}','${esc(entry.ip || "")}')">Unban</button>
+    </div>
+  `).join('') || '<p class="muted">Aucune IP bannie.</p>';
+
+  $("auditPresenceList").innerHTML = (presenceUsers || []).slice(0,30).map(user=>`
+    <div class="row">
+      <div><strong>${esc(user.name || user.id || "Session")}</strong><div class="muted">${esc(user.pageLabel || user.page || "Duo Update")} - ${esc(user.action || "present")}</div></div>
+      <span class="pill ok">${esc(stamp(user.updatedAt || user.createdAt))}</span>
+    </div>
+  `).join('') || '<p class="muted">Aucune presence active.</p>';
+
+  const botOk = !!DISCORD_ALERTS.siteAccessBotEndpoint;
+  const webhookCount = ["webhook","updateWebhook","deleteWebhook","accountCreateWebhook","accountUpdateWebhook","accountDeleteWebhook","accountStatusWebhook","photoCreateWebhook","photoUsedWebhook","siteAccessWebhook"].filter(k=>DISCORD_ALERTS[k]).length;
+  $("auditHealthList").innerHTML = `
+    <div class="row"><div><strong>Bot Discord acces</strong><div class="muted">${esc(DISCORD_ALERTS.siteAccessBotEndpoint || "Endpoint non configure")}</div></div><span class="pill ${botOk ? "ok" : "warn"}">${botOk ? "Pret" : "Absent"}</span></div>
+    <div class="row"><div><strong>Webhooks Discord</strong><div class="muted">Canaux configures dans le front</div></div><span class="pill warn">${webhookCount}</span></div>
+    <div class="row"><div><strong>PocketBase</strong><div class="muted">${esc(PB_URL)}</div></div><span class="pill ok">${pb.authStore.isValid ? "Connecte" : "Session requise"}</span></div>
+    <div class="row"><div><strong>Journalisation IP</strong><div class="muted">Acces, appareil, URL, bannissements</div></div><span class="pill ok">Active</span></div>
+  `;
+}
+window.unbanAuditIp = async (id, ip) => {
+  if(!bannedIpsRef || !id) return alert("PocketBase pas encore pret.");
+  if(!confirm(`Debannir cette IP ?\n${ip || id}`)) return;
+  await deleteDoc(doc(bannedIpsRef, id));
+  if(securityAuditRef){
+    await addDoc(securityAuditRef,{
+      type:"ip-unban",
+      ip,
+      actor:authUserName() || getCurrentSender?.() || "Duo",
+      createdAt:serverTimestamp()
+    });
+  }
+  renderAuditSecurity();
+};
 function renderAccounts(){
   const filter = $("accountStatusFilter")?.value || "";
   const summary = accountStatusCounts();
@@ -6957,7 +7190,7 @@ $("orderForm").addEventListener("submit", async e=>{
   }catch(err){
     return alert(err?.message || "Bordereau PDF invalide.");
   }
-  const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),accountId:$("orderAccount").value,shippedAt:$("shippedAt").value,tracking:$("tracking").value.trim(),note:$("note").value.trim(),...shippingLabelPayload,updatedAt:serverTimestamp()};
+  const data={date:$("date").value||today(),vendeur:$("vendeur").value.trim(),client:$("client").value.trim(),plateforme:$("plateforme").value,produit:$("produit").value,poids:$("poids").value,serie:$("serie").value.trim(),statut:$("statut").value,prix:Number($("prix").value||0),accountId:$("orderAccount").value,shippedAt:$("shippedAt").value,carrier:$("carrier").value,tracking:$("tracking").value.trim(),note:$("note").value.trim(),...shippingLabelPayload,updatedAt:serverTimestamp()};
   if(!data.vendeur) return alert("Vendeur obligatoire.");
 
   if(id){
@@ -7136,7 +7369,7 @@ $("chatForm").addEventListener("submit", async e=>{
 
 window.editOrder=id=>{
   const r=orders.find(x=>x.id===id); if(!r) return;
-  ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','orderAccount','shippedAt','tracking','note'].forEach(k=>$(k).value=k==='orderId'?id:(k==='orderAccount'?(r.accountId||''):(r[k]??'')));
+  ['orderId','date','vendeur','client','plateforme','produit','poids','serie','statut','prix','orderAccount','shippedAt','carrier','tracking','note'].forEach(k=>$(k).value=k==='orderId'?id:(k==='orderAccount'?(r.accountId||''):(r[k]??'')));
   if($("shippingLabelFile")) $("shippingLabelFile").value = "";
   if($("removeShippingLabel")) $("removeShippingLabel").checked = false;
   refreshShippingLabelCurrent(r);
@@ -7839,7 +8072,7 @@ window.fillAdFromPhotos=()=>{
 };
 
 window.exportCSV=()=>{
-  const headers=['date','vendeur','client','plateforme','produit','poids','serie','statut','prix','accountId','shippedAt','tracking','note'];
+  const headers=['date','vendeur','client','plateforme','produit','poids','serie','statut','prix','accountId','shippedAt','carrier','tracking','note'];
   const csv=[headers.join(';'),...filteredOrders().map(r=>headers.map(h=>`"${String(r[h]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='commandes-duo-update.csv'; a.click();
@@ -7858,7 +8091,8 @@ function goPage(id){
     chat:['Chat','Discussion directe avec réponses rapides et partage de comptes.'],
     photos:['Photos','Galerie partagee : Dora publie, Zerlezz consulte.'],
     annonce:['Annonce','Assistant pour generer une description propre avec numero de serie.'],
-    stats:['Stats','Performance par vendeur, plateforme et produit.']
+    stats:['Stats','Performance par vendeur, plateforme et produit.'],
+    audit:['Audit & Securite','Journal des acces, IP bannies, sessions actives et sante des alertes.']
   };
   $("pageTitle").textContent=titles[id][0]; $("pageDesc").textContent=titles[id][1];
   updatePresence({page:id,pageLabel:pageLabel(id)});
@@ -8861,6 +9095,7 @@ async function start(){
     photosRef=collection(db,'duos',duoId,'photos');
     photoFacesRef=collection(db,'duos',duoId,'photoFaces');
     bannedIpsRef=collection(db,'duos',duoId,'bannedIps');
+    securityAuditRef=collection(db,'duos',duoId,'securityAudit');
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
     const accessIp = await getPublicIp();
     if(await enforceIpBan(accessIp)) return;
@@ -8903,6 +9138,12 @@ async function start(){
 
     onSnapshot(query(bannedIpsRef,orderBy('createdAt','desc'),limit(250)), snap=>{
       bannedIps=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderAuditSecurity();
+    });
+
+    onSnapshot(query(securityAuditRef,orderBy('createdAt','desc'),limit(250)), snap=>{
+      securityAudit=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderAuditSecurity();
     });
 
     onSnapshot(query(ordersRef,orderBy('createdAt','desc')), snap=>{
