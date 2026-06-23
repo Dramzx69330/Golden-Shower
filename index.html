@@ -3663,7 +3663,7 @@ tbody tr:hover td{background:#1b1f29!important}
 <script type="module">
 import PocketBase, { LocalAuthStore } from "https://esm.sh/pocketbase@0.26.2";
 
-const PB_URL = "https://dramzx692.duckdns.org";
+const PB_URL = "http://127.0.0.1:8090";
 const PB_RECORDS_COLLECTION = "duo_records";
 const PB_SESSION_ID = sessionStorage.getItem("duoPbSessionId") || (() => {
   const id = "tab_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
