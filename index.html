@@ -4587,7 +4587,19 @@ async function logSecurityEvent(data = {}){
 }
 
 async function sendDiscordBannedAccessAlert(ip = "", banEntry = null){
-  if(!discordEnabled("site-access")) return;
+  const extra = {
+    event: "site-access-banned",
+    banned: true,
+    reason: banEntry?.reason || "IP bannie",
+    bannedBy: banEntry?.bannedBy || "",
+    banId: banEntry?.id || "",
+    unbanUrl: discordUnbanUrl(ip),
+    banEntry: banEntry || null
+  };
+
+  if(await sendDiscordSiteAccessBot(ip, extra)) return true;
+  if(!discordEnabled("site-access")) return false;
+
   const payload = {
     username: "Duo Update",
     avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f6ab.png",
@@ -4596,7 +4608,8 @@ async function sendDiscordBannedAccessAlert(ip = "", banEntry = null){
   };
 
   try{
-    const endpoint = `${discordWebhook("site-access")}${discordWebhook("site-access").includes("?") ? "&" : "?"}with_components=true`;
+    const hook = discordWebhook("site-access");
+    const endpoint = `${hook}${hook.includes("?") ? "&" : "?"}with_components=true`;
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -4607,8 +4620,11 @@ async function sendDiscordBannedAccessAlert(ip = "", banEntry = null){
       const txt = await res.text().catch(() => "");
       throw new Error(`Discord HTTP ${res.status} ${txt}`);
     }
+    console.info("Notification Discord acces bloque envoyee:", ip);
+    return true;
   }catch(e){
     console.warn("Notification Discord acces bloque non envoyee:", e);
+    return false;
   }
 }
 
@@ -4639,7 +4655,7 @@ async function enforceIpBan(ip){
         reason:banEntry.reason || "IP bannie",
         createdAt:serverTimestamp()
       });
-      sendDiscordBannedAccessAlert(ip, banEntry);
+      await sendDiscordBannedAccessAlert(ip, banEntry);
       showIpBannedScreen(ip);
       return true;
     }
@@ -4755,6 +4771,19 @@ function discordSiteAccessEmbed(access = {}){
   };
 }
 
+function discordUnbanUrl(ip){
+  const value = normalizeIp(ip);
+  if(!value) return "";
+  const baseUrl = "https://dramzx69330.github.io/Golden-Shower/";
+  try{
+    const url = new URL(/^https?:/i.test(location.href) ? location.href : baseUrl);
+    url.searchParams.set("unbanIp", value);
+    return url.toString();
+  }catch{
+    return `${baseUrl}?unbanIp=${encodeURIComponent(value)}`;
+  }
+}
+
 function discordSiteAccessComponents(ip, banned = false){
   const value = normalizeIp(ip);
   if(!value) return [];
@@ -4804,21 +4833,25 @@ function siteAccessPayload(ip = ""){
   };
 }
 
-async function sendDiscordSiteAccessBot(ip = ""){
+async function sendDiscordSiteAccessBot(ip = "", extra = {}){
   const endpoint = DISCORD_ALERTS.siteAccessBotEndpoint;
   if(!endpoint) return false;
   try{
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(siteAccessPayload(ip)),
+      body: JSON.stringify({
+        ...siteAccessPayload(ip),
+        ...extra,
+        ip: ip || extra.ip || ""
+      }),
       cache: "no-store"
     });
     if(!res.ok){
       const txt = await res.text().catch(() => "");
       throw new Error(`Bot HTTP ${res.status} ${txt}`);
     }
-    console.info("Tracker acces envoye au bot:", authUserName() || "");
+    console.info(extra?.banned ? "Tracker acces bloque envoye au bot:" : "Tracker acces envoye au bot:", authUserName() || "");
     return true;
   }catch(e){
     console.warn("Tracker bot indisponible, fallback webhook:", e);
