@@ -3398,6 +3398,7 @@ tbody tr:hover td{background:#1b1f29!important}
             <select id="auditTypeFilter" onchange="renderAuditSecurity()">
               <option value="">Tous types</option>
               <option value="site-access">Acces site</option>
+              <option value="site-access-banned">Acces bloque</option>
               <option value="ip-ban">Ban IP</option>
               <option value="ip-unban">Unban IP</option>
               <option value="account">Comptes</option>
@@ -3662,7 +3663,7 @@ tbody tr:hover td{background:#1b1f29!important}
 <script type="module">
 import PocketBase, { LocalAuthStore } from "https://esm.sh/pocketbase@0.26.2";
 
-const PB_URL = "http://127.0.0.1:8090";
+const PB_URL = "https://dramzx692.duckdns.org";
 const PB_RECORDS_COLLECTION = "duo_records";
 const PB_SESSION_ID = sessionStorage.getItem("duoPbSessionId") || (() => {
   const id = "tab_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -4205,6 +4206,7 @@ let currentReplyTo=null, currentThreadRootId=null, typingTimer=null, presenceTim
 const $ = id => document.getElementById(id);
 const euro = n => new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
 const esc = v => String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const jsArg = v => JSON.stringify(String(v ?? ''));
 const today = () => new Date().toISOString().slice(0,10);
 const isConfirmed = r => String(r.statut||'').toLowerCase().includes('confirm');
 
@@ -4412,7 +4414,7 @@ function notify(title, body){
 */
 const WHATSAPP_ALERTS = {
   enabled: true,
-  endpoint: "http://127.0.0.1:8090/wa/send"
+  endpoint: "https://dramzx692.duckdns.org/wa/send"
 };
 
 const whatsappAlertDedupe = new Map();
@@ -4429,7 +4431,7 @@ const DISCORD_ALERTS = {
   photoCreateWebhook: "https://discord.com/api/webhooks/1512386240132026470/-W1ENJpsFv1MJXEtU64NIems76u-iu7_msxlktgcsj4jUguaUPZyHQYZHZh6Z7U0mJsU",
   photoUsedWebhook: "https://discord.com/api/webhooks/1512386484643041325/DwRrJy5pwaD8bA6ZKyVqtozGsWTAq5PzHsKRIDxZdS6nfuM3zyP_BgfOgzXGpmub5zQC",
   siteAccessWebhook: "https://discord.com/api/webhooks/1512391565547405335/5ss_J5acOMjKGSJfcV7FlizOo_i_LO9gwPTaYFVmCpfpGrFyWlSi2Wt2nQQxCWqzfPIp",
-  siteAccessBotEndpoint: "http://127.0.0.1:8090/discord/access"
+  siteAccessBotEndpoint: "https://dramzx692.duckdns.org/discord/access"
 };
 
 const discordAlertDedupe = new Map();
@@ -4571,12 +4573,73 @@ function showIpBannedScreen(ip){
     </main>`;
 }
 
+async function logSecurityEvent(data = {}){
+  if(!securityAuditRef) return;
+  try{
+    await addDoc(securityAuditRef,{
+      ...data,
+      createdAt: data.createdAt || serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  }catch(e){
+    console.warn("Journal securite non ecrit:", e);
+  }
+}
+
+async function sendDiscordBannedAccessAlert(ip = "", banEntry = null){
+  if(!discordEnabled("site-access")) return;
+  const payload = {
+    username: "Duo Update",
+    avatar_url: "https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/1f6ab.png",
+    embeds: [discordSiteAccessEmbed({ ip, banned:true, banEntry })],
+    components: discordSiteAccessComponents(ip, true)
+  };
+
+  try{
+    const endpoint = `${discordWebhook("site-access")}${discordWebhook("site-access").includes("?") ? "&" : "?"}with_components=true`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      cache: "no-store"
+    });
+    if(!res.ok){
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Discord HTTP ${res.status} ${txt}`);
+    }
+  }catch(e){
+    console.warn("Notification Discord acces bloque non envoyee:", e);
+  }
+}
+
+async function refreshBannedIps(){
+  if(!bannedIpsRef) return [];
+  const snap = await getDocs(query(bannedIpsRef,orderBy('createdAt','desc'),limit(250)));
+  bannedIps = snap.docs.map(d=>({id:d.id,...d.data()}));
+  return bannedIps;
+}
+
 async function enforceIpBan(ip){
   if(!bannedIpsRef || !ip) return false;
   try{
-    const snap = await getDocs(query(bannedIpsRef,orderBy('createdAt','desc'),limit(250)));
-    bannedIps = snap.docs.map(d=>({id:d.id,...d.data()}));
-    if(isIpBanned(ip)){
+    await refreshBannedIps();
+    const banEntry = bannedIps.find(entry => normalizeIp(entry.ip) === normalizeIp(ip));
+    if(banEntry){
+      await logSecurityEvent({
+        type:"site-access-banned",
+        ip,
+        account:authUserName() || authUser()?.email || "Inconnu",
+        email:authUser()?.email || "",
+        browser:accessBrowserName(),
+        os:accessOsName(),
+        platform:navigator.platform || "",
+        language:navigator.language || "",
+        timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || "",
+        url:location.href,
+        reason:banEntry.reason || "IP bannie",
+        createdAt:serverTimestamp()
+      });
+      sendDiscordBannedAccessAlert(ip, banEntry);
       showIpBannedScreen(ip);
       return true;
     }
@@ -4584,6 +4647,46 @@ async function enforceIpBan(ip){
     console.warn("Verification ban IP impossible:", e);
   }
   return false;
+}
+
+async function handleUnbanIpLink(){
+  if(!bannedIpsRef) return false;
+  const params = new URLSearchParams(location.search);
+  const ip = normalizeIp(params.get("unbanIp"));
+  if(!ip) return false;
+
+  params.delete("unbanIp");
+  const clean = `${location.pathname}${params.toString() ? "?" + params.toString() : ""}${location.hash || ""}`;
+  history.replaceState(null, "", clean);
+
+  if(!canPostPhotos()){
+    alert("Seul Dora peut debannir une IP.");
+    return true;
+  }
+
+  await refreshBannedIps();
+  const entries = bannedIps.filter(entry => normalizeIp(entry.ip) === ip);
+  if(!entries.length){
+    alert(`IP deja debannie ou introuvable : ${ip}`);
+    return true;
+  }
+
+  if(!confirm(`Debannir cette IP du site ?\n${ip}`)) return true;
+
+  for(const entry of entries){
+    await deleteDoc(doc(bannedIpsRef, entry.id));
+  }
+
+  await logSecurityEvent({
+    type:"ip-unban",
+    ip,
+    actor:authUserName() || getCurrentSender?.() || "Duo",
+    reason:"Debanni depuis le webhook Discord",
+    createdAt:serverTimestamp()
+  });
+
+  alert(`IP debannie : ${ip}`);
+  return true;
 }
 
 async function handleBanIpLink(){
@@ -4598,6 +4701,7 @@ async function handleBanIpLink(){
     alert("Seul Dora peut bannir une IP.");
     return;
   }
+  await refreshBannedIps();
   if(isIpBanned(ip)){
     alert(`IP deja bannie : ${ip}`);
     return;
@@ -4610,6 +4714,13 @@ async function handleBanIpLink(){
     createdAt:serverTimestamp(),
     updatedAt:serverTimestamp()
   });
+  await logSecurityEvent({
+    type:"ip-ban",
+    ip,
+    actor:authUserName() || "Dora",
+    reason:"Banni depuis le webhook Discord",
+    createdAt:serverTimestamp()
+  });
   alert(`IP bannie : ${ip}`);
 }
 
@@ -4617,15 +4728,18 @@ function discordSiteAccessEmbed(access = {}){
   const user = authUser();
   const account = authUserName() || user?.username || user?.email || "Inconnu";
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Inconnu";
+  const banned = !!access.banned;
   return {
-    title: `👁️ Accès au site · ${account}`,
-    description: "Un utilisateur vient d'acceder a Duo Update.",
-    color: 0x38bdf8,
+    title: banned ? `⛔ Accès bloqué · ${account}` : `👁️ Accès au site · ${account}`,
+    description: banned ? "Une IP bannie vient d'essayer d'acceder a Duo Update." : "Un utilisateur vient d'acceder a Duo Update.",
+    color: banned ? 0xef4444 : 0x38bdf8,
     fields: [
       discordField("🌍 IP publique", access.ip || "Non recuperee"),
       discordField("👤 Compte", account),
       discordField("🧾 Email", user?.email || ""),
       discordField("🧩 Role", user?.role || user?.collectionName || ""),
+      ...(banned ? [discordField("🚫 Statut", "IP bannie")] : []),
+      ...(banned && access.banEntry?.reason ? [discordField("📝 Raison ban", access.banEntry.reason, false)] : []),
       discordField("🌐 Navigateur", accessBrowserName()),
       discordField("💻 OS", accessOsName()),
       discordField("📱 Plateforme", navigator.platform || ""),
@@ -4636,27 +4750,38 @@ function discordSiteAccessEmbed(access = {}){
       discordField("🔗 URL", location.href, false),
       ...(document.referrer ? [discordField("↩️ Referrer", document.referrer, false)] : [])
     ],
-    footer: { text: "Duo Update · accès journalisé" },
+    footer: { text: banned ? "Duo Update · accès bloqué journalisé" : "Duo Update · accès journalisé" },
     timestamp: new Date().toISOString()
   };
 }
 
-function discordSiteAccessComponents(ip){
+function discordSiteAccessComponents(ip, banned = false){
   const value = normalizeIp(ip);
   if(!value) return [];
-  let banUrl = "https://dramzx69330.github.io/Golden-Shower/";
+  const baseUrl = "https://dramzx69330.github.io/Golden-Shower/";
+  let banUrl = baseUrl;
+  let unbanUrl = baseUrl;
   try{
-    const url = new URL(/^https?:/i.test(location.href) ? location.href : banUrl);
+    const url = new URL(/^https?:/i.test(location.href) ? location.href : baseUrl);
+    url.searchParams.delete("unbanIp");
     url.searchParams.set("banIp", value);
     banUrl = url.toString();
+
+    const unban = new URL(/^https?:/i.test(location.href) ? location.href : baseUrl);
+    unban.searchParams.delete("banIp");
+    unban.searchParams.set("unbanIp", value);
+    unbanUrl = unban.toString();
   }catch{}
-  return [{
-    type: 1,
-    components: [
-      { type: 2, style: 5, label: "Voir IP", url: `https://ipinfo.io/${encodeURIComponent(value)}` },
-      { type: 2, style: 5, label: "Bannir IP", url: banUrl }
-    ]
-  }];
+  const buttons = [
+    { type: 2, style: 5, label: "Voir IP", url: `https://ipinfo.io/${encodeURIComponent(value)}` }
+  ];
+  if(banned){
+    buttons.push({ type: 2, style: 5, label: "Unban IP", url: unbanUrl });
+  }else{
+    buttons.push({ type: 2, style: 5, label: "Bannir IP", url: banUrl });
+    buttons.push({ type: 2, style: 5, label: "Unban IP", url: unbanUrl });
+  }
+  return [{ type: 1, components: buttons }];
 }
 
 function siteAccessPayload(ip = ""){
@@ -6004,7 +6129,7 @@ async function updateControlWhatsappHealth(){
   const meta = $('ccWhatsappMeta');
   if(!strong || !meta) return;
   try{
-    const res = await fetch('http://127.0.0.1:8090/wa/status', {cache:'no-store'});
+    const res = await fetch('https://dramzx692.duckdns.org/wa/status', {cache:'no-store'});
     const data = await res.json();
     strong.textContent = data.ready ? 'OK' : 'OFF';
     meta.textContent = data.ready ? 'connecté et prêt' : 'bot non prêt';
@@ -6359,6 +6484,7 @@ function auditTimeValue(item){
 function auditTypeLabel(type){
   const value = String(type || "site-access");
   if(value === "site-access") return "Acces site";
+  if(value === "site-access-banned") return "Acces bloque";
   if(value === "ip-ban") return "Ban IP";
   if(value === "ip-unban") return "Unban IP";
   if(value === "account") return "Compte";
@@ -6410,7 +6536,7 @@ function renderAuditSecurity(){
         <strong>${esc(entry.ip || "IP inconnue")}</strong>
         <div class="muted">${esc(entry.reason || "Aucune raison")} - ${esc(entry.bannedBy || "Systeme")}</div>
       </div>
-      <button class="danger small" type="button" onclick="unbanAuditIp('${esc(entry.id)}','${esc(entry.ip || "")}')">Unban</button>
+      <button class="danger small" type="button" onclick="unbanAuditIp(${jsArg(entry.id)},${jsArg(entry.ip || "")})">Unban</button>
     </div>
   `).join('') || '<p class="muted">Aucune IP bannie.</p>';
 
@@ -9098,8 +9224,9 @@ async function start(){
     securityAuditRef=collection(db,'duos',duoId,'securityAudit');
     voiceCallRef=doc(db,'duos',duoId,'voice','main');
     const accessIp = await getPublicIp();
-    if(await enforceIpBan(accessIp)) return;
+    await handleUnbanIpLink();
     await handleBanIpLink();
+    if(await enforceIpBan(accessIp)) return;
     sendDiscordSiteAccessAlert(accessIp);
     if(voiceUnsub) voiceUnsub();
     voiceUnsub = onSnapshot(voiceCallRef, handleVoiceSnapshot);
