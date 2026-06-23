@@ -3662,7 +3662,7 @@ tbody tr:hover td{background:#1b1f29!important}
 <script type="module">
 import PocketBase, { LocalAuthStore } from "https://esm.sh/pocketbase@0.26.2";
 
-const PB_URL = "https://dramzx692.duckdns.org";
+const PB_URL = "http://127.0.0.1:8090";
 const PB_RECORDS_COLLECTION = "duo_records";
 const PB_SESSION_ID = sessionStorage.getItem("duoPbSessionId") || (() => {
   const id = "tab_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -4412,7 +4412,7 @@ function notify(title, body){
 */
 const WHATSAPP_ALERTS = {
   enabled: true,
-  endpoint: "https://dramzx692.duckdns.org/wa/send"
+  endpoint: "http://127.0.0.1:8090/wa/send"
 };
 
 const whatsappAlertDedupe = new Map();
@@ -4429,7 +4429,7 @@ const DISCORD_ALERTS = {
   photoCreateWebhook: "https://discord.com/api/webhooks/1512386240132026470/-W1ENJpsFv1MJXEtU64NIems76u-iu7_msxlktgcsj4jUguaUPZyHQYZHZh6Z7U0mJsU",
   photoUsedWebhook: "https://discord.com/api/webhooks/1512386484643041325/DwRrJy5pwaD8bA6ZKyVqtozGsWTAq5PzHsKRIDxZdS6nfuM3zyP_BgfOgzXGpmub5zQC",
   siteAccessWebhook: "https://discord.com/api/webhooks/1512391565547405335/5ss_J5acOMjKGSJfcV7FlizOo_i_LO9gwPTaYFVmCpfpGrFyWlSi2Wt2nQQxCWqzfPIp",
-  siteAccessBotEndpoint: "https://dramzx692.duckdns.org/discord/access"
+  siteAccessBotEndpoint: "http://127.0.0.1:8090/discord/access"
 };
 
 const discordAlertDedupe = new Map();
@@ -6004,7 +6004,7 @@ async function updateControlWhatsappHealth(){
   const meta = $('ccWhatsappMeta');
   if(!strong || !meta) return;
   try{
-    const res = await fetch('https://dramzx692.duckdns.org/wa/status', {cache:'no-store'});
+    const res = await fetch('http://127.0.0.1:8090/wa/status', {cache:'no-store'});
     const data = await res.json();
     strong.textContent = data.ready ? 'OK' : 'OFF';
     meta.textContent = data.ready ? 'connecté et prêt' : 'bot non prêt';
